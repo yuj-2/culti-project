@@ -1,0 +1,25 @@
+@charset "UTF-8";
+/* 헤더 로고 텍스트 */
+.header-logo {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* 메인 네비게이션 링크 (티켓 예매, 일정 캘린더 등) */
+.header-nav-link {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+/* 드롭다운 하위 메뉴 아이템 (영화, 공연 등) */
+.header-dropdown-item {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* 로그인 버튼 */
+.header-login-btn {
+    font-size: 15px;
+    font-weight: 600;
+}

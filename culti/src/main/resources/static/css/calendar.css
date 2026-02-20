@@ -1,0 +1,12 @@
+@charset "UTF-8";
+.cal-title {
+    font-size: 24px;
+}
+
+.cal-side-title {
+    font-size: 20px;
+}
+
+.cal-day-header {
+    font-size: 14px;
+}
