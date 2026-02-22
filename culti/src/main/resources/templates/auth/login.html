@@ -33,7 +33,7 @@
                 </div>
 
                 <!-- 로그인 폼 -->
-                <form class="login-form" id="loginForm">
+                <form th:action="@{/auth/login}" th:method="post" class="login-form" id="loginForm">
                     <div class="form-group">
                         <label for="email">이메일</label>
                         <input 

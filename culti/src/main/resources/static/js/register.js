@@ -724,7 +724,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ========== 폼 제출 ==========
-
+/*
     signupForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -819,55 +819,8 @@ document.addEventListener('DOMContentLoaded', function() {
         signupBtn.classList.add('loading');
         signupBtn.disabled = true;
 
-        // 서버로 전송할 데이터
-        const signupData = {
-            name: name,
-            email: email,
-            password: password,
-            phone: phone,
-            birthdate: document.getElementById('birthdate').value,
-            gender: document.querySelector('input[name="gender"]:checked')?.value,
-            agreeMarketing: agreeMarketing.checked
-        };
 
-        console.log('회원가입 데이터:', signupData);
-
-        // 실제 서버 통신 코드
-        /*
-        fetch('/api/signup', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(signupData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // 회원가입 성공
-                window.location.href = '/signup-complete.html';
-            } else {
-                // 회원가입 실패
-                alert(data.message || '회원가입에 실패했습니다.');
-                signupBtn.classList.remove('loading');
-                signupBtn.disabled = false;
-            }
-        })
-        .catch(error => {
-            console.error('회원가입 오류:', error);
-            alert('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-            signupBtn.classList.remove('loading');
-            signupBtn.disabled = false;
-        });
-        */
-
-        // 데모용 타임아웃
-        setTimeout(function() {
-            signupBtn.classList.remove('loading');
-            signupBtn.disabled = false;
-            window.location.href = '/signup-complete.html';
-        }, 2000);
-    });
+    });*/
 
     // 페이지 벗어날 때 타이머 정리
     window.addEventListener('beforeunload', function() {

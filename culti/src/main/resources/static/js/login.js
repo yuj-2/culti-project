@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 폼 제출 처리
+	/*
     loginForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -120,43 +121,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // 여기서는 콘솔에 출력만 하고 2초 후 성공으로 처리
         console.log('로그인 시도:', loginData);
 
-        // 실제 프로젝트에서는 아래와 같이 서버로 요청을 보냅니다:
-        /*
-        fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(loginData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // 로그인 성공
-                window.location.href = '/';
-            } else {
-                // 로그인 실패
-                showError(passwordInput, passwordError, data.message || '로그인에 실패했습니다.');
-                loginButton.classList.remove('loading');
-                loginButton.disabled = false;
-            }
-        })
-        .catch(error => {
-            console.error('로그인 오류:', error);
-            showError(passwordInput, passwordError, '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-            loginButton.classList.remove('loading');
-            loginButton.disabled = false;
-        });
-        */
+        
 
-        // 데모용 타임아웃 (실제 프로젝트에서는 제거하세요)
-        setTimeout(function() {
-            loginButton.classList.remove('loading');
-            loginButton.disabled = false;
-            alert('로그인 성공! (데모)');
-            // 실제로는: window.location.href = '/';
-        }, 2000);
-    });
+    });*/
 
     // 카카오 로그인
     kakaoLoginBtn.addEventListener('click', function() {

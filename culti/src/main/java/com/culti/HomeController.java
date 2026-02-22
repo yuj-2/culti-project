@@ -28,19 +28,4 @@ public class HomeController {
 	    return "calendar/calendar";
 	}
 	
-	@GetMapping("/login/login")
-	public void login() {
-		
-	}
-	
-	@GetMapping("/login/signup")
-	public void signUp() {
-		
-	}
-	
-	@GetMapping("/login/signup-complete")
-	public void signupComplete() {
-		
-	}
-	
 }

@@ -43,14 +43,7 @@ function createConfetti() {
 }
 
 // 로그인 버튼 클릭 추적 (선택사항 - 분석용)
-const loginBtn = document.querySelector('.btn-primary');
-if (loginBtn) {
-    loginBtn.addEventListener('click', function() {
-        console.log('로그인 페이지로 이동');
-        // 여기에 Google Analytics나 다른 분석 도구 코드 추가 가능
-        // gtag('event', 'click', { 'event_category': 'signup_complete', 'event_label': 'login_button' });
-    });
-}
+
 
 // 메인으로 이동 버튼 클릭 추적 (선택사항)
 const mainBtn = document.querySelector('.btn-secondary');

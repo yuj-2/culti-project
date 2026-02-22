@@ -6,9 +6,9 @@
     <title>회원가입 - CULTI</title>
      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     
-    <link rel="stylesheet" th:href="@{/css/signup.css}">
+    <link rel="stylesheet" th:href="@{/css/register.css}">
     
-    <script th:src="@{/js/signup.js}"></script>
+    <script th:src="@{/js/register.js}"></script>
 </head>
 <body>
     <!-- 헤더 -->
@@ -33,7 +33,7 @@
                 </div>
 
                 <!-- 회원가입 폼 -->
-                <form class="signup-form" id="signupForm">
+                <form th:action="@{/auth/register}" th:method="post" class="signup-form" id="signupForm">
                     <!-- 이름 -->
                     <div class="form-group">
                         <label for="name">이름 <span class="required">*</span></label>
@@ -127,7 +127,7 @@
                             type="tel" 
                             id="phone" 
                             name="phone" 
-                            placeholder="010-0000-0000"
+                            placeholder="-하이픈 없이"
                             required
                         >
                         <span class="error-message" id="phoneError"></span>
@@ -148,15 +148,15 @@
                         <label>성별</label>
                         <div class="radio-group">
                             <label class="radio-label">
-                                <input type="radio" name="gender" value="male">
+                                <input type="radio" name="gender" value="M">
                                 <span>남성</span>
                             </label>
                             <label class="radio-label">
-                                <input type="radio" name="gender" value="female">
+                                <input type="radio" name="gender" value="F">
                                 <span>여성</span>
                             </label>
                             <label class="radio-label">
-                                <input type="radio" name="gender" value="other">
+                                <input type="radio" name="gender" value="X">
                                 <span>선택안함</span>
                             </label>
                         </div>
