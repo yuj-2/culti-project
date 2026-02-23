@@ -63,7 +63,7 @@
                             <input type="checkbox" id="rememberMe" name="rememberMe">
                             <span>로그인 상태 유지</span>
                         </label>
-                        <a href="/find-password" class="find-link">비밀번호 찾기</a>
+                        <a th:href="@{/auth/find-password}" class="find-link">비밀번호 찾기</a>
                     </div>
 
                     <button type="submit" class="btn-login">로그인</button>
@@ -104,7 +104,7 @@
                 <!-- 회원가입 링크 -->
                 <div class="signup-link">
                     <span>아직 회원이 아니신가요?</span>
-                    <a href="/signup">회원가입</a>
+                    <a th:href="@{/auth/register}">회원가입</a>
                 </div>
             </div>
         </div>

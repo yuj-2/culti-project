@@ -70,5 +70,10 @@ public class AuthController {
 		public void myPage() {
 			
 		}
+		
+		@GetMapping("/find-password")
+		public void findPassword() {
+			
+		}
 	
 }
