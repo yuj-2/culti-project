@@ -34,7 +34,7 @@ public class AuthController {
 	
 	//회원가입 하기 (post방식)
 	@PostMapping("/register")
-	public String register(UserDTO userDTO, RedirectAttributes rttr) {
+	public String register(UserDTO userDTO) {
 		log.info("👌 AuthController.register()... POST" );
 		Long userId = this.userService.register(userDTO);
 		//rttr.addFlashAttribute("msg", bno);
