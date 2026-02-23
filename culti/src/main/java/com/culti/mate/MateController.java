@@ -9,12 +9,17 @@ import lombok.RequiredArgsConstructor;
 @Controller
 @RequestMapping("/mate")
 @RequiredArgsConstructor
-public class mateController {
+public class MateController {
 
 	@GetMapping("/mate")
-	public void home() {
-		
+	public String mate() {
+		return "mate/mate"; 
 	}
 		
+//	마이페이지로 옮겨야 함
+	@GetMapping("/mateMypage")
+	public void mateMypage() {
+		
+	}
 	
 }

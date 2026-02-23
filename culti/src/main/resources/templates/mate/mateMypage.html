@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<html lang="ko">
+<html 
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/layout}">
 <head>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>마이페이지 - 동행 매칭 게시판</title>
     <style>
         * {
             margin: 0;
@@ -313,6 +311,7 @@
 </head>
 <body>
     <!-- Header -->
+    <div layout:fragment="content">
     <header>
         <div class="header-content">
             <button class="back-button" onclick="goBack()">
@@ -638,5 +637,6 @@
         renderStats();
         renderContent();
     </script>
+    </div>
 </body>
 </html>
