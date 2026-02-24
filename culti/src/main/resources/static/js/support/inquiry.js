@@ -4,6 +4,7 @@ let currentStep = 'title';
 let inquiryData = { title: '', content: '' };
 
 $(document).ready(function() {
+    // 페이지 로드 시 목록 불러오기
     loadInquiryList();
     startNewInquiry();
 
@@ -22,53 +23,65 @@ function formatDateTime(dateTimeStr) {
     return dateTimeStr.replace('T', ' ').split('.')[0];
 }
 
-// 1. 문의 목록 로드
+// 1. 문의 목록 로드 (경로: /support/inquiry/list)
 function loadInquiryList() {
-    $.get("/inquiry/list", function(data) {
+    $.get("/support/inquiry/list", function(data) {
         let html = "";
-        data.forEach(item => {
-            const statusText = item.inquiryStatus === 'PENDING' ? '답변 전' : '답변 완료';
-            const statusClass = item.inquiryStatus === 'PENDING' ? 'status_pending' : 'status_answered';
-            const dotClass = item.inquiryStatus === 'PENDING' ? 'offline' : '';
+        if(data && data.length > 0) {
+            data.forEach(item => {
+                const statusText = item.inquiryStatus === 'PENDING' ? '답변 전' : '답변 완료';
+                const statusClass = item.inquiryStatus === 'PENDING' ? 'status_pending' : 'status_answered';
+                const dotClass = item.inquiryStatus === 'PENDING' ? 'offline' : '';
 
-            html += `
-            <li id="inquiry-${item.inquiryId}" onclick="viewInquiry(${item.inquiryId})">
-                <div class="d-flex bd-highlight">
-                    <div class="img_cont">
-                        <img src="/images/manager.png" class="user_img">
-                        <span class="online_icon ${dotClass}"></span>
+                html += `
+                <li id="inquiry-${item.inquiryId}" onclick="viewInquiry(${item.inquiryId})">
+                    <div class="d-flex bd-highlight">
+                        <div class="img_cont">
+                            <img src="/images/support/manager.png" class="user_img">
+                            <span class="online_icon ${dotClass}"></span>
+                        </div>
+                        <div class="user_info">
+                            <span>운영자</span>
+                            <p>${item.inquiryTitle}</p>
+                            <span class="status_label ${statusClass}">${statusText}</span>
+                        </div>
                     </div>
-                    <div class="user_info">
-                        <span>운영자</span>
-                        <p>${item.inquiryTitle}</p>
-                        <span class="status_label ${statusClass}">${statusText}</span>
-                    </div>
-                </div>
-            </li>`;
-        });
+                </li>`;
+            });
+        } else {
+            html = '<li style="text-align:center; padding:20px; color:#ccc;">문의 내역이 없습니다.</li>';
+        }
         $('#inquiryList').html(html);
     });
 }
 
 // 2. 새로운 문의 모드 시작
 function startNewInquiry() {
+    $('.contacts li').removeClass('active_chat'); // 목록 선택 해제
     $('#chatBody').html("");
     $('#chatTitle').text("운영자 (새 문의)");
     $('#chatFooter').show();
-    $('#userInput').attr('disabled', false).attr('placeholder', '문의 내용을 입력하세요...');
+    
+    // 입력창 초기화 및 활성화
+    $('#userInput').attr('disabled', false)
+                 .val('')
+                 .attr('placeholder', '문의 제목을 입력하세요...')
+                 .css('background-color', 'white');
+    $('.send_btn').show(); // 전송 버튼 보이기
+                 
     currentStep = 'title';
     appendBotMessage("안녕하세요! 어떤 도움이 필요하신가요?<br>먼저 문의하실 <b>제목</b>을 입력해주세요.");
 }
 
-// 3. 기존 문의 클릭 (조회)
+// 3. 기존 문의 클릭 (상세 조회)
 function viewInquiry(id) {
     $('.contacts li').removeClass('active_chat');
     $('#inquiry-' + id).addClass('active_chat');
 
-    $.get("/inquiry/detail/" + id, function(data) {
+    $.get("/support/inquiry/detail/" + id, function(data) {
         $('#chatBody').html("");
         $('#chatTitle').text("운영자 (" + data.inquiryTitle + ")");
-        $('#chatFooter').hide();
+        $('#chatFooter').hide(); // 상세보기 시에는 입력창 숨김
 
         const dbTime = formatDateTime(data.createdAt);
 
@@ -80,6 +93,8 @@ function viewInquiry(id) {
         } else {
             appendBotMessage("아직 답변을 준비 중입니다.", dbTime);
         }
+    }).fail(function() {
+        alert("상세 내역을 불러오는 데 실패했습니다.");
     });
 }
 
@@ -95,6 +110,7 @@ function handleUserInput() {
         inquiryData.title = val;
         currentStep = 'content';
         appendBotMessage("상세한 <b>문의 내용</b>을 입력해 주시겠어요?");
+        $('#userInput').attr('placeholder', '상세 내용을 입력하세요...');
     } 
     else if(currentStep === 'content') {
         inquiryData.content = val;
@@ -111,17 +127,19 @@ function handleUserInput() {
     }
 }
 
-// 확인 버튼들 표시
+// 확인 버튼들 표시 (수정/전송 선택 시 레이아웃 유지)
 function showConfirmation() {
     appendBotMessage(`입력하신 내용이 맞나요?<br><br><b>제목:</b> ${inquiryData.title}<br><b>내용:</b> ${inquiryData.content}`);
     let btnHtml = `
-        <div class="mt-2">
-            <button class="btn btn-sm btn-primary mr-1" onclick="editField('title')">제목 수정</button>
-            <button class="btn btn-sm btn-primary mr-1" onclick="editField('content')">내용 수정</button>
+        <div class="mt-2 confirmation-buttons">
+            <button class="btn btn-sm btn-info mr-1" onclick="editField('title')">제목 수정</button>
+            <button class="btn btn-sm btn-info mr-1" onclick="editField('content')">내용 수정</button>
             <button class="btn btn-sm btn-primary" onclick="saveInquiry()">수정 사항 없음</button>
         </div>`;
     appendBotMessage(btnHtml);
-    $('#userInput').attr('disabled', true).attr('placeholder', '버튼을 선택해주세요');
+    
+    // 버튼 선택 전까지 입력창 잠시 비활성화
+    $('#userInput').attr('disabled', true).attr('placeholder', '위 버튼 중 하나를 선택해주세요.');
 }
 
 function editField(type) {
@@ -139,10 +157,10 @@ function askConfirmAgain() {
     currentStep = 'confirm';
     appendBotMessage(`수정되었습니다. 다시 확인해주세요.<br><br><b>제목:</b> ${inquiryData.title}<br><b>내용:</b> ${inquiryData.content}`);
     let btnHtml = `
-        <div class="mt-2">
-            <button class="btn btn-sm btn-primary mr-1" onclick="editField('title')">제목 수정</button>
-            <button class="btn btn-sm btn-primary mr-1" onclick="editField('content')">내용 수정</button>
-            <button class="btn btn-sm btn-primary" onclick="saveInquiry()">수정 사항 없음</button>
+        <div class="mt-2 confirmation-buttons">
+            <button class="btn btn-sm btn-info mr-1" onclick="editField('title')">제목 수정</button>
+            <button class="btn btn-sm btn-info mr-1" onclick="editField('content')">내용 수정</button>
+            <button class="btn btn-sm btn-primary" onclick="saveInquiry()">확인 및 전송</button>
         </div>`;
     appendBotMessage(btnHtml);
     $('#userInput').attr('disabled', true);
@@ -150,14 +168,14 @@ function askConfirmAgain() {
 
 // 최종 저장
 function saveInquiry() {
-    $.post("/inquiry/save", { 
+    $.post("/support/inquiry/save", { 
         title: inquiryData.title, 
         content: inquiryData.content 
     }, function(res) {
-        if(res === "success") {
+        if(res.trim() === "success") {
             appendBotMessage("<b>문의가 정상적으로 접수되었습니다.</b><br>운영자가 확인 후 답변 드릴 예정입니다. 감사합니다!");
             $('#chatFooter').hide();
-            loadInquiryList();
+            loadInquiryList(); 
         } else {
             appendBotMessage("저장 중 오류가 발생했습니다. 다시 시도해주세요.");
         }
@@ -168,13 +186,12 @@ function saveInquiry() {
 function appendBotMessage(msg, time = "") {
     if(!time) {
         let now = new Date();
-        time = now.getFullYear() + "-" + (now.getMonth()+1).toString().padStart(2, '0') + "-" + now.getDate().toString().padStart(2, '0') + " " +
-               now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0') + ":" + now.getSeconds().toString().padStart(2, '0');
+        time = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
     }
 
     let html = `
         <div class="d-flex justify-content-start mb-4">
-            <div class="img_cont_msg"><img src="/images/manager.png" style="width:40px; height:40px; border-radius:50%;"></div>
+            <div class="img_cont_msg"><img src="/images/support/manager.png" style="width:40px; height:40px; border-radius:50%;"></div>
             <div class="msg_cotainer">
                 ${msg}
                 <span class="msg_time">${time}</span>
@@ -187,8 +204,7 @@ function appendBotMessage(msg, time = "") {
 function appendUserMessage(msg, time = "") {
     if(!time) {
         let now = new Date();
-        time = now.getFullYear() + "-" + (now.getMonth()+1).toString().padStart(2, '0') + "-" + now.getDate().toString().padStart(2, '0') + " " +
-               now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0') + ":" + now.getSeconds().toString().padStart(2, '0');
+        time = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
     }
 
     let html = `
@@ -203,5 +219,7 @@ function appendUserMessage(msg, time = "") {
 }
 
 function scrollToBottom() { 
-    $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight); 
+    if($('#chatBody').length > 0) {
+        $('#chatBody').scrollTop($('#chatBody')[0].scrollHeight); 
+    }
 }

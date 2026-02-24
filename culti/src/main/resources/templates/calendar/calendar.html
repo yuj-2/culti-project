@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>일정 캘린더</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    
+    <link rel="stylesheet" th:href="@{/css/calendar.css}">
+    
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/calendar.js}"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50/30 font-sans">
+    
+    <div th:replace="~{layout/header :: headerFragment}"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <div class="mb-8 mt-2">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2 tracking-tight">문화 일정 캘린더</h2>
+            <p class="text-gray-500 text-base mb-6">이번 달 진행되는 영화, 공연, 전시 일정을 CULTI에서 한눈에 확인하세요.</p>
+        
+            <div class="flex flex-wrap gap-2">
+                <button class="px-5 py-2.5 rounded-full bg-[#503396] text-white text-sm font-semibold shadow-md shadow-purple-900/20 transition-all">전체 일정</button>
+                <button class="px-5 py-2.5 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-purple-50 hover:text-[#503396] hover:border-purple-200 text-sm font-medium transition-all">영화</button>
+                <button class="px-5 py-2.5 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-purple-50 hover:text-[#503396] hover:border-purple-200 text-sm font-medium transition-all">공연</button>
+                <button class="px-5 py-2.5 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-purple-50 hover:text-[#503396] hover:border-purple-200 text-sm font-medium transition-all">전시</button>
+                <button class="px-5 py-2.5 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-purple-50 hover:text-[#503396] hover:border-purple-200 text-sm font-medium transition-all">팝업스토어</button>
+                </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="calendar" class="w-6 h-6 text-[#503396]"></i>
+                            <h2 id="current-month-year" class="font-bold text-gray-800 cal-title">
+                                2024년 3월
+                            </h2>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="changeMonth(-1)" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                <i data-lucide="chevron-left" class="w-5 h-5 text-gray-600"></i>
+                            </button>
+                            <button onclick="changeMonth(1)" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-7 gap-2 mb-3">
+                        <div class="text-center py-2 font-semibold text-red-500 cal-day-header">일</div>
+                        <div class="text-center py-2 font-semibold text-gray-600 cal-day-header">월</div>
+                        <div class="text-center py-2 font-semibold text-gray-600 cal-day-header">화</div>
+                        <div class="text-center py-2 font-semibold text-gray-600 cal-day-header">수</div>
+                        <div class="text-center py-2 font-semibold text-gray-600 cal-day-header">목</div>
+                        <div class="text-center py-2 font-semibold text-gray-600 cal-day-header">금</div>
+                        <div class="text-center py-2 font-semibold text-blue-500 cal-day-header">토</div>
+                    </div>
+
+                    <div id="calendar-days" class="grid grid-cols-7 gap-2"></div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 sticky top-8">
+                    <h3 id="selected-date-title" class="font-bold text-gray-800 mb-4 cal-side-title">
+                        날짜를 선택해주세요
+                    </h3>
+                    <div id="event-list" class="space-y-4"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

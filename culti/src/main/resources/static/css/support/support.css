@@ -1,0 +1,116 @@
+.support-container {
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 0 20px;
+    font-family: 'Pretendard', sans-serif;
+}
+
+.support-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.support-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+/* 4분할 메뉴 그리드 */
+.support-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 60px;
+}
+
+.menu-item {
+    background: #fff;
+    border: 1px solid #e2e2e2;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.menu-item:hover {
+    border-color: #ed4933;
+    background-color: #fffaf9;
+    transform: translateY(-5px);
+}
+
+.menu-item i {
+    font-size: 2.5rem;
+    color: #ed4933;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.menu-item span {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+/* 공지사항 리스트 섹션 */
+.notice-section {
+    background: #fcfcfc;
+    border: 1px solid #eee;
+    padding: 30px;
+    border-radius: 15px;
+}
+
+.section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+}
+
+.section-title h2 {
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.more-btn {
+    text-decoration: none;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.notice-list {
+    list-style: none;
+    padding: 0;
+}
+
+.notice-list li {
+    border-bottom: 1px solid #eee;
+}
+
+.notice-list li a {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 10px;
+    text-decoration: none;
+    color: #444;
+}
+
+.notice-list li a:hover {
+    background-color: #f9f9f9;
+}
+
+.notice-list .title {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notice-list .date {
+    color: #999;
+    font-size: 0.85rem;
+    margin-left: 20px;
+}

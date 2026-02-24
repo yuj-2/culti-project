@@ -3,8 +3,8 @@
 body, html {
     height: 100%;
     margin: 0;
-    background-color: #503396;
-    /* 그라데이션 배경 background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5); */
+    /* background-color: #503396; */
+    background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5); 
 }
 
 .chat {
@@ -180,24 +180,57 @@ body, html {
     font-weight: bold;
 }
 
+/* 하단 입력 영역 레이아웃 조정 */
+.card-footer .input-group {
+    display: flex !important;
+    align-items: stretch !important; /* 입력창과 버튼 높이를 동일하게 맞춤 */
+}
+
 .type_msg {
+    flex: 1; /* 입력창이 남은 공간을 다 차지함 */
     background-color: rgba(0, 0, 0, 0.3) !important;
     border: 0 !important;
     color: white !important;
     height: 100px !important;
-    
-    /* 추가된 속성들 */
-    resize: none;                /* 사용자가 임의로 크기 조절 못하게 방지 */
-    word-break: break-all;      /* 가로 끝에 도달하면 단어 단위로 줄바꿈 */
-    overflow-y: auto;           /* 내용이 너무 길어지면 안에서 스크롤 생성 */
-    padding: 15px !important;    /* 텍스트가 테두리에 너무 붙지 않게 여백 추가 */
+    resize: none;
+    word-break: break-all;
+    overflow-y: auto;
+    padding: 15px !important;
+    border-radius: 15px 0 0 15px !important; /* 왼쪽 모서리만 둥글게 */
 }
 
+/* 전송 버튼 영역 - 여기서 크기를 조절합니다 */
+.input-group-append {
+    display: flex !important;
+    margin-left: 0 !important; /* 입력창과의 틈새 제거 */
+}
+
+/* 전송 버튼 영역 */
 .send_btn {
-    background-color: rgba(0, 0, 0, 0.3) !important;
+    width: 100px !important;    /* 기존 크기 유지 */
+    background-color: rgba(0, 0, 0, 0.5) !important;
     border: 0 !important;
-    color: white !important;
     cursor: pointer;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 0 15px 15px 0 !important;
+    transition: background 0.3s;
+    
+    /* 이미지 삽입을 위한 설정 */
+    background-image: url('/images/support/send.png') !important; /* 이미지 경로 확인 필요 */
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 40px !important; /* 이미지 크기 (원하는 만큼 조절하세요) */
+}
+
+.send_btn:hover {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* 기존 아이콘은 보이지 않게 처리 (혹시 HTML에 i태그가 남아있을 경우 대비) */
+.send_btn i {
+    display: none !important;
 }
 
 /* 왼쪽 목록 카드 스타일 수정 */

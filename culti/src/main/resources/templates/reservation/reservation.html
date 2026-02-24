@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>티켓 예매</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script th:src="@{/js/reservation.js}"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50/30 font-sans">
+
+    <div th:replace="~{layout/header :: headerFragment}"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+            
+            <div class="flex flex-wrap gap-3 mb-6">
+                <button class="px-6 py-3 rounded-xl transition-all duration-200 bg-[#503396] text-white shadow-lg shadow-purple-900/25 res-tab-active">
+                    영화
+                </button>
+                <button class="px-6 py-3 rounded-xl transition-all duration-200 bg-gray-50 text-gray-700 hover:bg-gray-100 res-tab-default">
+                    공연
+                </button>
+                <button class="px-6 py-3 rounded-xl transition-all duration-200 bg-gray-50 text-gray-700 hover:bg-gray-100 res-tab-default">
+                    전시
+                </button>
+                <button class="px-6 py-3 rounded-xl transition-all duration-200 bg-gray-50 text-gray-700 hover:bg-gray-100 res-tab-default">
+                    팝업스토어
+                </button>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4">
+                <div class="flex-1 relative">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                    <input type="text" placeholder="작품명으로 검색하세요" class="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#503396] focus:border-transparent transition-all res-input-text">
+                </div>
+
+                <div class="relative sm:w-48" id="sort-menu-container">
+				    <button id="sort-button" class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between hover:bg-gray-100 transition-all res-input-text">
+				        <span id="sort-text" class="text-gray-700">인기순</span>
+				        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 transition-transform duration-200" id="sort-chevron"></i>
+				    </button>
+				    
+				    <div id="sort-dropdown" class="hidden absolute top-full right-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-10">
+				        <button class="w-full px-4 py-3 text-left text-gray-700 hover:bg-purple-50 hover:text-[#503396] transition-colors res-input-text sort-option">인기순</button>
+				        <button class="w-full px-4 py-3 text-left text-gray-700 hover:bg-purple-50 hover:text-[#503396] transition-colors res-input-text sort-option">최신순</button>
+				        <button class="w-full px-4 py-3 text-left text-gray-700 hover:bg-purple-50 hover:text-[#503396] transition-colors res-input-text sort-option">가나다순</button>
+				    </div>
+				</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            
+            <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 cursor-pointer">
+                <div class="relative overflow-hidden aspect-[3/4] bg-gray-100">
+                    <img src="https://images.unsplash.com/photo-1655367574486-f63675dd69eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb3ZpZSUyMHBvc3RlciUyMGNpbmVtYXxlbnwxfHx8fDE3NzE1NjIxMTl8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="인터스텔라" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
+                <div class="p-5">
+                    <h3 class="text-gray-900 mb-3 group-hover:text-[#503396] transition-colors line-clamp-1 res-card-title">
+                        인터스텔라
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-block px-3 py-1 bg-purple-100 text-[#503396] rounded-lg res-card-badge">
+                                12세 관람가
+                            </span>
+                        </div>
+                        <p class="text-gray-600 res-card-date">2024.02.15 - 2024.03.30</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 cursor-pointer">
+                <div class="relative overflow-hidden aspect-[3/4] bg-gray-100">
+                    <img src="https://images.unsplash.com/photo-1765510296004-614b6cc204da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhY3Rpb24lMjB0aHJpbGxlciUyMG1vdmllfGVufDF8fHx8MTc3MTUxMTYyMnww&ixlib=rb-4.1.0&q=80&w=1080" alt="액션 블록버스터" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                	<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
+                <div class="p-5">
+                    <h3 class="text-gray-900 mb-3 group-hover:text-[#503396] transition-colors line-clamp-1 res-card-title">
+                        액션 블록버스터
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-block px-3 py-1 bg-purple-100 text-[#503396] rounded-lg res-card-badge">
+                                15세 관람가
+                            </span>
+                        </div>
+                        <p class="text-gray-600 res-card-date">2024.02.22 - 2024.04.15</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 cursor-pointer">
+                <div class="relative overflow-hidden aspect-[3/4] bg-gray-100">
+                    <img src="https://images.unsplash.com/photo-1655367574486-f63675dd69eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb3ZpZSUyMHBvc3RlciUyMGNpbmVtYXxlbnwxfHx8fDE3NzE1NjIxMTl8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="드라마 신작" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                	<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
+                <div class="p-5">
+                    <h3 class="text-gray-900 mb-3 group-hover:text-[#503396] transition-colors line-clamp-1 res-card-title">
+                        드라마 신작
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-block px-3 py-1 bg-purple-100 text-[#503396] rounded-lg res-card-badge">
+                                12세 관람가
+                            </span>
+                        </div>
+                        <p class="text-gray-600 res-card-date">2024.03.01 - 2024.04.20</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

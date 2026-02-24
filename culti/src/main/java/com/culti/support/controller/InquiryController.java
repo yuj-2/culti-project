@@ -1,7 +1,9 @@
 package com.culti.support.controller;
 
+import com.culti.support.entity.Notice; 
 import com.culti.support.entity.Inquiry;
 import com.culti.support.service.InquiryService;
+import com.culti.support.service.NoticeService;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -13,47 +15,27 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/support")
 public class InquiryController {
+
     private final InquiryService inquiryService;
-    
- // --- 고객센터 관련 추가 페이지 ---
+    private final NoticeService noticeService;
 
-    // 고객센터 메인 (4개 사각형이 있는 페이지)
-    @GetMapping("/support")
-    public String supportMain() {
-        return "support/support"; // templates/support/support.html
+    @GetMapping("")
+    public String supportMain(Model model) {
+        List<Notice> noticeList = noticeService.getLatestNotices();
+        model.addAttribute("noticeList", noticeList);
+        return "support/support";
     }
 
-    // 공지사항 페이지
-    @GetMapping("/support/notice")
-    public String noticePage() {
-        return "support/notice"; 
-    }
-
-    // 예매 환불 안내 페이지
-    @GetMapping("/support/refund")
-    public String refundPage() {
-        return "support/refund";
-    }
-
-    // FAQ 페이지
-    @GetMapping("/support/faq")
-    public String faqPage() {
-        return "support/faq";
-    }
-    
-    
-    // ////////////////////////////////
-    // 문의 페이지 구현 완료
     @GetMapping("/inquiry")
     public String inquiryPage(HttpSession session, Model model) {
-        Long testUserId = 1L; 
-        session.setAttribute("userId", testUserId);
-        model.addAttribute("currentUserId", testUserId); 
+        session.setAttribute("userId", 1L); 
+        model.addAttribute("currentUserId", 1L);
+        model.addAttribute("inquiry", new Inquiry()); 
         return "support/inquiry";
     }
 
-    // 목록 불러오기 API
     @GetMapping("/inquiry/list")
     @ResponseBody
     public List<Inquiry> getList(HttpSession session) {
@@ -61,7 +43,6 @@ public class InquiryController {
         return inquiryService.getMyInquiries(userId != null ? userId : 1L);
     }
 
-    // 상세 내용 가져오기 API
     @GetMapping("/inquiry/detail/{id}")
     @ResponseBody
     public Inquiry getDetail(@PathVariable("id") Long id) {
@@ -71,17 +52,24 @@ public class InquiryController {
     @PostMapping("/inquiry/save")
     @ResponseBody
     public String saveInquiry(
-        @RequestParam("title") String title,
-        @RequestParam("content") String content,
-        HttpSession session) {
+            @RequestParam("title") String title,
+            @RequestParam("content") String content,
+            HttpSession session) {
         
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) userId = 1L; 
 
         try {
-            inquiryService.saveInquiry(title, content, userId);
+            Inquiry inquiry = Inquiry.builder()
+                    .userId(userId)
+                    .inquiryTitle(title)
+                    .inquiryContent(content)
+                    .build();
+            
+            inquiryService.saveInquiry(inquiry);
             return "success";
         } catch (Exception e) {
+            e.printStackTrace();
             return "fail";
         }
     }

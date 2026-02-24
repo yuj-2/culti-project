@@ -1,0 +1,34 @@
+@charset "UTF-8";
+/* 상단 필터 버튼 (선택됨) */
+.res-tab-active {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* 상단 필터 버튼 (기본) */
+.res-tab-default {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+/* 검색창 및 정렬 버튼 텍스트 */
+.res-input-text {
+    font-size: 15px;
+}
+
+/* 포스터 카드 제목 */
+.res-card-title {
+    font-size: 17px;
+    font-weight: 600;
+}
+
+/* 관람가 연령 뱃지 */
+.res-card-badge {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* 기간(날짜) 텍스트 */
+.res-card-date {
+    font-size: 14px;
+}

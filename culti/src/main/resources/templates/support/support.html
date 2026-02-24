@@ -1,117 +1,59 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
 <head>
-    <title>Culti - 고객센터</title>
+    <title>Culti Support Center</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <noscript><link rel="stylesheet" th:href="@{/css/noscript.css}" /></noscript>
-    <style>
-        /* 1. 상단 배너 배경 이미지 지정 */
-        #banner.support-banner {
-            background-image: url('/images/support_01.png'); /* 이미지 경로 확인 필요 */
-            background-position: center;
-            background-size: cover;
-        }
-
-        /* 2. 타일별 반투명 색상 필터 (사진 느낌 재현) */
-        .tiles article.sky-blue:before { background-color: rgba(135, 206, 235, 0.85) !important; }
-        .tiles article.purple:before { background-color: rgba(147, 112, 219, 0.85) !important; }
-        .tiles article.red:before { background-color: rgba(255, 99, 71, 0.85) !important; }
-        .tiles article.yellow:before { background-color: rgba(244, 208, 63, 0.85) !important; }
-
-        /* 타일 호버 시 텍스트 가독성 유지 */
-        .tiles article > .header.major {
-            z-index: 10;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <link rel="stylesheet" th:href="@{/css/support/support.css}" />
 </head>
 <body class="is-preload">
+    <div layout:fragment="content">
+        <section class="support-container">
+            <div class="support-header">
+                <h1>고객센터</h1>
+                <p>Culti 서비스 이용 중 궁금한 점을 해결해 드립니다.</p>
+            </div>
 
-    <div id="wrapper">
-
-        <header id="header" class="alt">
-            <a th:href="@{/}" class="logo"><strong>CULTI</strong> <span>Support</span></a>
-        </header>
-
-        <section id="banner" class="major support-banner">
-            <div class="inner">
-                <header class="major">
-                    <h1>고객센터</h1>
-                </header>
-                <div class="content">
-                    <p>도움이 필요하신가요? 아래 메뉴에서 원하는 서비스를 선택해주세요.</p>
+            <div class="support-menu-grid">
+                <div class="menu-item" onclick="location.href='/support/notice'">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>공지사항</span>
+                </div>
+                <div class="menu-item" onclick="location.href='/support/faq'">
+                    <i class="fas fa-question-circle"></i>
+                    <span>FAQ</span>
+                </div>
+                <div class="menu-item" onclick="location.href='/support/refund'">
+                    <i class="fas fa-undo-alt"></i>
+                    <span>환불 안내</span>
+                </div>
+                <div class="menu-item" th:onclick="|location.href='@{/support/inquiry}'|">
+                    <i class="fas fa-envelope-open-text"></i>
+                    <span>1:1 문의</span>
                 </div>
             </div>
-        </section>
 
-        <div id="main">
-            <section id="one" class="tiles">
-                
-                <article class="sky-blue">
-                    <span class="image">
-                        <img th:src="@{/images/pic01.jpg}" alt="" />
-                    </span>
-                    <header class="major">
-                        <h3>공지사항</h3>
-                        <p>새로운 소식을 확인하세요</p>
-                    </header>
-                    <a th:href="@{/support/notice}" class="link primary"></a>
-                </article>
-
-                <article class="purple">
-                    <span class="image">
-                        <img th:src="@{/images/pic02.jpg}" alt="" />
-                    </span>
-                    <header class="major">
-                        <h3>예매 환불 안내</h3>
-                        <p>취소 및 환불 규정 안내</p>
-                    </header>
-                    <a th:href="@{/support/refund}" class="link primary"></a>
-                </article>
-
-                <article class="red">
-                    <span class="image">
-                        <img th:src="@{/images/pic03.jpg}" alt="" />
-                    </span>
-                    <header class="major">
-                        <h3>FAQ</h3>
-                        <p>자주 묻는 질문들</p>
-                    </header>
-                    <a th:href="@{/support/faq}" class="link primary"></a>
-                </article>
-
-                <article class="yellow">
-                    <span class="image">
-                        <img th:src="@{/images/pic04.jpg}" alt="" />
-                    </span>
-                    <header class="major">
-                        <h3>1:1 문의</h3>
-                        <p>문의사항을 남겨주세요</p>
-                    </header>
-                    <a th:href="@{/inquiry}" class="link primary"></a>
-                </article>
-
-            </section>
-        </div>
-
-        <footer id="footer">
-            <div class="inner">
-                <ul class="copyright">
-                    <li>&copy; Culti. All rights reserved.</li>
+            <div class="notice-section">
+                <div class="section-title">
+                    <h2>최근 공지사항</h2>
+                    <a href="/support/notice" class="more-btn">더보기 +</a>
+                </div>
+                <ul class="notice-list">
+                    <li th:each="notice : ${noticeList}">
+                        <a th:href="@{/support/notice/view(id=${notice.noticeId})}">
+                            <span class="title" th:text="${notice.noticeTitle}">공지사항 제목이 들어갑니다.</span>
+                            <span class="date" th:text="${#temporals.format(notice.createdAt, 'yyyy-MM-dd')}">2026-02-24</span>
+                        </a>
+                    </li>
+                    <li th:if="${#lists.isEmpty(noticeList)}">
+                        <p style="text-align: center; color: #999;">등록된 공지사항이 없습니다.</p>
+                    </li>
                 </ul>
             </div>
-        </footer>
-
+        </section>
     </div>
-
-    <script th:src="@{/js/jquery.min.js}"></script>
-    <script th:src="@{/js/jquery.scrolly.min.js}"></script>
-    <script th:src="@{/js/jquery.scrollex.min.js}"></script>
-    <script th:src="@{/js/browser.min.js}"></script>
-    <script th:src="@{/js/breakpoints.min.js}"></script>
-    <script th:src="@{/js/util.js}"></script>
-    <script th:src="@{/js/main.js}"></script>
-
 </body>
 </html>
