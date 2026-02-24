@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<select id="getContentByScheduleId" resultType="com.culti.booking.vo.ContentVO">
+    SELECT c.title, c.category, c.poster_url 
+    FROM content c
+    JOIN schedule s ON c.content_id = s.content_id
+    WHERE s.schedule_id = #{scheduleId}
+</select>
+
+<select id="getReservedSeats" resultType="string">
+    SELECT CONCAT(st.seat_row, st.seat_col)
+    FROM schedule_seat ss
+    JOIN seat st ON ss.seat_id = st.seat_id
+    WHERE ss.schedule_id = #{scheduleId} 
+      AND ss.status != 'AVAILABLE'
+</select>
