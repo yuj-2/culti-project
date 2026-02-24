@@ -1,5 +1,6 @@
 package com.culti.auth.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -69,6 +70,7 @@ public class AuthController {
 	}*/
 	
 		//마이페이지
+		@PreAuthorize("isAuthenticated()")
 		@GetMapping("/myPage")
 		public void myPage() {
 			
