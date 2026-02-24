@@ -53,10 +53,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // 골라낸 데이터들로 HTML 카드 예쁘게 만들기
+		// 골라낸 데이터들로 HTML 카드 예쁘게 만들기
         filteredData.forEach(item => {
             const cardHTML = `
-                <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 cursor-pointer">
+                <div onclick="location.href='/reservation/detail/${item.id}'" 
+                     class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 cursor-pointer">
+                    
                     <div class="relative overflow-hidden aspect-[3/4] bg-gray-100">
                         <img src="${item.posterUrl}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
