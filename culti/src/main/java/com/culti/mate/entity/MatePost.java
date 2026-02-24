@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 @Entity
@@ -49,7 +50,7 @@ public class MatePost {
     private String location;
 
 	@Column(nullable = false)
-    private int maxPeople;
+    private Integer maxPeople;
 
 
     @Column(columnDefinition = "TEXT")

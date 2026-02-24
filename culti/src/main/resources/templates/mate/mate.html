@@ -35,7 +35,7 @@
     
     <!-- 작품 카드창 -->
 		<div class="posts-grid">
-		  <div class="post-card" th:each="p : ${posts}" 
+		  <div class="post-card" th:each="p : ${paging.content}" 
 		  th:attr="data-id=${p.postId},
 		   data-title=${p.title},
 	       data-category=${p.category.name()},
@@ -71,12 +71,9 @@
 		</div>
 
     <!-- Floating Button -->
-    <button class="floating-button" id="createButton">
-        <svg class="icon" style="width: 1.5rem; height: 1.5rem;">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-    </button>
+	<button class="floating-button" id="createButton">
+	  <i class="fa-solid fa-plus"></i>
+	</button>
     
     
     
@@ -288,7 +285,7 @@
 		    const desc = card.dataset.description || '';
 		
 		    document.getElementById('detailTitle').innerHTML =
-		      `${title} <span class="badge badge-${category.toLowerCase()}">${category}</span>`;
+		      `${title} <span class="badge badge-${category.toLowerCase()}" style="margin-left:20px;">${category}</span>`;
 		
 		    document.getElementById('detailContent').innerHTML = `
 		      <div class="detail-grid">
