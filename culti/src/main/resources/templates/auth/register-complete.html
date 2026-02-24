@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 완료 - CULTI</title>
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    
+    <link rel="stylesheet" th:href="@{/css/register-complete.css}">
+    
+    <script th:src="@{/js/register-complete.js}"></script>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">
+                    <div class="logo-icon">C</div>
+                    <span class="logo-text">CULTI</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main">
+        <div class="complete-container">
+            <div class="complete-box">
+                <!-- 성공 아이콘 -->
+                <div class="success-icon">
+                    <svg class="checkmark" viewBox="0 0 52 52">
+                        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                    </svg>
+                </div>
+
+                <!-- 환영 메시지 -->
+                <div class="complete-header">
+                    <h1>회원가입이 완료되었습니다!</h1>
+                    <p>CULTI의 회원이 되신 것을 환영합니다.</p>
+                </div>
+
+                <!-- 안내 메시지 -->
+                <div class="complete-info">
+                    <div class="info-card">
+                        <div class="info-icon">🎉</div>
+                        <div class="info-content">
+                            <h3>환영 쿠폰 지급</h3>
+                            <p>신규 회원 전용 5,000원 할인 쿠폰이 지급되었습니다.</p>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">🎁</div>
+                        <div class="info-content">
+                            <h3>첫 예매 혜택</h3>
+                            <p>첫 예매 시 추가 10% 할인 혜택을 받으실 수 있습니다.</p>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">⭐</div>
+                        <div class="info-content">
+                            <h3>포인트 적립</h3>
+                            <p>모든 예매 시 5%의 포인트가 적립됩니다.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 액션 버튼들 -->
+                <div class="complete-actions">
+                    <a th:href="@{/auth/login}" class="btn btn-primary">
+                        로그인하기
+                    </a>
+                    <a th:href="@{/}" class="btn btn-secondary">
+                        메인으로 이동
+                    </a>
+                </div>
+
+                <!-- 추가 정보 -->
+                <div class="complete-notice">
+                    <p class="notice-text">
+                        <strong>이메일을 확인해주세요!</strong><br>
+                        회원가입 확인 메일이 발송되었습니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2026 CULTI. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="/terms">이용약관</a>
+                    <a href="/privacy">개인정보처리방침</a>
+                    <a href="/help">고객센터</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
