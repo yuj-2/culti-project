@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<div th:fragment="headerFragment">
+<div th:fragment="headerFragment" >
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,7 +22,7 @@
       }
     </script>
 
-    <nav class="bg-[#252451] shadow-lg relative z-50 font-sans">
+    <nav class="bg-[#252451] shadow-lg relative z-50 culti-header">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           
@@ -48,7 +48,8 @@
             </div>
 
             <a th:href="@{/calendar}" class="px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 header-nav-link">일정 캘린더</a>
-            <button class="px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 header-nav-link">동행 찾기</button>
+            <a th:href="@{/mate/mate}" class="px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 header-nav-link">동행 찾기</a>
+<!--             <button class="px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 header-nav-link">동행 찾기</button> -->
             <button class="px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 header-nav-link">고객센터</button>
           </div>
 

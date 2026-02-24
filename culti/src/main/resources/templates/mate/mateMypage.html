@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html 
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/layout}">
+<head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(to bottom, rgba(80, 51, 150, 0.05), #ffffff);
+            min-height: 100vh;
+            color: #1a1a1a;
+        }
+
+        /* Header */
+        header {
+            background: #503396;
+            color: white;
+            padding: 2rem 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .tab:hover {
+            color: #503396;
+        }
+
+        .tab.active {
+            color: #503396;
+            border-bottom-color: #503396;
+        }
+
+        /* Application Card */
+        .application-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .application-card:hover {
+            border-color: rgba(80, 51, 150, 0.3);
+            box-shadow: 0 4px 12px rgba(80, 51, 150, 0.1);
+        }
+
+        .application-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .application-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .application-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1a1a1a;
+        }
+
+        .application-meta {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .application-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .application-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .info-row svg {
+            width: 1rem;
+            height: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* Badge */
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .badge-pending {
+            background: #ffa500;
+            color: white;
+        }
+
+        .badge-accepted {
+            background: #22c55e;
+            color: white;
+        }
+
+        .badge-rejected {
+            background: #ef4444;
+            color: white;
+        }
+
+        .badge-cancelled {
+            background: #999;
+            color: white;
+        }
+
+        /* Buttons */
+        .button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .button-success {
+            background: #22c55e;
+            color: white;
+        }
+
+        .button-success:hover {
+            background: #16a34a;
+        }
+
+        .button-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .button-danger:hover {
+            background: #dc2626;
+        }
+
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: #666;
+        }
+
+        .empty-state svg {
+            width: 4rem;
+            height: 4rem;
+            margin: 0 auto 1rem;
+            color: #ccc;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: #999;
+        }
+
+        .empty-state p {
+            color: #999;
+        }
+
+        /* SVG Icons */
+        .icon {
+            width: 1rem;
+            height: 1rem;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #503396;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .application-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .application-actions {
+                justify-content: flex-start;
+            }
+
+            .tabs {
+                overflow-x: auto;
+            }
+
+            .tab {
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div layout:fragment="content">
+    <header>
+        <div class="header-content">
+            <button class="back-button" onclick="goBack()">
+                <svg class="icon">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                돌아가기
+            </button>
+            <h1>마이페이지</h1>
+            <div style="width: 100px;"></div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats" id="stats">
+            <!-- Stats will be inserted by JavaScript -->
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="received">받은 신청</button>
+            <button class="tab" data-tab="sent">내가 신청한 것</button>
+        </div>
+
+        <!-- Content -->
+        <div id="content">
+            <!-- Content will be inserted by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Get current user
+        let currentUser = localStorage.getItem('currentUser') || '게스트';
+
+        // Get data from localStorage
+        let posts = JSON.parse(localStorage.getItem('posts')) || [];
+        let applications = JSON.parse(localStorage.getItem('applications')) || [];
+        let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+
+        let currentTab = 'received';
+
+        const statusLabels = {
+            pending: '대기중',
+            accepted: '수락됨',
+            rejected: '거절됨',
+            cancelled: '취소됨'
+        };
+
+        // Go back to main page
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        // Render stats
+        function renderStats() {
+            const myPosts = posts.filter(p => p.author === currentUser);
+            const receivedApps = applications.filter(app => 
+                myPosts.some(p => p.id === app.postId) && app.status !== 'cancelled'
+            );
+            const sentApps = applications.filter(app => 
+                app.applicant === currentUser && app.status !== 'cancelled'
+            );
+            const acceptedApps = sentApps.filter(app => app.status === 'accepted');
+
+            const statsContainer = document.getElementById('stats');
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${myPosts.length}</div>
+                    <div class="stat-label">내가 작성한 게시글</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${receivedApps.length}</div>
+                    <div class="stat-label">받은 신청</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${sentApps.length}</div>
+                    <div class="stat-label">보낸 신청</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${acceptedApps.length}</div>
+                    <div class="stat-label">수락된 신청</div>
+                </div>
+            `;
+        }
+
+        // Accept application
+        function acceptApplication(applicationId) {
+            const application = applications.find(a => a.id === applicationId);
+            if (!application) return;
+
+            application.status = 'accepted';
+            localStorage.setItem('applications', JSON.stringify(applications));
+
+            const post = posts.find(p => p.id === application.postId);
+            if (post) {
+                post.currentMembers++;
+                localStorage.setItem('posts', JSON.stringify(posts));
+                
+                // Add notification to applicant
+                addNotification(
+                    'accepted',
+                    '동행 신청 수락됨',
+                    `"${post.title}" 동행 신청이 수락되었습니다! 🎉`,
+                    application.postId,
+                    applicationId
+                );
+            }
+
+            renderContent();
+            renderStats();
+        }
+
+        // Reject application
+        function rejectApplication(applicationId) {
+            if (!confirm('신청을 거절하시겠습니까?')) return;
+
+            const application = applications.find(a => a.id === applicationId);
+            if (!application) return;
+
+            application.status = 'rejected';
+            localStorage.setItem('applications', JSON.stringify(applications));
+
+            const post = posts.find(p => p.id === application.postId);
+            if (post) {
+                // Add notification to applicant
+                addNotification(
+                    'rejected',
+                    '동행 신청 거절됨',
+                    `"${post.title}" 동행 신청이 거절되었습니다.`,
+                    application.postId,
+                    applicationId
+                );
+            }
+
+            renderContent();
+            renderStats();
+        }
+
+        // Cancel application
+        function cancelApplication(applicationId) {
+            if (!confirm('신청을 취소하시겠습니까?')) return;
+
+            const application = applications.find(a => a.id === applicationId);
+            if (!application) return;
+
+            application.status = 'cancelled';
+            localStorage.setItem('applications', JSON.stringify(applications));
+
+            renderContent();
+            renderStats();
+        }
+
+        // Add notification
+        function addNotification(type, title, description, postId, applicationId) {
+            const notification = {
+                id: Date.now().toString(),
+                type,
+                title,
+                description,
+                postId,
+                applicationId,
+                read: false,
+                createdAt: new Date().toISOString()
+            };
+            notifications.unshift(notification);
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+        }
+
+        // Render content
+        function renderContent() {
+            const content = document.getElementById('content');
+            
+            if (currentTab === 'received') {
+                // Show applications received by current user's posts
+                const myPosts = posts.filter(p => p.author === currentUser);
+                const receivedApps = applications.filter(app => 
+                    myPosts.some(p => p.id === app.postId) && app.status !== 'cancelled'
+                );
+
+                if (receivedApps.length === 0) {
+                    content.innerHTML = `
+                        <div class="empty-state">
+                            <svg class="icon" style="width: 4rem; height: 4rem;">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            <h3>받은 신청이 없습니다</h3>
+                            <p>게시글을 작성하고 동행을 기다려보세요!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                content.innerHTML = receivedApps.map(app => {
+                    const post = posts.find(p => p.id === app.postId);
+                    if (!post) return '';
+
+                    const isPending = app.status === 'pending';
+
+                    return `
+                        <div class="application-card">
+                            <div class="application-header">
+                                <div class="application-info">
+                                    <div class="application-title">${post.title}</div>
+                                    <div class="application-meta">
+                                        <span>신청자: <strong>${app.applicant}</strong></span> · 
+                                        <span>${new Date(app.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+                                <div class="application-actions">
+                                    <span class="badge badge-${app.status}">${statusLabels[app.status]}</span>
+                                    ${isPending ? `
+                                        <button class="button button-success" onclick="acceptApplication('${app.id}')">수락</button>
+                                        <button class="button button-danger" onclick="rejectApplication('${app.id}')">거절</button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <div class="application-details">
+                                <div class="info-row">
+                                    <svg class="icon">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                    <span>${post.date} ${post.time}</span>
+                                </div>
+                                <div class="info-row">
+                                    <svg class="icon">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                    <span>${post.location}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } else {
+                // Show applications sent by current user
+                const sentApps = applications.filter(app => 
+                    app.applicant === currentUser && app.status !== 'cancelled'
+                );
+
+                if (sentApps.length === 0) {
+                    content.innerHTML = `
+                        <div class="empty-state">
+                            <svg class="icon" style="width: 4rem; height: 4rem;">
+                                <path d="M22 2L11 13"></path>
+                                <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+                            </svg>
+                            <h3>신청한 게시글이 없습니다</h3>
+                            <p>마음에 드는 게시글에 동행을 신청해보세요!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                content.innerHTML = sentApps.map(app => {
+                    const post = posts.find(p => p.id === app.postId);
+                    if (!post) return '';
+
+                    const canCancel = app.status === 'pending';
+
+                    return `
+                        <div class="application-card">
+                            <div class="application-header">
+                                <div class="application-info">
+                                    <div class="application-title">${post.title}</div>
+                                    <div class="application-meta">
+                                        <span>작성자: <strong>${post.author}</strong></span> · 
+                                        <span>${new Date(app.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+                                <div class="application-actions">
+                                    <span class="badge badge-${app.status}">${statusLabels[app.status]}</span>
+                                    ${canCancel ? `
+                                        <button class="button button-danger" onclick="cancelApplication('${app.id}')">취소</button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <div class="application-details">
+                                <div class="info-row">
+                                    <svg class="icon">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                    <span>${post.date} ${post.time}</span>
+                                </div>
+                                <div class="info-row">
+                                    <svg class="icon">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                    <span>${post.location}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                currentTab = e.target.dataset.tab;
+                renderContent();
+            });
+        });
+
+        // Initial render
+        renderStats();
+        renderContent();
+    </script>
+    </div>
+</body>
+</html>
