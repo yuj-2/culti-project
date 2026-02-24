@@ -1,20 +1,17 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>일정 캘린더</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    
-    <link rel="stylesheet" th:href="@{/css/calendar.css}">
-    
+<html 
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/layout}">
+<head>    
+    <link rel="stylesheet" th:href="@{/css/calendar.css}">   
     <script th:src="@{/js/common.js}"></script>
     <script th:src="@{/js/calendar.js}"></script>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50/30 font-sans">
     
-    <div th:replace="~{layout/header :: headerFragment}"></div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div  layout:fragment="content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         <div class="mb-8 mt-2">
             <h2 class="text-3xl font-bold text-gray-900 mb-2 tracking-tight">문화 일정 캘린더</h2>

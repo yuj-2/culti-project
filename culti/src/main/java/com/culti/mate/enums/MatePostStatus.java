@@ -1,4 +1,4 @@
-package com.culti.mate;
+package com.culti.mate.enums;
 
 public enum MatePostStatus {
 	OPEN, 
