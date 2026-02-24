@@ -24,18 +24,20 @@ public class SecurityConfig {
             .authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
                 .requestMatchers(new AntPathRequestMatcher("/**")).permitAll())
             /* /h2-console/시작하는 모든 요청 URL은 CSRF 검증을 하지 않는다. */
+            
+            /*
             .csrf((csrf) -> csrf
-                    .ignoringRequestMatchers(new AntPathRequestMatcher("/h2-console/**")))
+                    .ignoringRequestMatchers(new AntPathRequestMatcher("/h2-console/**")))*/
             .headers((headers) -> headers
     				.addHeaderWriter(new XFrameOptionsHeaderWriter(
     						XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
             .formLogin((formLogin) -> formLogin
-                    .loginPage("/user/login") 
+                    .loginPage("/auth/login") 
                     .defaultSuccessUrl("/"))
             .logout((logout) -> logout
-                    .logoutRequestMatcher(new AntPathRequestMatcher("/user/logout"))
+                    .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"))
                     .logoutSuccessUrl("/")
-                    .invalidateHttpSession(true))
+                    .invalidateHttpSession(true)) //로그아웃 시 현재 세션을 무효화합니다.
         ;
         return http.build();
     }

@@ -3,6 +3,7 @@ package com.culti.auth;
 
 import java.util.Optional;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import lombok.extern.log4j.Log4j2;
 public class UserServiceImpl implements UserService{
 	
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 	
 	@Override
 	public Long register(UserDTO userDTO) {
@@ -22,6 +24,9 @@ public class UserServiceImpl implements UserService{
 		userDTO.setStatus("정상");
 		// BoardDTO -> Board 엔티티로 변환
 		User entity = this.dtoToEntity(userDTO);
+		
+		entity.setPassword(this.passwordEncoder.encode(entity.getPassword()));
+		
 		this.userRepository.save(entity);
 		
 		return entity.getUserId(); // 가입된 회원 고유Id 번호
