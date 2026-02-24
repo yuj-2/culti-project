@@ -1,4 +1,4 @@
-package com.culti.auth;
+package com.culti.auth.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.culti.auth.dto.UserDTO;
+import com.culti.auth.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +25,8 @@ public class AuthController {
 	
 	//로그인페이지
 	@GetMapping("/login")
-	public void login() {
-		
+	public String login() {
+		return "/auth/login_form";
 	}
 	
 	//회원가입 페이지
@@ -48,7 +51,7 @@ public class AuthController {
 		
 	}
 	
-	
+	/*
 	@PostMapping("/login")
 	public String login(@RequestParam("email") String email,@RequestParam("password") String password, HttpSession session, RedirectAttributes rttr) {
 	    UserDTO loginUser = userService.login(email, password);
@@ -63,7 +66,7 @@ public class AuthController {
 	        
 	        return "redirect:/auth/login";
 	    }
-	}
+	}*/
 	
 		//마이페이지
 		@GetMapping("/myPage")

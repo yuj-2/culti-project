@@ -1,4 +1,4 @@
-package com.culti.auth;
+package com.culti.auth.entity;
 
 import java.time.LocalDateTime;
 

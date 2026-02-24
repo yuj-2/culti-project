@@ -1,10 +1,14 @@
-package com.culti.auth;
+package com.culti.auth.service;
 
 
 import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.culti.auth.dto.UserDTO;
+import com.culti.auth.entity.User;
+import com.culti.auth.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -20,7 +24,7 @@ public class UserServiceImpl implements UserService{
 	@Override
 	public Long register(UserDTO userDTO) {
 		log.info("😝 UserServiceImpl.register()..." + userDTO);
-		userDTO.setRole("일반회원");
+		userDTO.setRole("USER");
 		userDTO.setStatus("정상");
 		// BoardDTO -> Board 엔티티로 변환
 		User entity = this.dtoToEntity(userDTO);

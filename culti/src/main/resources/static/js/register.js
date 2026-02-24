@@ -479,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         resendBtn.disabled = true;
-        emailInput.disabled = true;
+        emailInput.readOnly = true;
     }
 
     // 인증 실패 처리

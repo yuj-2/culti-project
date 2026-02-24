@@ -1,4 +1,4 @@
-package com.culti.auth;
+package com.culti.auth.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,10 +33,11 @@ public class SecurityConfig {
     						XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
             .formLogin((formLogin) -> formLogin
                     .loginPage("/auth/login") 
-                    .defaultSuccessUrl("/"))
+                    .usernameParameter("email")
+                    .defaultSuccessUrl("/home"))
             .logout((logout) -> logout
                     .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"))
-                    .logoutSuccessUrl("/")
+                    .logoutSuccessUrl("/home")
                     .invalidateHttpSession(true)) //로그아웃 시 현재 세션을 무효화합니다.
         ;
         return http.build();

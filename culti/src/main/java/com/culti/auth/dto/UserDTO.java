@@ -1,40 +1,33 @@
-package com.culti.auth;
+package com.culti.auth.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
-
-@Entity
+@Data
+@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-@ToString
-@Table(name = "users")
-public class User extends BaseEntity{
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+public class UserDTO {
 	private Long userId;
-	
 	private String email;
 	private String password;
 	private String phone;
 	private String name;
 	private String status;
+    private LocalDateTime createdAt;
 	private String role;
+	
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate birthDate; 
+	
 	private Character gender;
 	private String nickname;
 }

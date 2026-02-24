@@ -1,260 +1,230 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>회원가입 - CULTI</title>
-     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    
-    <link rel="stylesheet" th:href="@{/css/register.css}">
-    
-    <script th:src="@{/js/register.js}"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>회원가입 - CULTI</title>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<link rel="stylesheet" th:href="@{/css/register.css}">
+
+<script th:src="@{/js/register.js}"></script>
 </head>
 <body>
-    <!-- 헤더 -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <a href="/" class="logo">
-                    <div class="logo-icon">C</div>
-                    <span class="logo-text">CULTI</span>
-                </a>
-            </div>
-        </div>
-    </header>
+	<!-- 헤더 -->
+	<header class="header">
+		<div class="container">
+			<div class="header-content">
+				<a href="/" class="logo">
+					<div class="logo-icon">C</div> <span class="logo-text">CULTI</span>
+				</a>
+			</div>
+		</div>
+	</header>
 
-    <!-- 메인 컨텐츠 -->
-    <main class="main">
-        <div class="signup-container">
-            <div class="signup-box">
-                <div class="signup-header">
-                    <h1>회원가입</h1>
-                    <p>CULTI와 함께 특별한 문화생활을 시작하세요</p>
-                </div>
+	<!-- 메인 컨텐츠 -->
+	<main class="main">
+		<div class="signup-container">
+			<div class="signup-box">
+				<div class="signup-header">
+					<h1>회원가입</h1>
+					<p>CULTI와 함께 특별한 문화생활을 시작하세요</p>
+				</div>
 
-                <!-- 회원가입 폼 -->
-                <form th:action="@{/auth/register}" th:method="post" class="signup-form" id="signupForm">
-                    <!-- 이름 -->
-                    <div class="form-group">
-                        <label for="name">이름 <span class="required">*</span></label>
-                        <input 
-                            type="text" 
-                            id="name" 
-                            name="name" 
-                            placeholder="이름을 입력하세요"
-                            required
-                        >
-                        <span class="error-message" id="nameError"></span>
-                    </div>
+				<!-- 회원가입 폼 -->
+				<form th:action="@{/auth/register}" th:method="post"
+					class="signup-form" id="signupForm">
+					<!-- 이름 -->
+					<div class="form-group">
+						<label for="name">이름 <span class="required">*</span></label> <input
+							type="text" id="name" name="name" placeholder="이름을 입력하세요"
+							required> <span
+							class="error-message" id="nameError"></span>
+					</div>
 
-                    <!-- 이메일 -->
-                    <div class="form-group">
-                        <label for="email">이메일 <span class="required">*</span></label>
-                        <div class="input-with-button">
-                            <input 
-                                type="email" 
-                                id="email" 
-                                name="email" 
-                                placeholder="example@email.com"
-                                required
-                            >
-                            <button type="button" class="btn-verify" id="sendVerifyBtn">
-                                인증번호 발송
-                            </button>
-                        </div>
-                        <span class="error-message" id="emailError"></span>
-                    </div>
+					<!-- 이메일 -->
+					<div class="form-group">
+						<label for="email">이메일 <span class="required">*</span></label>
+						<div class="input-with-button">
+							<input type="email" id="email" name="email"
+								placeholder="example@email.com" required>
+							<button type="button" class="btn-verify" id="sendVerifyBtn">
+								인증번호 발송</button>
+						</div>
+						<span class="error-message" id="emailError"></span>
+					</div>
 
-                    <!-- 이메일 인증번호 -->
-                    <div class="form-group verification-group" id="verificationGroup" style="display: none;">
-                        <label for="verificationCode">인증번호 <span class="required">*</span></label>
-                        <div class="verification-input-wrapper">
-                            <div class="verification-code-inputs">
-                                <input type="text" maxlength="1" class="code-input" data-index="0">
-                                <input type="text" maxlength="1" class="code-input" data-index="1">
-                                <input type="text" maxlength="1" class="code-input" data-index="2">
-                                <input type="text" maxlength="1" class="code-input" data-index="3">
-                                <input type="text" maxlength="1" class="code-input" data-index="4">
-                                <input type="text" maxlength="1" class="code-input" data-index="5">
-                            </div>
-                            <div class="verification-timer" id="verificationTimer">
-                                <span class="timer-text">남은 시간: <span id="timerDisplay">03:00</span></span>
-                            </div>
-                        </div>
-                        <button type="button" class="btn-resend" id="resendBtn">
-                            인증번호 재발송
-                        </button>
-                        <span class="error-message" id="verificationError"></span>
-                        <span class="success-message" id="verificationSuccess"></span>
-                    </div>
+					<!-- 이메일 인증번호 -->
+					<div class="form-group verification-group" id="verificationGroup"
+						style="display: none;">
+						<label for="verificationCode">인증번호 <span class="required">*</span></label>
+						<div class="verification-input-wrapper">
+							<div class="verification-code-inputs">
+								<input type="text" maxlength="1" class="code-input"
+									data-index="0"> <input type="text" maxlength="1"
+									class="code-input" data-index="1"> <input type="text"
+									maxlength="1" class="code-input" data-index="2"> <input
+									type="text" maxlength="1" class="code-input" data-index="3">
+								<input type="text" maxlength="1" class="code-input"
+									data-index="4"> <input type="text" maxlength="1"
+									class="code-input" data-index="5">
+							</div>
+							<div class="verification-timer" id="verificationTimer">
+								<span class="timer-text">남은 시간: <span id="timerDisplay">03:00</span></span>
+							</div>
+						</div>
+						<button type="button" class="btn-resend" id="resendBtn">
+							인증번호 재발송</button>
+						<span class="error-message" id="verificationError"></span> <span
+							class="success-message" id="verificationSuccess"></span>
+					</div>
 
-                    <!-- 비밀번호 -->
-                    <div class="form-group">
-                        <label for="password">비밀번호 <span class="required">*</span></label>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password" 
-                            placeholder="8자 이상, 영문/숫자/특수문자 조합"
-                            required
-                        >
-                        <div class="password-strength" id="passwordStrength">
-                            <div class="strength-bar">
-                                <div class="strength-bar-fill"></div>
-                            </div>
-                            <span class="strength-text"></span>
-                        </div>
-                        <span class="error-message" id="passwordError"></span>
-                    </div>
+					<!-- 비밀번호 -->
+					<div class="form-group">
+						<label for="password">비밀번호 <span class="required">*</span></label>
+						<input type="password" id="password" name="password"
+							placeholder="8자 이상, 영문/숫자/특수문자 조합" required>
+						<div class="password-strength" id="passwordStrength">
+							<div class="strength-bar">
+								<div class="strength-bar-fill"></div>
+							</div>
+							<span class="strength-text"></span>
+						</div>
+						<span class="error-message" id="passwordError"></span>
+					</div>
 
-                    <!-- 비밀번호 확인 -->
-                    <div class="form-group">
-                        <label for="passwordConfirm">비밀번호 확인 <span class="required">*</span></label>
-                        <input 
-                            type="password" 
-                            id="passwordConfirm" 
-                            name="passwordConfirm" 
-                            placeholder="비밀번호를 다시 입력하세요"
-                            required
-                        >
-                        <span class="error-message" id="passwordConfirmError"></span>
-                    </div>
+					<!-- 비밀번호 확인 -->
+					<div class="form-group">
+						<label for="passwordConfirm">비밀번호 확인 <span
+							class="required">*</span></label> <input type="password"
+							id="passwordConfirm" name="passwordConfirm"
+							placeholder="비밀번호를 다시 입력하세요" required>
+						<span class="error-message" id="passwordConfirmError"></span>
+					</div>
+					<!-- 닉네임 -->
+					<div class="form-group">
+						<label for="nickname">닉네임 <span class="required">*</span></label>
+						<input type="text" id="nickname" name="nickname"
+							placeholder="활동하실 닉네임을 입력하세요" required> <span
+							class="error-message" id="nicknameError"></span>
+					</div>
+					<!-- 전화번호 -->
+					<div class="form-group">
+						<label for="phone">전화번호 <span class="required">*</span></label> <input
+							type="tel" id="phone" name="phone" placeholder="-하이픈 없이" required>
+						<span class="error-message" id="phoneError"></span>
+					</div>
 
-                    <!-- 전화번호 -->
-                    <div class="form-group">
-                        <label for="phone">전화번호 <span class="required">*</span></label>
-                        <input 
-                            type="tel" 
-                            id="phone" 
-                            name="phone" 
-                            placeholder="-하이픈 없이"
-                            required
-                        >
-                        <span class="error-message" id="phoneError"></span>
-                    </div>
+					<!-- 생년월일 -->
+					<div class="form-group">
+						<label for="birthDate">생년월일</label> <input type="date"
+							id="birthDate" name="birthDate">
+					</div>
 
-                    <!-- 생년월일 -->
-                    <div class="form-group">
-                        <label for="birthdate">생년월일</label>
-                        <input 
-                            type="date" 
-                            id="birthdate" 
-                            name="birthdate"
-                        >
-                    </div>
+					<!-- 성별 -->
+					<div class="form-group">
+						<label>성별</label>
+						<div class="radio-group">
+							<label class="radio-label"> <input type="radio"
+								name="gender" value="M"> <span>남성</span>
+							</label> <label class="radio-label"> <input type="radio"
+								name="gender" value="F"> <span>여성</span>
+							</label> <label class="radio-label"> <input type="radio"
+								name="gender" value="X"> <span>선택안함</span>
+							</label>
+						</div>
+					</div>
 
-                    <!-- 성별 -->
-                    <div class="form-group">
-                        <label>성별</label>
-                        <div class="radio-group">
-                            <label class="radio-label">
-                                <input type="radio" name="gender" value="M">
-                                <span>남성</span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="gender" value="F">
-                                <span>여성</span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="gender" value="X">
-                                <span>선택안함</span>
-                            </label>
-                        </div>
-                    </div>
+					<!-- 약관 동의 -->
+					<div class="form-group terms-group">
+						<label class="checkbox-label checkbox-all"> <input
+							type="checkbox" id="agreeAll"> <span>전체 약관에 동의합니다</span>
+						</label>
 
-                    <!-- 약관 동의 -->
-                    <div class="form-group terms-group">
-                        <label class="checkbox-label checkbox-all">
-                            <input type="checkbox" id="agreeAll">
-                            <span>전체 약관에 동의합니다</span>
-                        </label>
-                        
-                        <div class="terms-detail">
-                            <label class="checkbox-label">
-                                <input type="checkbox" class="required-term" id="agreeTerms" required>
-                                <span>[필수] 이용약관 동의</span>
-                            </label>
-                            <button type="button" class="terms-link" data-modal="terms">보기</button>
-                        </div>
+						<div class="terms-detail">
+							<label class="checkbox-label"> <input type="checkbox"
+								class="required-term" id="agreeTerms" required> <span>[필수]
+									이용약관 동의</span>
+							</label>
+							<button type="button" class="terms-link" data-modal="terms">보기</button>
+						</div>
 
-                        <div class="terms-detail">
-                            <label class="checkbox-label">
-                                <input type="checkbox" class="required-term" id="agreePrivacy" required>
-                                <span>[필수] 개인정보 수집 및 이용 동의</span>
-                            </label>
-                            <button type="button" class="terms-link" data-modal="privacy">보기</button>
-                        </div>
+						<div class="terms-detail">
+							<label class="checkbox-label"> <input type="checkbox"
+								class="required-term" id="agreePrivacy" required> <span>[필수]
+									개인정보 수집 및 이용 동의</span>
+							</label>
+							<button type="button" class="terms-link" data-modal="privacy">보기</button>
+						</div>
 
-                        <div class="terms-detail">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="agreeMarketing">
-                                <span>[선택] 마케팅 정보 수신 동의</span>
-                            </label>
-                            <button type="button" class="terms-link" data-modal="marketing">보기</button>
-                        </div>
+						<div class="terms-detail">
+							<label class="checkbox-label"> <input type="checkbox"
+								id="agreeMarketing"> <span>[선택] 마케팅 정보 수신 동의</span>
+							</label>
+							<button type="button" class="terms-link" data-modal="marketing">보기</button>
+						</div>
 
-                        <div class="terms-detail">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="agreeAge" class="required-term" required>
-                                <span>[필수] 만 14세 이상입니다</span>
-                            </label>
-                        </div>
+						<div class="terms-detail">
+							<label class="checkbox-label"> <input type="checkbox"
+								id="agreeAge" class="required-term" required> <span>[필수]
+									만 14세 이상입니다</span>
+							</label>
+						</div>
 
-                        <span class="error-message" id="termsError"></span>
-                    </div>
+						<span class="error-message" id="termsError"></span>
+					</div>
 
-                    <!-- 회원가입 버튼 -->
-                    <button type="submit" class="btn-signup" id="signupBtn">
-                        회원가입
-                    </button>
-                </form>
+					<!-- 회원가입 버튼 -->
+					<button type="submit" class="btn-signup" id="signupBtn">
+						회원가입</button>
+				</form>
 
-                <!-- 로그인 링크 -->
-                <div class="login-link">
-                    <span>이미 회원이신가요?</span>
-                    <a href="/login.html">로그인</a>
-                </div>
-            </div>
-        </div>
-    </main>
+				<!-- 로그인 링크 -->
+				<div class="login-link">
+					<span>이미 회원이신가요?</span> <a href="/login.html">로그인</a>
+				</div>
+			</div>
+		</div>
+	</main>
 
-    <!-- 푸터 -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <p>&copy; 2026 CULTI. All rights reserved.</p>
-                <div class="footer-links">
-                    <a href="/terms">이용약관</a>
-                    <a href="/privacy">개인정보처리방침</a>
-                    <a href="/help">고객센터</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+	<!-- 푸터 -->
+	<footer class="footer">
+		<div class="container">
+			<div class="footer-content">
+				<p>&copy; 2026 CULTI. All rights reserved.</p>
+				<div class="footer-links">
+					<a href="/terms">이용약관</a> <a href="/privacy">개인정보처리방침</a> <a
+						href="/help">고객센터</a>
+				</div>
+			</div>
+		</div>
+	</footer>
 
-    <!-- 약관 모달 -->
-    <div class="modal-overlay" id="termsModal">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h2 id="modalTitle">약관</h2>
-                <button type="button" class="modal-close" id="closeModal">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+	<!-- 약관 모달 -->
+	<div class="modal-overlay" id="termsModal">
+		<div class="modal-container">
+			<div class="modal-header">
+				<h2 id="modalTitle">약관</h2>
+				<button type="button" class="modal-close" id="closeModal">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="modal-content" id="modalContent">
-                    <!-- 여기에 DB에서 불러온 약관 내용이 표시됩니다 -->
-                    약관 내용을 불러오는 중...
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-modal-confirm" id="modalConfirm">확인</button>
-            </div>
-        </div>
-    </div>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="modal-content" id="modalContent">
+					<!-- 여기에 DB에서 불러온 약관 내용이 표시됩니다 -->
+					약관 내용을 불러오는 중...
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn-modal-confirm" id="modalConfirm">확인</button>
+			</div>
+		</div>
+	</div>
 
 </body>
 </html>

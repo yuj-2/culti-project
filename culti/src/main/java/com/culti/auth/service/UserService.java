@@ -1,6 +1,9 @@
-package com.culti.auth;
+package com.culti.auth.service;
 
 import java.time.LocalDate;
+
+import com.culti.auth.dto.UserDTO;
+import com.culti.auth.entity.User;
 
 
 public interface UserService {
