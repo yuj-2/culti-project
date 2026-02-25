@@ -364,3 +364,35 @@
     transform: rotate(180deg);
     color: #503396;
 }
+
+/* FAQ 카테고리 탭 */
+.faq-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.faq-tab {
+    padding: 10px 25px;
+    border: 1px solid #ddd;
+    border-radius: 30px;
+    background: #fff;
+    color: #666;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.faq-tab.active {
+    background: #503396;
+    color: #fff;
+    border-color: #503396;
+}
+
+.faq-tab:hover:not(.active) {
+    background: #f0edfa;
+    color: #503396;
+    border-color: #503396;
+}

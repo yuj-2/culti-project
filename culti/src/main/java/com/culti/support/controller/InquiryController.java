@@ -111,11 +111,24 @@ public class InquiryController {
     }
     
     
-    // FAQ 목록 메서드 통합
+ // FAQ 목록 메서드 수정 (페이징 + 카테고리 필터 추가)
     @GetMapping("/faq")
-    public String faqList(Model model) {
-        List<Faq> faqList = faqService.findAll();
-        model.addAttribute("faqList", faqList); //
+    public String faqList(Model model, 
+        @RequestParam(value = "category", required = false) String category,
+        @PageableDefault(size = 10, sort = "faqId", direction = Sort.Direction.DESC) Pageable pageable) {
+        
+        Page<Faq> faqPage;
+        if (category != null && !category.isEmpty() && !category.equals("전체")) {
+            faqPage = faqService.getFaqListByCategory(category, pageable);
+        } else {
+            faqPage = faqService.getFaqList(pageable);
+        }
+        
+        model.addAttribute("faqPage", faqPage);
+        model.addAttribute("currentCategory", category != null ? category : "전체");
+        // 카테고리 목록 (탭 생성을 위함)
+        model.addAttribute("categories", List.of("전체", "예매", "전시", "취소/환불", "동행", "회원"));
+        
         return "support/faq";
     }
     
