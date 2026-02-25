@@ -17,7 +17,7 @@
     margin-bottom: 10px;
 }
 
-/* ✅ 세부 메뉴 그리드 (보라색 테마 및 중앙 정렬 반영) */
+/* 세부 메뉴 그리드 (보라색 테마 및 중앙 정렬 반영) */
 .support-menu-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -272,4 +272,95 @@
     background-color: #3d2675;
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(80, 51, 150, 0.3);
+}
+
+
+/* faq 페이지 css */
+.faq-list {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.faq-item {
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    transition: all 0.3s ease;
+}
+
+/* 질문 영역 */
+.faq-question {
+    width: 100%;
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: #fff;
+    border: none;
+    outline: none;
+    text-align: left;
+    transition: background-color 0.2s;
+}
+
+.faq-question:hover {
+    background-color: #fafafa;
+}
+
+.faq-category {
+    font-size: 0.85rem;
+    color: #503396; /* 보라색 포인트 */
+    font-weight: 700;
+    margin-right: 15px;
+    display: inline-block;
+    min-width: 80px;
+}
+
+.faq-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    flex-grow: 1;
+}
+
+/* 화살표 아이콘 */
+.faq-icon {
+    font-size: 1.2rem;
+    color: #ccc;
+    transition: transform 0.3s ease;
+}
+
+/* 답변 영역 (초기 상태 숨김) */
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    background-color: #f9f9fb;
+    transition: max-height 0.3s ease-out, padding 0.3s ease;
+    padding: 0 25px;
+}
+
+.answer-inner {
+    padding: 20px 0 20px 95px; /* 카테고리 넓이만큼 들여쓰기 */
+    color: #666;
+    line-height: 1.7;
+    border-top: 1px solid #f0f0f0;
+}
+
+/* 활성화 상태 (스크립트로 제어) */
+.faq-item.active {
+    border-color: #503396;
+    box-shadow: 0 4px 12px rgba(80, 51, 150, 0.08);
+}
+
+.faq-item.active .faq-answer {
+    max-height: 500px; /* 충분한 높이 */
+    padding: 0 25px;
+}
+
+.faq-item.active .faq-icon {
+    transform: rotate(180deg);
+    color: #503396;
 }

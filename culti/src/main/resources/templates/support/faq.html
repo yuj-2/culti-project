@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>Culti - FAQ</title>
+    <link rel="stylesheet" th:href="@{/css/support/support.css}" />
+</head>
+<body>
+<div layout:fragment="content">
+    <section class="support-container">
+        <div class="support-header">
+            <h1>자주 묻는 질문</h1>
+            <p>궁금하신 점을 카테고리별로 빠르게 확인해 보세요.</p>
+        </div>
+
+        <div class="faq-list">
+            <div class="faq-item" th:each="faq : ${faqList}">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span class="faq-category" th:text="${faq.faqCategory}">예매</span>
+                    <span class="faq-title" th:text="${faq.faqContent}">질문 내용이 들어갑니다.</span>
+                    <span class="faq-icon">▼</span>
+                </button>
+                <div class="faq-answer">
+                    <div class="answer-inner" th:text="${faq.faqAnswer}">
+                        답변 내용이 이곳에 출력됩니다.
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(faqList)}" style="text-align:center; padding:50px; color:#999;">
+                등록된 FAQ가 없습니다.
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function toggleFaq(button) {
+            const faqItem = button.parentElement;
+            
+            // 클릭된 아이템이 이미 열려있으면 닫고, 아니면 열기
+            const isActive = faqItem.classList.contains('active');
+            
+            // 모든 FAQ 아이템을 닫고 싶다면 아래 주석 해제 (하나씩만 열리게 함)
+            /*
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            */
+
+            if (!isActive) {
+                faqItem.classList.add('active');
+            } else {
+                faqItem.classList.remove('active');
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

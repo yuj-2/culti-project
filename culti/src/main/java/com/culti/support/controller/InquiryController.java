@@ -17,6 +17,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 
+import com.culti.support.entity.Faq;
+import com.culti.support.service.FaqService;
+
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/support")
@@ -24,6 +27,7 @@ public class InquiryController {
 
     private final InquiryService inquiryService;
     private final NoticeService noticeService;
+    private final FaqService faqService; // FAQ 서비스 추가
 
     @GetMapping("")
     public String supportMain(Model model, 
@@ -105,4 +109,14 @@ public class InquiryController {
             return "fail";
         }
     }
+    
+    
+    // FAQ 목록 메서드 통합
+    @GetMapping("/faq")
+    public String faqList(Model model) {
+        List<Faq> faqList = faqService.findAll();
+        model.addAttribute("faqList", faqList); //
+        return "support/faq";
+    }
+    
 }
