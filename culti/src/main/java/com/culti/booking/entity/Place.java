@@ -16,10 +16,8 @@ import lombok.Setter;
 @Entity
 @Getter @Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Getter 
-@Setter
+
 @Table(name = "place")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 
 public class Place {
     @Id
