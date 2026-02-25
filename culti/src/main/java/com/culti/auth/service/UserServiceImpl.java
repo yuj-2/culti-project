@@ -18,8 +18,6 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
-
-    private final BookingController bookingController;
 	
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
