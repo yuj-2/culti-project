@@ -76,9 +76,19 @@
             <input type="hidden" name="scheduleId" th:value="${scheduleId}">
             <input type="hidden" id="input-seat-ids" name="seatIds">
             <input type="hidden" id="input-total-price" name="totalPrice">
-            <input type="hidden" name="userId" value="1"> </form>
+            <input type="hidden" name="userId" value="1"> 
+        </form>
     </main>
 
-    <script th:src="@{/js/booking_seat.js}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // Thymeleaf 인라인 표준 주석 문법입니다. 
+    // 서버 실행 시에는 seats 데이터로 치환되고, 에디터에서는 주석으로 처리되어 에러가 안 뜹니다.
+    const seatListFromDb = /*[[${seats}]]*/ []; 
+    
+    console.log("DB에서 불러온 좌석 데이터:", seatListFromDb);
+    /*]]>*/
+</script>
+<script th:src="@{/js/booking_seat.js}"></script>
 </body>
 </html>
