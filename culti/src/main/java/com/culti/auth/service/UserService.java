@@ -52,6 +52,7 @@ public interface UserService {
 					.gender(user.getGender())
 					.createdAt(user.getCreatedAt())
 					.nickname(user.getNickname())
+					.email(user.getEmail())
 					.build();		
 			return dto;
 		} 
@@ -62,4 +63,6 @@ public interface UserService {
 		//[2] 로그인 
 		UserDTO login(String email,String password);
 		
+		//[3] 이메일로 회원정보 가져오기
+		UserDTO findByEmail(String email);
 }
