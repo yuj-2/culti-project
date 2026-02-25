@@ -1,13 +1,16 @@
-package com.culti.content;
+package com.culti.content.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -45,5 +48,12 @@ public class Content {
 	
 	@Column(nullable = false)
 	private LocalDate endDate;
+	
+	// 장소
+	@OneToMany(mappedBy = "content")
+    private List<Schedule> schedules;
+	
+	@OneToMany(mappedBy = "content", cascade = CascadeType.ALL)
+    private java.util.List<Review> reviews;
 	
 }

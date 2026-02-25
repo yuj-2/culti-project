@@ -1,9 +1,12 @@
-package com.culti.content;
+package com.culti.content.service;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+
+import com.culti.content.entity.Content;
+import com.culti.content.repository.ContentRepository;
 
 import lombok.RequiredArgsConstructor;
 
