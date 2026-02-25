@@ -1,6 +1,10 @@
 package com.culti.auth.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,10 +71,15 @@ public class AuthController {
 	        return "redirect:/auth/login";
 	    }
 	}*/
-	
+		
 		//마이페이지
+		@PreAuthorize("isAuthenticated()")
 		@GetMapping("/myPage")
-		public void myPage() {
+		public void myPage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+			
+			String email=userDetails.getUsername();
+			UserDTO userDTO=this.userService.findByEmail(email);
+			model.addAttribute("user",userDTO);
 			
 		}
 		

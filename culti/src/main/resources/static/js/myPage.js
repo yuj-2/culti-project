@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========== 데이터 로딩 및 렌더링 ==========
 
     // 사용자 정보 로드
+	/*
     function loadUserInfo() {
         // 데모용
         const userData = {
@@ -111,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const radio = document.querySelector(`input[name="gender"][value="${userData.gender}"]`);
             if(radio) radio.checked = true;
         }
-    }
+    }*/
 
     // 예매 내역 렌더링
     function renderReservations(reservations, containerId) {
