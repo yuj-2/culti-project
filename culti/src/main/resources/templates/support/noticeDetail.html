@@ -1,0 +1,17 @@
+<div layout:fragment="content">
+    <section class="support-container">
+        <div class="notice-detail-box">
+            <h2 class="detail-title" th:text="${notice.noticeTitle}">제목</h2>
+            <div class="detail-info">
+                <span th:text="'작성일: ' + ${#temporals.format(notice.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                <span th:text="'조회수: ' + ${notice.viewCount}"></span>
+            </div>
+            <hr>
+            <div class="detail-content" th:utext="${notice.noticeContent}">
+                내용이 들어갑니다.
+            </div>
+            <hr>
+            <button class="back-btn" onclick="location.href='/support/notice'">목록으로</button>
+        </div>
+    </section>
+</div>

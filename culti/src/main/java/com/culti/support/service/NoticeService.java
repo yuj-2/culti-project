@@ -9,6 +9,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
 @RequiredArgsConstructor
 public class NoticeService {
@@ -24,4 +28,21 @@ public class NoticeService {
             PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "noticeId"))
         ).getContent();
     }
+    
+    
+    // 페이징된 목록 가져오기
+    public Page<Notice> getNoticeList(Pageable pageable) {
+        return noticeRepository.findAll(pageable);
+    }
+
+    // 상세보기 및 조회수 증가
+    @Transactional
+    public Notice getNoticeDetail(Long id) {
+        Notice notice = noticeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 공지사항이 없습니다. id=" + id));
+        
+        notice.setViewCount(notice.getViewCount() + 1); // 조회수 증가
+        return notice;
+    }
+    
 }

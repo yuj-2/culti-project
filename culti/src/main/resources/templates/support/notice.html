@@ -1,0 +1,35 @@
+<div layout:fragment="content">
+    <section class="support-container">
+        <div class="support-header">
+            <h1>공지사항</h1>
+        </div>
+        
+        <table class="notice-table"> <thead>
+                <tr>
+                    <th>번호</th>
+                    <th>제목</th>
+                    <th>작성일</th>
+                    <th>조회수</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="notice : ${noticePage.content}">
+                    <td th:text="${notice.noticeId}"></td>
+                    <td>
+                        <a th:href="@{/support/notice/view(id=${notice.noticeId})}" th:text="${notice.noticeTitle}"></a>
+                    </td>
+                    <td th:text="${#temporals.format(notice.createdAt, 'yyyy-MM-dd')}"></td>
+                    <td th:text="${notice.viewCount}"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="pagination" th:if="${noticePage.totalPages > 1}">
+            <a th:href="@{/support/notice(page=${noticePage.number - 1})}" th:if="${noticePage.hasPrevious()}">&lt;</a>
+            <span th:each="i : ${#numbers.sequence(0, noticePage.totalPages - 1)}">
+                <a th:href="@{/support/notice(page=${i})}" th:text="${i + 1}" th:classappend="${i == noticePage.number} ? 'active'"></a>
+            </span>
+            <a th:href="@{/support/notice(page=${noticePage.number + 1})}" th:if="${noticePage.hasNext()}">&gt;</a>
+        </div>
+    </section>
+</div>

@@ -10,8 +10,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 
 @Controller
 @RequiredArgsConstructor
@@ -23,9 +27,28 @@ public class InquiryController {
 
     @GetMapping("")
     public String supportMain(Model model) {
+        // 기존 기능 유지: 최근 공지 5개
         List<Notice> noticeList = noticeService.getLatestNotices();
         model.addAttribute("noticeList", noticeList);
         return "support/support";
+    }
+
+    // 1. 공지사항 전체 목록 (페이징 적용)
+    @GetMapping("/notice")
+    public String noticeListPage(Model model, 
+        @PageableDefault(size = 10, sort = "noticeId", direction = Sort.Direction.DESC) Pageable pageable) {
+        
+        Page<Notice> noticePage = noticeService.getNoticeList(pageable);
+        model.addAttribute("noticePage", noticePage);
+        return "support/notice"; // templates/support/notice.html
+    }
+
+    // 2. 공지사항 상세보기 (ID로 조회)
+    @GetMapping("/notice/view")
+    public String noticeDetail(@RequestParam("id") Long id, Model model) {
+        Notice notice = noticeService.getNoticeDetail(id);
+        model.addAttribute("notice", notice);
+        return "support/noticeDetail"; // templates/support/noticeDetail.html
     }
 
     @GetMapping("/inquiry")
