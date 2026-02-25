@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.culti.auth.dto.UserDTO;
 import com.culti.auth.entity.User;
 import com.culti.auth.repository.UserRepository;
+import com.culti.booking.controller.BookingController;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -17,9 +18,12 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
+
+    private final BookingController bookingController;
 	
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+
 	
 	@Override
 	public Long register(UserDTO userDTO) {
@@ -48,6 +52,22 @@ public class UserServiceImpl implements UserService{
 	            // 로그인 성공 시 엔티티를 DTO로 변환해서 반환
 	            return entityToDto(user);
 	        }
+	    }
+	    
+	    // 3. 회원이 없거나 비밀번호가 틀리면 null 반환
+	    return null;
+	}
+
+	@Override
+	public UserDTO findByEmail(String email) {
+		// 1. DB에서 이메일로 회원 조회
+	    Optional<User> result = userRepository.findByEmail(email);
+
+	    if (result.isPresent()) {
+	        User user = result.get();
+	        System.out.println("진입");
+	        return entityToDto(user);
+	        
 	    }
 	    
 	    // 3. 회원이 없거나 비밀번호가 틀리면 null 반환
