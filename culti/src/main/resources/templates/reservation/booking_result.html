@@ -31,11 +31,14 @@
             <span th:text="${booking.showTime}">2026-02-24 19:00</span>
         </div>
         
-        <div class="info-row">
-            <span class="label">선택 좌석:</span>
-            <span th:text="${#strings.listJoin(booking.seatNames, ', ')}">A1, A2</span>
-        </div>
-        
+<div class="info-row">
+    <span class="label">선택 좌석:</span>
+    <span th:each="bs, iterStat : ${booking.bookingSeats}">
+        <span th:text="${bs.seat.seatRow} + ${bs.seat.seatCol}"></span>
+        <span th:if="${!iterStat.last}">, </span>
+    </span>
+</div>
+
         <div class="info-row">
             <span class="label">결제 금액:</span>
             <span th:text="${#numbers.formatInteger(booking.totalPrice, 3, 'COMMA')}">0</span>원
@@ -45,7 +48,5 @@
             <a href="/" style="padding: 10px 20px; background-color: #333; color: #fff; text-decoration: none; border-radius: 5px;">홈으로 돌아가기</a>
         </div>
     </main>
-
-
 </body>
 </html>
