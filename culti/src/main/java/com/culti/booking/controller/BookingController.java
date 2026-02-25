@@ -1,15 +1,19 @@
-package com.culti.booking;
+package com.culti.booking.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.culti.booking.dto.BookingRequestDTO;
 import com.culti.booking.dto.BookingResponseDTO;
 import com.culti.booking.service.BookingService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import java.util.*;
 
 @Controller
 @RequiredArgsConstructor // BookingService를 자동으로 가져옵니다.
@@ -24,10 +28,16 @@ public class BookingController {
         return "reservation/booking"; 
     }
 
-    // 2. 좌석 선택 페이지
+ // 2. 좌석 선택 페이지
     @GetMapping("/reservation/booking/seat")
-    public String bookingSeatPage(@RequestParam(value = "scheduleId", required = false) Long scheduleId, Model model) {
-        // 테스트를 위해 주소에 숫자가 없다면 강제로 1번을 넣어봅니다.
+    public String bookingSeatPage(
+            @RequestParam(value = "scheduleId", required = false) Long scheduleId, 
+            HttpServletRequest request, // 세션 생성을 위해 추가
+            Model model) {
+        
+        // 타임리프가 폼(Action)을 그리기 전에 세션을 미리 생성하여 CSRF 에러를 방지합니다.
+        request.getSession(true); 
+
         if (scheduleId == null) {
             scheduleId = 1L; 
         }
