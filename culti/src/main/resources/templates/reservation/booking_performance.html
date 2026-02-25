@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>공연 예매 | culti</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 좌석 기본 스타일 */
+        .seat { 
+            width: 28px; 
+            height: 28px; 
+            margin: 2px; 
+            font-size: 10px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            border: 1px solid #444; 
+            transition: all 0.2s; 
+            background: transparent; 
+            color: white; 
+        }
+        
+        /* 좌석 상태별 스타일 */
+        .seat.available { border-color: #666; }
+        .seat.vip { border-color: #ffd700; color: #ffd700; } 
+        .seat.selected { background: #503396 !important; color: white !important; border-color: #503396 !important; }
+        .seat.reserved { background: #333; color: #555; cursor: not-allowed; border: none; }
+        
+        /* 공연장 무대(STAGE) 스타일 */
+        .stage { 
+            background: linear-gradient(to bottom, #444, #111); 
+            height: 45px; 
+            width: 50%; 
+            margin: 0 auto 60px; 
+            border-radius: 0 0 100px 100px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            color: #777; 
+            font-weight: bold; 
+            letter-spacing: 15px; 
+            border-bottom: 2px solid #555;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        /* 1번 사진처럼 좌/중/우 구역을 나누는 컨테이너 */
+        .seat-layout-wrapper { 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; 
+            gap: 30px; 
+        }
+        
+        /* 각 블록(Section) 세로 정렬 */
+        .seat-block { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 4px; 
+        }
+        
+        /* 양 끝 블록을 무대 쪽으로 꺾어주는 효과 (사진 1번 핵심) */
+        .left-block { transform: rotate(8deg); margin-top: 20px; }
+        .right-block { transform: rotate(-8deg); margin-top: 20px; }
+        .center-block { margin-top: 0; }
+
+        /* 행(Row) 가로 정렬 */
+        .row-wrapper { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 2px; 
+        }
+        
+        /* 알파벳 행 레이블 스타일 */
+        .row-label { 
+            width: 24px; 
+            text-align: center; 
+            font-size: 11px; 
+            color: #666; 
+            font-weight: bold; 
+        }
+
+        /* 층 선택 버튼 활성화 상태 */
+        .floor-btn.active { 
+            background-color: #503396; 
+            color: white; 
+            border-color: #503396; 
+        }
+    </style>
+</head>
+<body class="bg-[#1A1A1A] text-white">
+    <div th:replace="~{layout/header :: headerFragment}"></div>
+
+    <main class="max-w-6xl mx-auto py-12 px-4 pb-40">
+        
+        <div class="bg-[#252525] p-6 rounded-2xl mb-8 flex justify-between items-center border border-gray-800">
+            <div class="flex gap-10">
+                <div class="flex items-center gap-4 text-gray-400 font-medium">
+                    성인 
+                    <div class="flex items-center bg-[#1A1A1A] border border-gray-700 rounded-lg overflow-hidden">
+                        <button onclick="updateCount('adult', -1)" class="w-10 h-10 hover:bg-gray-800 transition-colors">-</button>
+                        <span id="adult-count" class="w-12 text-center text-white font-bold text-lg">0</span>
+                        <button onclick="updateCount('adult', 1)" class="w-10 h-10 hover:bg-gray-800 transition-colors">+</button>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 text-gray-400 font-medium">
+                    청소년 
+                    <div class="flex items-center bg-[#1A1A1A] border border-gray-700 rounded-lg overflow-hidden">
+                        <button onclick="updateCount('youth', -1)" class="w-10 h-10 hover:bg-gray-800 transition-colors">-</button>
+                        <span id="youth-count" class="w-12 text-center text-white font-bold text-lg">0</span>
+                        <button onclick="updateCount('youth', 1)" class="w-10 h-10 hover:bg-gray-800 transition-colors">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-[#503396] font-mono text-lg font-bold" id="hold-timer">좌석 임시 점유 중 10:00</div>
+        </div>
+
+        <div class="flex justify-center gap-4 mb-8">
+            <button onclick="switchFloor(1)" id="btn-1f" 
+                    class="floor-btn active px-12 py-2.5 rounded-full border border-gray-600 text-sm font-bold transition-all">
+                1층 (1F)
+            </button>
+            <button onclick="switchFloor(2)" id="btn-2f" 
+                    class="floor-btn px-12 py-2.5 rounded-full border border-gray-600 text-sm font-bold text-gray-500 transition-all">
+                2층 (2F)
+            </button>
+        </div>
+
+        <div class="bg-[#252525] p-12 rounded-3xl border border-gray-800 text-center overflow-x-auto min-h-[600px]">
+            <div class="stage">STAGE</div>
+            
+            <div id="seat-map-grid" class="seat-layout-wrapper transition-opacity duration-300">
+                <div id="block-left" class="seat-block left-block"></div>
+                <div id="block-center" class="seat-block center-block"></div>
+                <div id="block-right" class="seat-block right-block"></div>
+            </div>
+
+            <div class="mt-16 flex justify-center gap-10 text-[11px] text-gray-500 font-medium border-t border-gray-800 pt-8">
+                <div class="flex items-center gap-2"><div class="seat available" style="width:16px;height:16px;cursor:default;"></div>일반석</div>
+                <div class="flex items-center gap-2"><div class="seat vip" style="width:16px;height:16px;cursor:default;"></div>VIP석</div>
+                <div class="flex items-center gap-2"><div class="seat selected" style="width:16px;height:16px;cursor:default;"></div>선택된 좌석</div>
+                <div class="flex items-center gap-2"><div class="seat reserved" style="width:16px;height:16px;cursor:default;">X</div>예매 완료</div>
+            </div>
+        </div>
+
+        <div class="fixed bottom-0 left-0 right-0 bg-white text-black p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.4)] z-50">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <div class="flex gap-16">
+                    <div>
+                        <div class="text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-widest">Selected Seats</div>
+                        <div id="display-seat-names" class="text-sm font-black text-gray-800">선택된 좌석 없음</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-widest">Total Payment</div>
+                        <div id="display-total-price" class="text-2xl font-black text-[#503396]">₩0</div>
+                    </div>
+                </div>
+                <button id="submit-booking-btn" disabled onclick="handleBookingSubmit()" 
+                        class="px-20 py-4 rounded-xl text-white font-black bg-gray-300 transition-all text-lg shadow-lg">
+                    결제하기
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script th:src="@{/js/booking_performance.js}"></script>
+</body>
+</html>

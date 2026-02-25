@@ -1,8 +1,11 @@
-package com.culti.mate;
+package com.culti.mate.service;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+
+import com.culti.mate.entity.MatePost;
+import com.culti.mate.repository.MateRepository;
 
 import lombok.RequiredArgsConstructor;
 

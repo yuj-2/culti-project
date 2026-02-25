@@ -1,7 +1,7 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.5.10'
-	id 'io.spring.dependency-management' version '1.1.7'
+   id 'java'
+   id 'org.springframework.boot' version '3.5.10'
+   id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.culti'
@@ -9,23 +9,23 @@ version = '0.0.1-SNAPSHOT'
 description = 'Demo project for Spring Boot'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+   toolchain {
+      languageVersion = JavaLanguageVersion.of(17)
+   }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+   compileOnly {
+      extendsFrom annotationProcessor
+   }
 }
 
 repositories {
-	mavenCentral()
+   mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
    implementation 'org.springframework.boot:spring-boot-starter-web'
    compileOnly 'org.projectlombok:lombok'
@@ -45,14 +45,20 @@ dependencies {
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
     implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+    
+    /*Spring Security*/
+   implementation 'org.springframework.boot:spring-boot-starter-security'
+   /*thymeleaf-extras-springsecurity6 패키지는 타임리프 템플릿 엔진과 스프링 시큐리티 프레임워크를 함께 사용할 때 필요한 타임리프의 확장 기능*/
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+   /*이메일 관련*/
+   implementation 'org.springframework.boot:spring-boot-starter-mail'
+   
+   /*소셜 로그인 oauth2 관련*/
+   implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 }
 
-
-// build.gradle 맨 밑부분
 tasks.named('test') {
-    enabled = false // 테스트 수행을 잠시 끔
-    useJUnitPlatform()
+   useJUnitPlatform()
+   enabled = false //테스트 수행을 잠시 끔 
 }
-
-
-

@@ -18,11 +18,6 @@ public class HomeController {
 		
 	}
 	
-	@GetMapping("/reservation")
-	public String subpage() {
-		return "reservation/reservation"; 
-	}
-	
 	@GetMapping("/calendar")
 	public String calendar() {
 	    return "calendar/calendar";
