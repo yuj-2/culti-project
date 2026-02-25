@@ -3,6 +3,7 @@ package com.culti.content.entity;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import com.culti.booking.entity.Place;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

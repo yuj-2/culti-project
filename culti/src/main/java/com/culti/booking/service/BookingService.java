@@ -11,7 +11,7 @@ import com.culti.booking.dto.BookingRequestDTO;
 import com.culti.booking.dto.BookingResponseDTO;
 import com.culti.booking.entity.Booking;
 import com.culti.booking.entity.BookingSeat;
-import com.culti.booking.entity.Schedule;
+import com.culti.content.entity.Schedule;
 import com.culti.booking.entity.SiteUser;
 import com.culti.booking.entity.Seat;
 import com.culti.booking.repository.BookingRepository;
