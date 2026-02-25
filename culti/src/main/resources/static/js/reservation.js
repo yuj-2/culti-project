@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-		// 골라낸 데이터들로 HTML 카드 예쁘게 만들기
+      // 골라낸 데이터들로 HTML 카드 예쁘게 만들기
         filteredData.forEach(item => {
             const cardHTML = `
                 <div onclick="location.href='/reservation/detail/${item.id}'" 
@@ -82,38 +82,38 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-	let savedCategory = sessionStorage.getItem('savedCategory');
-	const referrer = document.referrer; 
-	const navEntries = performance.getEntriesByType("navigation");
+   let savedCategory = sessionStorage.getItem('savedCategory');
+   const referrer = document.referrer; 
+   const navEntries = performance.getEntriesByType("navigation");
     const navType = navEntries.length > 0 ? navEntries[0].type : "";
 
     const isReload = navType === "reload";
     const isBackForward = navType === "back_forward";
     const isFromDetail = referrer.includes('/reservation/detail');
-	
-	if (!isReload && !isBackForward && !isFromDetail) {
-	        savedCategory = '영화';
+   
+   if (!isReload && !isBackForward && !isFromDetail) {
+           savedCategory = '영화';
         sessionStorage.removeItem('savedCategory');
     } else if (!savedCategory) {
         savedCategory = '영화';
     }
-	
-	tabButtons.forEach(btn => {
+   
+   tabButtons.forEach(btn => {
         if (btn.textContent.trim() === savedCategory) {
             btn.className = "px-6 py-3 rounded-xl transition-all duration-200 bg-[#503396] text-white shadow-lg shadow-purple-900/25 res-tab-active";
         } else {
             btn.className = "px-6 py-3 rounded-xl transition-all duration-200 bg-gray-50 text-gray-700 hover:bg-gray-100 res-tab-default";
         }
     });
-	
+   
     // 탭 버튼을 클릭했을 때의 이벤트 설정
     tabButtons.forEach(button => {
         button.addEventListener('click', function() {
             // 1. 클릭한 버튼의 글자(영화, 공연 등) 가져오기
             const clickedCategory = this.textContent.trim();
 
-			sessionStorage.setItem('savedCategory', clickedCategory);
-			
+         sessionStorage.setItem('savedCategory', clickedCategory);
+         
             // 2. 모든 버튼의 디자인을 하얀색(비활성화)으로 초기화
             tabButtons.forEach(btn => {
                 btn.className = "px-6 py-3 rounded-xl transition-all duration-200 bg-gray-50 text-gray-700 hover:bg-gray-100 res-tab-default";
@@ -132,8 +132,8 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('/content/api/list')
     .then(response => response.json())
     .then(data => {
-		allContents = data; 
-		renderCards(savedCategory);
+      allContents = data; 
+      renderCards(savedCategory);
     })
     .catch(error => {
         console.error('데이터를 불러오는데 실패했습니다:', error);
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
             contentGrid.innerHTML = '<p class="col-span-full text-center py-12 text-red-500">데이터를 불러오는 중 오류가 발생했습니다.</p>';
         }
     });
-	
+   
 });
 
 // 모달 열기 함수
