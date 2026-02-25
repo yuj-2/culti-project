@@ -5,6 +5,7 @@
 <title>상세페이지</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
+<script th:src="@{/js/reservation.js}"></script>
 </head>
 <body class="min-h-screen bg-gray-50 font-sans">
 
@@ -115,7 +116,7 @@
         <div class="bg-white rounded-2xl p-8 md:p-10 shadow-sm">
             <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">줄거리 / 소개</h2>
             <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
-                <p th:text="${content.description}">상세 설명이 들어갑니다.</p>
+                <p th:text="${content.description}"></p>
             </div>
         </div>
     </section>
@@ -123,7 +124,7 @@
     <section class="max-w-7xl mx-auto px-6 py-12 md:py-16">
         <div class="bg-white rounded-2xl p-8 md:p-10 shadow-sm">
             
-            <div class="text-center mb-10">
+            <div class="text-center mb-10" th:if="${not #lists.isEmpty(content.reviews)}">
                 <div class="inline-flex items-center justify-center gap-2 mb-3">
                     <i data-lucide="star" class="w-8 h-8 fill-yellow-400 text-yellow-400"></i>
                     <i data-lucide="star" class="w-8 h-8 fill-yellow-400 text-yellow-400"></i>
@@ -131,56 +132,46 @@
                     <i data-lucide="star" class="w-8 h-8 fill-yellow-400 text-yellow-400"></i>
                     <i data-lucide="star" class="w-8 h-8 fill-yellow-400 text-yellow-400"></i>
                 </div>
-                <p class="text-4xl font-bold text-gray-900">4.8</p>
-                <p class="text-gray-600 mt-1">전체 리뷰 1,284개</p>
+                <p class="text-4xl font-bold text-gray-900">5.0</p>
+                <p class="text-gray-600 mt-1" th:text="'전체 리뷰 ' + ${#lists.size(content.reviews)} + '개'">전체 리뷰 1,284개</p>
             </div>
 
             <h3 class="text-xl md:text-2xl font-bold text-gray-900 mb-6">베스트 관람평</h3>
-            <div class="space-y-5 mb-8">
-                
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-100">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gradient-to-br from-[#503396] to-[#252451] rounded-full flex items-center justify-center text-white font-medium">김</div>
-                            <div>
-                                <p class="font-medium text-gray-900">김**</p>
-                                <p class="text-sm text-gray-500">2026.02.20</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-0.5">
-                            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
-                        </div>
-                    </div>
-                    <p class="text-gray-700 leading-relaxed">정말 기대 이상의 공연이었습니다! 배우분들의 연기력과 라이브 가창력이 압도적이었고, 무대 연출과 조명도 환상적이었어요. 특히 'This is the Moment' 넘버에서는 온몸에 전율이 느껴졌습니다. 뮤지컬을 좋아하신다면 꼭 보셔야 할 작품입니다!</p>
-                </div>
-
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-100">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gradient-to-br from-[#503396] to-[#252451] rounded-full flex items-center justify-center text-white font-medium">박</div>
-                            <div>
-                                <p class="font-medium text-gray-900">박**</p>
-                                <p class="text-sm text-gray-500">2026.02.18</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-0.5">
-                            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-gray-300 text-gray-300"></i>
-                        </div>
-                    </div>
-                    <p class="text-gray-700 leading-relaxed">명작은 역시 명작이네요. 스토리 전개가 긴장감 넘치고 음악도 너무 아름다웠습니다. 세트 디자인과 의상도 디테일이 살아있어서 몰입감이 엄청났어요. 커튼콜 때 관객들의 열렬한 박수가 계속 이어졌던 게 기억에 남습니다.</p>
-                </div>
+            
+            <div th:if="${#lists.isEmpty(content.reviews)}" class="text-center py-12 bg-gray-50 rounded-xl border border-gray-100 mb-8">
+                <p class="text-gray-500">아직 작성된 관람평이 없습니다. 첫 리뷰의 주인공이 되어보세요!</p>
             </div>
 
-            <button class="w-full py-4 bg-white border-2 border-[#503396] text-[#503396] rounded-xl font-medium hover:bg-[#503396] hover:text-white transition-colors duration-200">
-                리뷰 전체보기 (1,284개)
+            <div class="space-y-5 mb-8" th:unless="${#lists.isEmpty(content.reviews)}">
+                
+                <div th:each="review : ${content.reviews}" class="bg-gray-50 rounded-xl p-6 border border-gray-100">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-[#503396] to-[#252451] rounded-full flex items-center justify-center text-white font-medium"
+                                 th:text="${review.user?.name != null ? #strings.substring(review.user.name, 0, 1) : '익'}">김</div>
+                            <div>
+                                <p class="font-medium text-gray-900" 
+                                   th:text="${review.user?.name != null ? #strings.substring(review.user.name, 0, 1) + '**' : '익명'}">김**</p>
+                                <p class="text-sm text-gray-500" 
+                                   th:text="${#temporals.format(review.createdAt, 'yyyy.MM.dd')}">2026.02.20</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-0.5">
+                            <i th:each="num : ${#numbers.sequence(1, 5)}" 
+                               data-lucide="star" class="w-4 h-4"
+                               th:classappend="${num <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-300 text-gray-300'}"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 leading-relaxed" th:text="${review.text}">정말 기대 이상의 공연이었습니다!</p>
+                </div>
+
+            </div>
+
+            <button th:if="${not #lists.isEmpty(content.reviews)}"
+                    onclick="openReviewModal()" 
+                    class="w-full py-4 bg-white border-2 border-[#503396] text-[#503396] rounded-xl font-medium hover:bg-[#503396] hover:text-white transition-colors duration-200"
+                    th:text="'리뷰 전체보기 (' + ${#lists.size(content.reviews)} + '개)'">
             </button>
         </div>
     </section>
@@ -211,7 +202,60 @@
         lucide.createIcons();
     </script>
     
+    
     <div th:replace="~{layout/footer::footer}"></div>
+    
+<div id="review-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    
+    <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity backdrop-blur-sm" onclick="closeReviewModal()"></div>
+
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
+                
+                <div class="bg-white px-6 py-5 border-b border-gray-100 flex justify-between items-center sticky top-0 z-10">
+                    <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2" id="modal-title">
+                        전체 관람평 <span class="text-[#503396] text-base" th:text="${#lists.size(content.reviews)}">12</span>
+                    </h3>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeReviewModal()">
+                        <i data-lucide="x" class="w-6 h-6"></i> </button>
+                </div>
+                
+                <div class="px-6 py-6 max-h-[65vh] overflow-y-auto space-y-4 bg-gray-50">
+                    
+                    <div th:each="review : ${content.reviews}" class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-[#503396] to-[#252451] rounded-full flex items-center justify-center text-white font-medium"
+                                     th:text="${review.user?.name != null ? #strings.substring(review.user.name, 0, 1) : '익'}">김</div>
+                                <div>
+                                    <p class="font-medium text-gray-900" 
+                                       th:text="${review.user?.name != null ? #strings.substring(review.user.name, 0, 1) + '**' : '익명'}">김**</p>
+                                    <p class="text-sm text-gray-500" 
+                                       th:text="${#temporals.format(review.createdAt, 'yyyy.MM.dd')}">2026.02.20</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-0.5">
+                                <i th:each="num : ${#numbers.sequence(1, 5)}" 
+                                   data-lucide="star" class="w-4 h-4"
+                                   th:classappend="${num <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-300 text-gray-300'}"></i>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed" th:text="${review.text}">리뷰 내용입니다.</p>
+                    </div>
+
+                </div>
+                
+                <div class="bg-white px-6 py-4 border-t border-gray-100">
+                    <button type="button" onclick="closeReviewModal()" class="w-full rounded-xl bg-gray-100 px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-200 transition-colors">
+                        닫기
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
     
 </body>
 </html>

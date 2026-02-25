@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -51,5 +52,8 @@ public class Content {
 	// 장소
 	@OneToMany(mappedBy = "content")
     private List<Schedule> schedules;
+	
+	@OneToMany(mappedBy = "content", cascade = CascadeType.ALL)
+    private java.util.List<Review> reviews;
 	
 }
