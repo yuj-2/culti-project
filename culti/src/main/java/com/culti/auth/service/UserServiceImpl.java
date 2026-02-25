@@ -9,7 +9,8 @@ import org.springframework.stereotype.Service;
 import com.culti.auth.dto.UserDTO;
 import com.culti.auth.entity.User;
 import com.culti.auth.repository.UserRepository;
-import com.culti.booking.BookingController;
+import com.culti.booking.controller.BookingController;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
