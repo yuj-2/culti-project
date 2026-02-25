@@ -2,6 +2,8 @@ package com.culti.booking.entity;
 
 import java.time.LocalDateTime;
 
+import com.culti.content.Content;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
