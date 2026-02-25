@@ -2,44 +2,63 @@ package com.culti.booking;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
+
+import com.culti.booking.dto.BookingRequestDTO;
+import com.culti.booking.dto.BookingResponseDTO;
+import com.culti.booking.service.BookingService;
+
+import lombok.RequiredArgsConstructor;
 import java.util.*;
 
 @Controller
+@RequiredArgsConstructor // BookingService를 자동으로 가져옵니다.
 public class BookingController {
 
+    private final BookingService bookingService;
+
+    // 1. 기존 예매 메인 페이지 (영화/날짜 선택)
     @GetMapping("/reservation/booking")
     public String bookingPage(Model model) {
-        
-        // 1. 영화 목록 (이미지 왼쪽 섹션)
-        List<Map<String, String>> contents = new ArrayList<>();
-        contents.add(Map.of("id", "1", "age", "12세", "title", "인터스텔라 리마스터"));
-        contents.add(Map.of("id", "2", "age", "15세", "title", "듄 파트2"));
-        model.addAttribute("contents", contents);
-
-        // 2. 지역 목록 (수정됨: String 리스트 -> Map 리스트)
-        // HTML에서 r.name으로 접근하기 때문에 키값을 "name"으로 설정합니다.
-        List<Map<String, String>> regions = new ArrayList<>();
-        regions.add(Map.of("name", "서울"));
-        regions.add(Map.of("name", "경기"));
-        regions.add(Map.of("name", "인천"));
-        regions.add(Map.of("name", "부산"));
-        model.addAttribute("regions", regions);
-
-        // 3. 날짜 목록 (이미지 상단 슬라이더)
-        List<Map<String, String>> dates = new ArrayList<>();
-        String[] days = {"월", "화", "수", "목", "금", "토", "일"};
-        for (int i = 0; i < 14; i++) {
-            Map<String, String> dateMap = new HashMap<>();
-            dateMap.put("dayName", days[i % 7]);
-            // 날짜가 28일을 넘어가면 다시 1일부터 시작하도록 로직을 살짝 보정하면 더 좋습니다.
-            int displayDate = 23 + i; 
-            dateMap.put("date", String.valueOf(displayDate)); 
-            dateMap.put("isToday", i == 0 ? "true" : "false");
-            dates.add(dateMap);
-        }
-        model.addAttribute("dates", dates);
-
+        // (기존 영화/날짜/지역 더미 데이터 로직은 유지하거나, 나중에 서비스 호출로 교체 가능)
         return "reservation/booking"; 
     }
-}
+
+    // 2. 좌석 선택 페이지
+    @GetMapping("/reservation/booking/seat")
+    public String bookingSeatPage(@RequestParam(value = "scheduleId", required = false) Long scheduleId, Model model) {
+        // 테스트를 위해 주소에 숫자가 없다면 강제로 1번을 넣어봅니다.
+        if (scheduleId == null) {
+            scheduleId = 1L; 
+        }
+        
+        model.addAttribute("scheduleId", scheduleId); 
+        return "reservation/booking_seat"; 
+    }
+
+    // 3. [핵심] 예매 실행 (결제하기 버튼 클릭 시 호출)
+    @PostMapping("/reservation/booking/create")
+    public String createBooking(@ModelAttribute BookingRequestDTO requestDTO) {
+        // 서비스 호출하여 DB에 저장하고 생성된 ID를 받아옴
+        Long bookingId = bookingService.createBooking(requestDTO);
+        
+        // 저장 성공 후 결과 페이지로 리다이렉트 (ID 전달)
+        return "redirect:/reservation/booking/result/" + bookingId;
+    }
+
+    // 4. 예매 완료 결과 페이지
+    @GetMapping("/reservation/booking/result/{id}")
+    public String showBookingResult(@PathVariable("id") Long id, Model model) {
+        // 서비스에서 ResponseDTO를 받아옴
+        BookingResponseDTO response = bookingService.getBookingResult(id);
+        
+        // HTML(접시)에 데이터(음식)를 담아서 보냄
+        model.addAttribute("booking", response);
+        return "reservation/booking_result"; 
+    }
+
+    @GetMapping("/reservation/booking/performance")
+    public String bookingPerformancePage(Model model) {
+        return "reservation/booking_performance"; 
+    }
+}	
