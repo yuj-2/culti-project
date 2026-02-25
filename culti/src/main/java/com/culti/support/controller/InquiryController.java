@@ -26,10 +26,19 @@ public class InquiryController {
     private final NoticeService noticeService;
 
     @GetMapping("")
-    public String supportMain(Model model) {
-        // 기존 기능 유지: 최근 공지 5개
-        List<Notice> noticeList = noticeService.getLatestNotices();
-        model.addAttribute("noticeList", noticeList);
+    public String supportMain(Model model, 
+        // 기본값을 5개씩, ID 내림차순으로 설정
+        @PageableDefault(size = 5, sort = "noticeId", direction = Sort.Direction.DESC) Pageable pageable) {
+        
+        // 1. 기존 List 대신 Page 객체로 가져옵니다.
+        Page<Notice> noticePage = noticeService.getNoticeList(pageable);
+        
+        // 2. HTML에서 페이징 처리를 할 수 있도록 Page 객체 자체를 넘깁니다.
+        model.addAttribute("noticePage", noticePage);
+        
+        // 기존 List 이름도 유지하고 싶다면 content만 따로 담아줘도 됩니다.
+        model.addAttribute("noticeList", noticePage.getContent()); 
+        
         return "support/support";
     }
 
