@@ -1,4 +1,4 @@
-package com.culti.page;
+package com.culti.mate.matePage;
 
 import lombok.Getter;
 import lombok.ToString;

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.culti.auth.entity.User;
 import com.culti.mate.enums.MateApplyStatus;
 
 import jakarta.persistence.Column;
@@ -30,7 +31,7 @@ import lombok.ToString;
 @Getter
 @ToString(exclude =  {"applicant", "post"})
 @Table(name = "mate_apply")
-public class MateApply {
+public class MateApply extends PostBaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,16 +47,16 @@ public class MateApply {
 	@Column
 	private LocalDateTime decidedAt;
 	
-	@Column(nullable = false, updatable = false)
-	@CreationTimestamp
-	private LocalDateTime createdAt;
+//	@Column(nullable = false, updatable = false)
+//	@CreationTimestamp
+//	private LocalDateTime createdAt;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "post_id", nullable = false)
 	private MatePost post;
 	
-//	@ManyToOne(fetch = FetchType.LAZY)
-//	@JoinColumn(name = "applicant_id", nullable = false)
-//	private Users applicant;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "applicant_id", nullable = false)
+	private User applicant;
 	
 }

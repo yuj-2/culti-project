@@ -87,17 +87,18 @@
                 <button class="close-button" onclick="closeCreateModal()">&times;</button>
             </div>
             <!-- form!!!!!! -->
-            <form id="createForm" >
+            <form id="createForm" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="form-group">
                     <label class="form-label" for="title">작품명</label>
                     
                     <!-- 여기 content db 불러오는 걸로 수정!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
-                    <input type="text" class="form-input" id="title" placeholder="예) 듄: 파트2" required>
+                    <input type="text" class="form-input" id="title" name="title" placeholder="예) 듄: 파트2" required>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="category">카테고리</label>
-                    <select class="form-select" id="category" required>
+                    <select class="form-select" id="category" name="category" required>
                         <option value="movie">영화</option>
                         <option value="concert">공연</option>
                         <option value="exhibition">전시</option>
@@ -117,12 +118,12 @@
 
                 <div class="form-group">
                     <label class="form-label" for="location">장소</label>
-                    <input type="text" class="form-input" id="location" placeholder="예) CGV 강남" required>
+                    <input type="text" class="form-input" id="location" name="location"  placeholder="예) CGV 강남" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="maxMembers">모집 인원</label>
-                    <select class="form-select" id="maxMembers" required>
+                    <label class="form-label" for="maxPeople">모집 인원</label>
+                    <select class="form-select" id="maxPeople" name="maxPeople" required>
                         <option value="2">2명</option>
                         <option value="3">3명</option>
                         <option value="4">4명</option>
@@ -132,13 +133,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="author">작성자 닉네임</label>
-                    <input type="text" class="form-input" id="author" placeholder="닉네임을 입력하세요" required>
+                    <label class="form-label" for="nickname" >작성자 닉네임</label>
+                    <input type="text" class="form-input" id="nickname" name="nickname" placeholder="닉네임을 입력하세요" required>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="description">상세 설명</label>
-                    <textarea class="form-textarea" id="description" placeholder="함께 보고 싶은 이유, 선호하는 분위기 등을 자유롭게 작성해주세요" required></textarea>
+                    <textarea class="form-textarea" id="description" name="description" placeholder="함께 보고 싶은 이유, 선호하는 분위기 등을 자유롭게 작성해주세요" required></textarea>
                 </div>
 
                 <div class="button-group">
@@ -204,66 +205,7 @@
             exhibition: '전시'
         };
 
-//      // Render posts
-//         function renderPosts() {
-//           const grid = document.getElementById('postsGrid');
-//           const emptyState = document.getElementById('emptyState');
 
-//           const filteredPosts = currentCategory === 'all'
-//             ? posts
-//             : posts.filter(post => post.category === currentCategory);
-
-//           if (filteredPosts.length === 0) {
-//             grid.style.display = 'none';
-//             emptyState.style.display = 'block';
-//             return;
-//           }
-
-//           grid.style.display = 'grid';
-//           emptyState.style.display = 'none';
-
-//           grid.innerHTML = filteredPosts.map(post => {
-//             const isFull = post.currentMembers >= post.maxMembers;
-//             const badgeClass = `badge-${post.category}`;
-
-//             return `
-//               <div class="post-card" onclick="showDetail('${post.id}')">
-//                 <div class="post-header">
-//                   <h3 class="post-title">${post.title}</h3>
-//                   <span class="badge ${badgeClass}">${categoryLabels[post.category]}</span>
-//                 </div>
-
-//                 <div class="post-info">
-//                   <div class="info-row">
-//                     <i class="fa-regular fa-calendar"></i>
-//                     <span>${post.date} ${post.time}</span>
-//                   </div>
-
-//                   <div class="info-row">
-//                     <i class="fa-solid fa-location-dot"></i>
-//                     <span>${post.location}</span>
-//                   </div>
-
-//                   <div class="info-row">
-//                     <i class="fa-solid fa-users"></i>
-//                     <span>
-//                       <span class="members-count ${isFull ? 'full' : ''}">${post.currentMembers}</span>
-//                       <span style="color: #666">/${post.maxMembers}명</span>
-//                       ${isFull ? '<span class="badge badge-full">모집완료</span>' : ''}
-//                     </span>
-//                   </div>
-//                 </div>
-
-//                 <div class="post-footer">
-//                   <div class="info-row">
-//                     <i class="fa-regular fa-user"></i>
-//                     <span>${post.author}</span>
-//                   </div>
-//                 </div>
-//               </div>
-//             `;
-//           }).join('');
-//         }
 
         // Filter tabs
         document.querySelectorAll('.tab-button').forEach(button => {
@@ -315,121 +257,6 @@
 		  });
 		});
 
-        // Show detail modal
-//         function showDetail(postId) {
-//           const post = posts.find(p => p.id === postId);
-//           if (!post) return;
-
-//           const isFull = post.currentMembers >= post.maxMembers;
-//           const badgeClass = `badge-${post.category}`;
-
-//           // ✅ 기본값 처리
-//           const isAccepted = post.isAccepted === true;
-//           const comments = Array.isArray(post.comments) ? post.comments : [];
-
-//           document.getElementById('detailTitle').innerHTML = `
-//             ${post.title}
-//             <span class="badge ${badgeClass}" style="font-size: 0.875rem; margin-left: 0.5rem;">
-//               ${categoryLabels[post.category]}
-//             </span>
-//           `;
-
-//           const commentsHtml = isAccepted
-//             ? `
-//               <div class="detail-description">
-//                 <div class="detail-label">댓글</div>
-
-//                 <div class="comment-list">
-//                   ${
-//                     comments.length === 0
-//                       ? `<p style="color:#666; font-size:0.9rem;">아직 댓글이 없습니다.</p>`
-//                       : comments.map(c => `
-//                           <div class="comment-item">
-//                             <div class="comment-meta">
-//                               <span class="comment-writer">${c.writer}</span>
-//                               <span class="comment-date">${c.createdAt}</span>
-//                             </div>
-//                             <div class="comment-content">${c.content}</div>
-//                           </div>
-//                         `).join('')
-//                   }
-//                 </div>
-
-//                 <div class="comment-form">
-//                   <textarea id="commentInput" class="form-textarea" placeholder="댓글을 입력하세요"></textarea>
-//                   <div class="button-group" style="margin-top: 0.75rem;">
-//                     <button class="button button-primary" onclick="addComment('${post.id}')">댓글 등록</button>
-//                   </div>
-//                 </div>
-//               </div>
-//             `
-//             : `
-//               <div class="detail-description">
-//                 <div class="detail-label">댓글</div>
-//                 <p style="color:#666; font-size:0.9rem;">
-//                   ✅ 참여 신청이 수락되면 댓글을 볼 수 있어요.
-//                 </p>
-//               </div>
-//             `;
-
-//           document.getElementById('detailContent').innerHTML = `
-//             <div class="detail-grid">
-
-//               <div class="detail-item">
-//                 <i class="fa-regular fa-calendar detail-fa"></i>
-//                 <div class="detail-content">
-//                   <div class="detail-label">날짜 및 시간</div>
-//                   <div class="detail-value">${post.date} ${post.time}</div>
-//                 </div>
-//               </div>
-
-//               <div class="detail-item">
-//                 <i class="fa-solid fa-location-dot detail-fa"></i>
-//                 <div class="detail-content">
-//                   <div class="detail-label">장소</div>
-//                   <div class="detail-value">${post.location}</div>
-//                 </div>
-//               </div>
-
-//               <div class="detail-item">
-//                 <i class="fa-solid fa-users detail-fa"></i>
-//                 <div class="detail-content">
-//                   <div class="detail-label">모집 인원</div>
-//                   <div class="detail-value">
-//                     <span class="${isFull ? 'members-count full' : 'members-count'}">${post.currentMembers}</span>/${post.maxMembers}명
-//                     ${isFull ? '<span class="badge badge-full">모집완료</span>' : ''}
-//                   </div>
-//                 </div>
-//               </div>
-
-//               <div class="detail-item">
-//                 <i class="fa-regular fa-user detail-fa"></i>
-//                 <div class="detail-content">
-//                   <div class="detail-label">작성자</div>
-//                   <div class="detail-value">${post.author}</div>
-//                 </div>
-//               </div>
-
-//             </div>
-
-//             <div class="detail-description">
-//               <div class="detail-label">상세 설명</div>
-//               <p class="description-text">${post.description}</p>
-//             </div>
-
-//             <div class="button-group">
-//               <button class="button button-primary"
-//                 onclick="openApplyModal()"
-//                 ${isFull ? 'disabled' : ''}>
-//                 ${isFull ? '모집 완료' : '참여 신청'}
-//               </button>
-//             </div>
-
-//             ${commentsHtml}
-//           `;
-
-//           document.getElementById('detailModal').classList.add('show');
-//         }
 
         function closeDetailModal() {
           document.getElementById('detailModal').classList.remove('show');
@@ -450,10 +277,7 @@
        	  closeApplyModal();
        	}
 
-//         // Initial render
-//         renderPosts();
-        
-        
+      
      // ✅ 새글 모달 열기
         document.getElementById('createButton').addEventListener('click', () => {
           document.getElementById('createModal').classList.add('show');

@@ -1,4 +1,4 @@
-package com.culti.page;
+package com.culti.mate.matePage;
 
 import org.springframework.web.util.UriComponentsBuilder;
 
