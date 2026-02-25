@@ -1,66 +1,67 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/layout}">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/layout}">
 <head>
-    <title>Culti - FAQ</title>
-    <link rel="stylesheet" th:href="@{/css/support/support.css}" />
+<title>Culti - FAQ</title>
+<link rel="stylesheet" th:href="@{/css/support/support.css}" />
 </head>
 <body>
-<div layout:fragment="content">
-    <section class="support-container">
-        <div class="support-header">
-            <h1>자주 묻는 질문</h1>
-            <p>궁금하신 점을 카테고리별로 빠르게 확인해 보세요.</p>
-        </div>
+	<div layout:fragment="content">
+		<section class="support-container">
+			<div class="support-header">
+				<h1>자주 묻는 질문</h1>
+				<p>궁금하신 점을 카테고리별로 빠르게 확인해 보세요.</p>
+			</div>
 
-        <div class="faq-tabs">
-            <a th:each="cat : ${categories}" 
-               th:href="@{/support/faq(category=${cat})}"
-               th:text="${cat}"
-               th:classappend="${cat == currentCategory} ? 'active' : ''"
-               class="faq-tab">전체</a>
-        </div>
+			<div class="faq-tabs">
+				<a th:each="cat : ${categories}"
+					th:href="@{/support/faq(category=${cat})}" th:text="${cat}"
+					th:classappend="${cat == currentCategory} ? 'active' : ''"
+					class="faq-tab">전체</a>
+			</div>
 
-        <div class="faq-list">
-            <div class="faq-item" th:each="faq : ${faqPage.content}">
-                <button class="faq-question" onclick="toggleFaq(this)">
-                    <span class="faq-category" th:text="${faq.faqCategory}">예매</span>
-                    <span class="faq-title" th:text="${faq.faqContent}">질문 내용</span>
-                    <span class="faq-icon">▼</span>
-                </button>
-                <div class="faq-answer">
-                    <div class="answer-inner" th:text="${faq.faqAnswer}">답변 내용</div>
-                </div>
-            </div>
-            <div th:if="${faqPage.isEmpty()}" style="text-align:center; padding:50px; color:#999;">
-                등록된 FAQ가 없습니다.
-            </div>
-        </div>
+			<div class="faq-list">
+				<div class="faq-item" th:each="faq : ${faqPage.content}">
+					<button class="faq-question" onclick="toggleFaq(this)">
+						<span class="faq-category" th:text="${faq.faqCategory}">예매</span>
+						<span class="faq-title" th:text="${faq.faqContent}">질문 내용</span> <span
+							class="faq-icon">▼</span>
+					</button>
+					<div class="faq-answer">
+						<div class="answer-inner" th:text="${faq.faqAnswer}">답변 내용</div>
+					</div>
+				</div>
+				<div th:if="${faqPage.isEmpty()}"
+					style="text-align: center; padding: 50px; color: #999;">등록된
+					FAQ가 없습니다.</div>
+			</div>
 
-        <div class="pagination-wrapper" th:if="${faqPage.totalPages > 1}">
-            <div class="pagination">
-                <a th:href="@{/support/faq(page=${faqPage.number - 1}, category=${currentCategory})}" 
-                   th:if="${faqPage.hasPrevious()}">&lt;</a>
-                
-                <span th:each="i : ${#numbers.sequence(0, faqPage.totalPages - 1)}">
-                    <a th:href="@{/support/faq(page=${i}, category=${currentCategory})}" 
-                       th:text="${i + 1}" 
-                       th:classappend="${i == faqPage.number} ? 'active'"></a>
-                </span>
-                
-                <a th:href="@{/support/faq(page=${faqPage.number + 1}, category=${currentCategory})}" 
-                   th:if="${faqPage.hasNext()}">&gt;</a>
-            </div>
-        </div>
-    </section>
+			<div class="pagination-wrapper" th:if="${faqPage.totalPages > 1}">
+				<div class="pagination">
+					<a
+						th:href="@{/support/faq(page=${faqPage.number - 1}, category=${currentCategory})}"
+						th:classappend="${!faqPage.hasPrevious()} ? 'disabled' : ''"
+						th:if="${faqPage.hasPrevious()}">&lt;</a> <span
+						th:each="i : ${#numbers.sequence(0, faqPage.totalPages - 1)}">
+						<a
+						th:href="@{/support/faq(page=${i}, category=${currentCategory})}"
+						th:text="${i + 1}"
+						th:classappend="${i == faqPage.number} ? 'active' : ''"></a>
+					</span> <a
+						th:href="@{/support/faq(page=${faqPage.number + 1}, category=${currentCategory})}"
+						th:classappend="${!faqPage.hasNext()} ? 'disabled' : ''"
+						th:if="${faqPage.hasNext()}">&gt;</a>
+				</div>
+			</div>
+		</section>
 
-    <script>
+		<script>
         function toggleFaq(button) {
             const faqItem = button.parentElement;
             faqItem.classList.toggle('active');
         }
     </script>
-</div>
+	</div>
 </body>
 </html>
