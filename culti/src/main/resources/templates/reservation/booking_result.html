@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>예매 완료</title>
+    <style>
+        main { max-width: 800px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
+        .info-row { margin-bottom: 10px; font-size: 1.1em; }
+        .label { font-weight: bold; color: #555; display: inline-block; width: 100px; }
+    </style>
+</head>
+<body>
+    <div th:replace="~{layout/header :: headerFragment}"></div>
+
+    <main>
+        <h1>🎉 예매가 완료되었습니다!</h1>
+        <hr>
+        
+        <div class="info-row">
+            <span class="label">예매 번호:</span>
+            <span th:text="${booking.bookingNumber}">B12345678</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="label">공연 제목:</span>
+            <span th:text="${booking.movieTitle}">오케스트라 갈라</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="label">상영 시간:</span>
+            <span th:text="${booking.showTime}">2026-02-24 19:00</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="label">선택 좌석:</span>
+            <span th:text="${#strings.listJoin(booking.seatNames, ', ')}">A1, A2</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="label">결제 금액:</span>
+            <span th:text="${#numbers.formatInteger(booking.totalPrice, 3, 'COMMA')}">0</span>원
+        </div>
+
+        <div style="margin-top: 30px;">
+            <a href="/" style="padding: 10px 20px; background-color: #333; color: #fff; text-decoration: none; border-radius: 5px;">홈으로 돌아가기</a>
+        </div>
+    </main>
+
+
+</body>
+</html>
