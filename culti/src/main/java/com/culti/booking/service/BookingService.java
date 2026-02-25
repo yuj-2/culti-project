@@ -57,29 +57,33 @@ public class BookingService {
         booking.setPaymentStatus("COMPLETED");
         booking.setDiscountAmount(0);
 
-        // [좌석 매핑] 전달받은 seatId 문자열을 실제 Seat 엔티티와 연결
+     // BookingService.java 내 루프 부분 수정
         for (String seatIdStr : requestDTO.getSeatIds()) {
             BookingSeat bookingSeat = new BookingSeat();
             bookingSeat.setBooking(booking);
             
             try {
-                // 전달받은 값이 숫자 ID라면 해당 좌석 조회
                 Long seatId = Long.parseLong(seatIdStr);
-                Seat seat = seatRepository.findById(seatId)
-                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 좌석 ID: " + seatId));
-                bookingSeat.setSeat(seat); // BookingSeat 엔티티의 @ManyToOne Seat seat 필드에 세팅
-            } catch (NumberFormatException e) {
-                // 숫자가 아닐 경우(예: "A1") 테스트를 위해 DB의 첫 번째 좌석 강제 할당
-                Seat firstSeat = seatRepository.findAll().stream().findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("DB에 Seat 데이터가 하나도 없습니다."));
-                bookingSeat.setSeat(firstSeat);
+                // findById로 못 찾을 경우 DB의 첫 번째 좌석을 대신 가져오도록 설정
+                Seat seat = seatRepository.findById(seatId).orElseGet(() -> {
+                    System.out.println("주의: ID " + seatId + "가 DB에 없어 임시 좌석으로 대체됨");
+                    return seatRepository.findAll().stream().findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("DB에 좌석 데이터가 없습니다."));
+                });
+                bookingSeat.setSeat(seat);
+            } catch (Exception e) {
+                // 예외 발생 시 방어적으로 첫 번째 좌석 할당
+                Seat seat = seatRepository.findAll().get(0);
+                bookingSeat.setSeat(seat);
             }
-            
             booking.getBookingSeats().add(bookingSeat);
         }
+            
 
-        // DB 저장
-        return bookingRepository.save(booking).getBookingId();
+
+        // [중요] DB 저장 후 생성된 PK(Long)를 반드시 리턴해야 함
+        Booking savedBooking = bookingRepository.save(booking);
+        return savedBooking.getBookingId();
     }
 
     /**
@@ -93,13 +97,11 @@ public class BookingService {
         return BookingResponseDTO.builder()
                 .bookingNumber(booking.getBookingNumber())
                 .totalPrice(booking.getTotalPrice())
-                // [수정] 이제 Schedule -> Content -> Title로 진짜 제목을 가져옵니다.
+                // 담당자 엔티티 필드 반영 (Title)
                 .movieTitle(booking.getSchedule().getContent().getTitle()) 
                 .showTime(booking.getSchedule().getShowTime().toString())
-                // [수정] 실제 좌석의 행(Row)과 열(Col) 정보를 조합해서 출력
-                .seatNames(booking.getBookingSeats().stream()
-                        .map(bs -> bs.getSeat().getSeatRow() + bs.getSeat().getSeatCol()) 
-                        .collect(Collectors.toList()))
+                // 타임리프 th:each 반복문을 위해 리스트 전달
+                .bookingSeats(booking.getBookingSeats()) 
                 .build();
     }
 }

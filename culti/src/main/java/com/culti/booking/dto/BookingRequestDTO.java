@@ -14,4 +14,6 @@ public class BookingRequestDTO {
     private List<String> seatIds; // ★ Long에서 String으로 변경!
     private Integer totalPrice;
     private Long userId;
+    
+    
 }
