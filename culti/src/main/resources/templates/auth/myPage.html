@@ -45,8 +45,8 @@
                             </div>
                         </div>
                         <div class="user-info">
-                            <h2 class="user-name" id="userName">홍길동</h2>
-                            <p class="user-email" id="userEmail">hong@example.com</p>
+                            <h2 class="user-name" id="userName" th:text="${user.name}">홍길동</h2>
+                            <p class="user-email" id="userEmail" th:text="${user.email}">hong@example.com</p>
                         </div>
                         <div class="user-grade">
                             <span class="grade-badge">일반회원</span>

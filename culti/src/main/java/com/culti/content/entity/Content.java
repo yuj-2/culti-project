@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,10 +52,15 @@ public class Content {
 	private LocalDate endDate;
 	
 	// 장소
+	@JsonIgnore
 	@OneToMany(mappedBy = "content")
     private List<Schedule> schedules;
 	
+	@JsonIgnore
 	@OneToMany(mappedBy = "content", cascade = CascadeType.ALL)
     private java.util.List<Review> reviews;
+	
+	@Column(nullable = false)
+    private int bookingCount = 0;
 	
 }
