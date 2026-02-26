@@ -268,6 +268,26 @@ document.addEventListener('DOMContentLoaded', function() {
         sendVerifyBtn.disabled = true;
         sendVerifyBtn.textContent = '발송중...';
 
+		
+		
+		const emailData = document.getElementById('email').value;
+		/*
+		fetch('/api/auth/send', {
+		  method: 'POST',
+		  headers: {
+		    'Content-Type': 'application/json', // 서버의 @RequestBody가 인식할 수 있게 설정
+			'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content // 토큰 추가  
+			},
+		  body: JSON.stringify(emailData) // 데이터를 JSON 문자열로 변환
+		})
+		.then(response => response.text()) // 서버 응답을 텍스트로 받기
+		.then(data => {
+		  console.log("서버 응답:", data);
+		  alert("인증번호가 발송되었습니다!");
+		})
+		.catch(error => console.error('에러 발생:', error));
+		*/
+		
         // 실제 서버 통신 코드
         /*
         fetch('/api/send-verification', {
