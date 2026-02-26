@@ -8,8 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -20,7 +20,6 @@ import com.culti.mate.entity.MatePost;
 import com.culti.mate.matePage.Criteria;
 import com.culti.mate.matePage.PageDTO;
 import com.culti.mate.service.MateService;
-import com.culti.mate.service.MateServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,6 +37,7 @@ public class MateController {
 			, @AuthenticationPrincipal UserDetails userDetails
 			, @RequestParam(value = "page", defaultValue = "1") int page
 			, @RequestParam(value = "size", defaultValue = "9") int size
+			, @RequestParam(value="category", defaultValue="all") String category
 			) {
 		if (userDetails != null) {
 	        String email = userDetails.getUsername();
@@ -45,8 +45,14 @@ public class MateController {
 	        model.addAttribute("user", userDTO);
 	    }
 		
-		Page<MatePost> paging = this.mateService.getList(page, size);
+		Page<MatePost> paging;
+	    if ("all".equalsIgnoreCase(category)) {
+	        paging = mateService.getList(page, size);
+	    } else {
+	        paging = mateService.getListByCategory(category, page, size);
+	    }
 		model.addAttribute("paging", paging);
+		model.addAttribute("category", category);
 		
 		// [1] 2 3 4 5 6 7 8 9 10 >
 		Criteria criteria = new Criteria(page, size);
@@ -69,49 +75,54 @@ public class MateController {
 	}
 	
 	// 게시글 삭제
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/deletePost")
-	public String deletePost(@RequestBody String entity) {
-		//TODO: process POST request
+	public String deletePost(@RequestParam("postId") Long postId
+										,@AuthenticationPrincipal UserDetails userDetails) {
+		String email = userDetails.getUsername();
+		this.mateService.delete(postId, email);
 		
-		return entity;
+		return "redirect:/mate/mate";
 	}
 	
 	// 참여신청
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/applyPost")
-	public String apply(@RequestBody String entity) {
-		//TODO: process POST request
-		
-		return entity;
+	public String applyPost(@RequestParam("postId") Long postId,
+            @RequestParam("message") String message,
+            @AuthenticationPrincipal UserDetails userDetails) {
+		String email = userDetails.getUsername();
+		mateService.apply(postId, email, message);
+		return "redirect:/mate/mate";
 	}
 	
-	// 댓글 쓰기
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/addComment")
-	public String addComment(@RequestBody String entity) {
-		//TODO: process POST request
-		
-		return entity;
+	public String addComment(@RequestParam("postId") Long postId,
+	                         @RequestParam("comment") String comment,
+	                         @AuthenticationPrincipal UserDetails userDetails) {
+	    String email = userDetails.getUsername();
+	    mateService.addComment(postId, email, comment);
+	    return "redirect:/mate/mate";
 	}
-	
-	// 댓글 수정
+
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/updateComment")
-	public String updateComment(@RequestBody String entity) {
-		//TODO: process POST request
-		
-		return entity;
+	public String updateComment(@RequestParam Long commentId,
+								@RequestParam("comment") String comment,
+	                            @AuthenticationPrincipal UserDetails userDetails) {
+	    String email = userDetails.getUsername();
+	    mateService.updateComment(commentId, email, comment);
+	    return "redirect:/mate/mate";
 	}
-	
 
-	
-	// 댓글 삭제
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/deleteComment")
-	public String deleteComment(@RequestBody String entity) {
-		//TODO: process POST request
-		
-		return entity;
+	public String deleteComment(@RequestParam Long commentId,
+	                            @AuthenticationPrincipal UserDetails userDetails) {
+	    String email = userDetails.getUsername();
+	    mateService.deleteComment(commentId, email);
+	    return "redirect:/mate/mate";
 	}
 	
 	
@@ -121,10 +132,46 @@ public class MateController {
 		
 //	마이페이지로 옮겨야 함
 	@GetMapping("/mateMypage")
-	public void mateMypage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+	public void mateMypage(@RequestParam(name="tab", defaultValue="received") String tab,
+							        @RequestParam(name="section", defaultValue="mate") String section,
+							        @AuthenticationPrincipal UserDetails userDetails,
+							        Model model) {
 		String email=userDetails.getUsername();
 		UserDTO userDTO=this.userService.findByEmail(email);
 		model.addAttribute("user",userDTO);
+		model.addAttribute("tab", tab);
+		model.addAttribute("section", section);
+
+	    // DB 조회해서 담기
+	    model.addAttribute("receivedApps", mateService.getReceivedApps(email));
+	    model.addAttribute("sentApps", mateService.getSentApps(email));
 	}
+	
+	// 수락
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/{id}/accept")
+    public String accept(@PathVariable("id") Long applyId,
+                         @AuthenticationPrincipal UserDetails userDetails) {
+        mateService.accept(applyId, userDetails.getUsername());
+        return "redirect:/mate/mateMypage?section=mate&tab=received";
+    }
+
+    // 거절
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/{id}/reject")
+    public String reject(@PathVariable("id") Long applyId,
+                         @AuthenticationPrincipal UserDetails userDetails) {
+        mateService.reject(applyId, userDetails.getUsername());
+        return "redirect:/mate/mateMypage?section=mate&tab=received";
+    }
+
+    // 취소(내가 신청한 것)
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/{id}/cancel")
+    public String cancel(@PathVariable("id") Long applyId,
+                         @AuthenticationPrincipal UserDetails userDetails) {
+        mateService.cancel(applyId, userDetails.getUsername());
+        return "redirect:/mate/mateMypage?section=mate&tab=sent";
+    }
 	
 }

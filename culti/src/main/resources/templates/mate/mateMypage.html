@@ -7,6 +7,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/mate/mateMypage.css}">
     <link rel="stylesheet" th:href="@{/css/myPage.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <script th:src="@{/js/myPage.js}"></script>
 </head>
@@ -324,17 +325,19 @@
 
 					  <!-- Tabs -->
 					  <div class="tabs">
-					    <a class="tab"
-					       th:classappend="${tab}=='received' ? ' active' : ''"
-					       th:href="@{/auth/myPage(tab='received', section='mate')}">
-					      받은 신청
-					    </a>
-					    <a class="tab"
-					       th:classappend="${tab}=='sent' ? ' active' : ''"
-					       th:href="@{/auth/myPage(tab='sent', section='mate')}">
-					      내가 신청한 것
-					    </a>
-					  </div>
+						  <a class="tab"
+						     th:classappend="${tab}=='received' ? ' active' : ''"
+						     th:href="@{/mate/mateMypage(tab='received', section='mate')}">
+						    받은 신청
+						  </a>
+						
+						  <a class="tab"
+						     th:classappend="${tab}=='sent' ? ' active' : ''"
+						     th:href="@{/mate/mateMypage(tab='sent', section='mate')}">
+						    내가 신청한 것
+						  </a>
+						</div>
+					  
 					
 					  <!-- Content -->
 					  <div id="mate-content">
@@ -365,15 +368,17 @@
 					              대기중
 					            </span>
 					
-					            <div th:if="${app.status}=='pending'">
-					              <form th:action="@{/mypage/applications/{id}/accept(id=${app.id})}" method="post" style="display:inline;">
-					                <button class="button button-success" type="submit">수락</button>
-					              </form>
-					              <form th:action="@{/mypage/applications/{id}/reject(id=${app.id})}" method="post" style="display:inline;">
-					                <button class="button button-danger" type="submit"
-					                        onclick="return confirm('신청을 거절하시겠습니까?');">거절</button>
-					              </form>
-					            </div>
+					            <div th:if="${app.status}=='PENDING'">
+								  <form th:action="@{/mate/{id}/accept(id=${app.id})}" method="post">
+									  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+									  <button type="submit">수락</button>
+									</form>
+									
+									<form th:action="@{/mate/{id}/reject(id=${app.id})}" method="post">
+									  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+									  <button type="submit">거절</button>
+									</form>
+								</div>
 					          </div>
 					        </div>
 					
@@ -416,12 +421,12 @@
 					              대기중
 					            </span>
 					
-					            <div th:if="${app.status}=='pending'">
-					              <form th:action="@{/mypage/applications/{id}/cancel(id=${app.id})}" method="post" style="display:inline;">
-					                <button class="button button-danger" type="submit"
-					                        onclick="return confirm('신청을 취소하시겠습니까?');">취소</button>
-					              </form>
-					            </div>
+					            <div th:if="${app.status}=='PENDING'">
+								  <form th:action="@{/mate/{id}/cancel(id=${app.id})}" method="post">
+									  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+									  <button type="submit">취소</button>
+									</form>
+								</div>
 					          </div>
 					        </div>
 					

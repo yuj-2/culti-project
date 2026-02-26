@@ -68,4 +68,12 @@ public class MatePost extends PostBaseEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_id", nullable = false)
     private User writer;
+    
+    public void close() {
+        this.status = MatePostStatus.CLOSED;
+    }
+    
+    public void open() {
+        this.status = MatePostStatus.OPEN;
+    }
 }
