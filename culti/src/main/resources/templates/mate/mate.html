@@ -25,9 +25,7 @@
 
     <!-- Main Content -->
     <div class="container">
-        <div class="posts-grid" id="postsGrid">
-            <!-- Posts will be inserted here by JavaScript -->
-        </div>
+
         <div class="empty-state" id="emptyState" style="display: none;">
             <p>아직 등록된 게시글이 없습니다.</p>
         </div>
@@ -88,7 +86,7 @@
                 <button class="close-button" onclick="closeCreateModal()">&times;</button>
             </div>
             <!-- form!!!!!! -->
-            <form id="createForm" method="post">
+            <form id="createForm" method="post" th:action="@{/mate/addPost}">
                 <div class="form-group">
                     <label class="form-label" for="title">작품명</label>
                     
@@ -107,11 +105,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label" for="date">날짜</label>
-                        <input type="date" class="form-input" id="date" required>
+                        <input type="date" class="form-input" id="date" name="date" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="time">시간</label>
-                        <input type="time" class="form-input" id="time" required>
+                        <input type="time" class="form-input" id="time" name="time" required>
                     </div>
                 </div>
 
@@ -195,7 +193,7 @@
 </div>
 
 <script th:inline="javascript">
-  const isAuthenticated = [[${#authorization.expression('isAuthenticated()')}]];
+  const isAuthenticated = false;
 </script>
 
     <script>
@@ -235,8 +233,8 @@
 		      `${title} <span class="badge badge-${category.toLowerCase()}" style="margin-left:20px;">${category}</span>`;
 		
 	      const applyButtonHtml = isAuthenticated
-	      ? `<button class="button button-primary" onclick="openApplyModal()">참여 신청</button>`
-	      : `<button class="button button-primary" onclick="location.href='/auth/login'">로그인 후 신청</button>`;
+	      ? `<button class="button button-primary" onclick="openApplyModal()" sec:authorize="isAuthenticated()">참여 신청</button>`
+	      : `<button class="button button-primary" onclick="location.href='/auth/login'" sec:authorize="isAnonymous()">로그인 후 신청</button>`;
 		      
 		    document.getElementById('detailContent').innerHTML = `
 		      <div class="detail-grid">
@@ -290,9 +288,12 @@
 
       
      // ✅ 새글 모달 열기
-        document.getElementById('createButton').addEventListener('click', () => {
-          document.getElementById('createModal').classList.add('show');
-        });
+        const createBtn = document.getElementById('createButton');
+			if (createBtn) {
+			  createBtn.addEventListener('click', () => {
+			    document.getElementById('createModal').classList.add('show');
+			  });
+			}
 
         // ✅ 새글 모달 닫기
         function closeCreateModal() {

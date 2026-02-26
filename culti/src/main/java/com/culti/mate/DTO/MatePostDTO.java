@@ -27,6 +27,9 @@ public class MatePostDTO {
 
     private MatePostCategory category;   
 
+    private String date; 
+    private String time;
+    
     private LocalDateTime eventAt;
     private String location;
     private Integer maxPeople;
@@ -37,7 +40,7 @@ public class MatePostDTO {
 
     private MatePostStatus status;   
     
-    @DateTimeFormat(pattern = "yyyy/MM/dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 	
 }

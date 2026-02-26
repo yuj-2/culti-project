@@ -59,7 +59,7 @@ public class MatePost extends PostBaseEntity{
 
 
     @Enumerated(EnumType.STRING)
-    private MatePostStatus status;
+    private MatePostStatus status  = MatePostStatus.OPEN;
     
 //    @Column(nullable = false)
 //    @CreationTimestamp
