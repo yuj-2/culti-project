@@ -1,0 +1,247 @@
+/* inquiry.css */
+
+body, html {
+    height: 100%;
+    margin: 0;
+    /* background-color: #503396; */
+    background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5); 
+}
+
+.chat {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.card {
+    height: 750px;
+    border-radius: 15px !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    color: white;
+    border: none;
+}
+
+/* 왼쪽 목록 스타일 */
+.contacts_body {
+    overflow-y: auto;
+    padding: 0 !important;
+}
+
+.contacts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.contacts li {
+    width: 100%;
+    padding: 15px 20px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: 0.3s;
+    position: relative;
+}
+
+.contacts li:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 선택된 채팅방 스타일 (파란색 선 포인트) */
+.contacts li.active_chat {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    border-left: 5px solid #007bff !important;
+    transition: all 0.2s ease;
+}
+
+/* 프로필 이미지 스타일 */
+.img_cont {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.user_img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    object-fit: cover;
+    background-color: transparent;
+}
+
+.online_icon {
+    position: absolute;
+    height: 15px;
+    width: 15px;
+    background-color: #4cd137;
+    border-radius: 50%;
+    bottom: 2px;
+    right: 5px;
+    border: 2px solid white;
+}
+
+.offline {
+    background-color: #c23616 !important;
+}
+
+.user_info {
+    margin-left: 15px;
+    color: white;
+    overflow: hidden;
+}
+
+.user_info span {
+    font-size: 18px;
+    font-weight: bold;
+    display: block;
+}
+
+.user_info p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+}
+
+/* 상태 뱃지 */
+.status_label {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top: 5px;
+    display: inline-block;
+}
+
+.status_pending {
+    background-color: #e67e22;
+    color: white;
+}
+
+.status_answered {
+    background-color: #2ecc71;
+    color: white;
+}
+
+/* 채팅창 메시지 및 시간 스타일 */
+.msg_card_body {
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.d-flex.mb-4 {
+    position: relative;
+    margin-bottom: 35px !important; /* 시간 표시 공간 확보 */
+}
+
+.msg_cotainer {
+    margin-left: 10px;
+    border-radius: 20px;
+    background-color: #82ccdd;
+    padding: 10px 15px;
+    color: black;
+    position: relative;
+    max-width: 80%;
+}
+
+.msg_cotainer_send {
+    margin-right: 10px;
+    border-radius: 20px;
+    background-color: #78e08f;
+    padding: 10px 15px;
+    color: black;
+    position: relative;
+    max-width: 80%;
+}
+
+.msg_time, .msg_time_send {
+    position: absolute;
+    bottom: -22px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.msg_time { left: 10px; }
+.msg_time_send { right: 10px; }
+
+.img_cont_msg img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* 하단 입력창 */
+.new_btn {
+    width: 100%;
+    margin-bottom: 0;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    height: 70px;
+    font-weight: bold;
+}
+
+/* 하단 입력 영역 레이아웃 조정 */
+.card-footer .input-group {
+    display: flex !important;
+    align-items: stretch !important; /* 입력창과 버튼 높이를 동일하게 맞춤 */
+}
+
+.type_msg {
+    flex: 1; /* 입력창이 남은 공간을 다 차지함 */
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    border: 0 !important;
+    color: white !important;
+    height: 100px !important;
+    resize: none;
+    word-break: break-all;
+    overflow-y: auto;
+    padding: 15px !important;
+    border-radius: 15px 0 0 15px !important; /* 왼쪽 모서리만 둥글게 */
+}
+
+/* 전송 버튼 영역 - 여기서 크기를 조절합니다 */
+.input-group-append {
+    display: flex !important;
+    margin-left: 0 !important; /* 입력창과의 틈새 제거 */
+}
+
+/* 전송 버튼 영역 */
+.send_btn {
+    width: 100px !important;    /* 기존 크기 유지 */
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    border: 0 !important;
+    cursor: pointer;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 0 15px 15px 0 !important;
+    transition: background 0.3s;
+    
+    /* 이미지 삽입을 위한 설정 */
+    background-image: url('/images/support/send.png') !important; /* 이미지 경로 확인 필요 */
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 40px !important; /* 이미지 크기 (원하는 만큼 조절하세요) */
+}
+
+.send_btn:hover {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* 기존 아이콘은 보이지 않게 처리 (혹시 HTML에 i태그가 남아있을 경우 대비) */
+.send_btn i {
+    display: none !important;
+}
+
+/* 왼쪽 목록 카드 스타일 수정 */
+.contacts_card {
+    height: 750px;
+    /* 오른쪽 .card와 동일하게 15px radius 적용 */
+    border-radius: 15px !important; 
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    color: white;
+    border: none;
+    /* 모서리가 깎인 부분 밖으로 내용이 나가지 않도록 설정 */
+    overflow: hidden; 
+}
+

@@ -1,0 +1,72 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>CULTI - 고객센터</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <link rel="stylesheet" th:href="@{/css/support/support.css}" />
+    
+</head>
+<body class="is-preload">
+    <div layout:fragment="content">
+        <section class="support-container">
+            <div class="support-header">
+                <h1>고객센터</h1>
+                <p>Culti 서비스 이용 중 궁금한 점을 해결해 드립니다.</p>
+            </div>
+
+            <div class="support-menu-grid">
+                <div class="menu-item" onclick="location.href='/support/notice'">
+                    <img th:src="@{/images/support/support_notice.png}" alt="공지사항" class="menu-icon">
+                    <span>공지사항</span>
+                </div>
+                <div class="menu-item" onclick="location.href='/support/faq'">
+                    <img th:src="@{/images/support/support_faq.png}" alt="FAQ" class="menu-icon">
+                    <span>FAQ</span>
+                </div>
+                <div class="menu-item" onclick="location.href='/support/refund'">
+                    <img th:src="@{/images/support/support_refund.png}" alt="환불 안내" class="menu-icon">
+                    <span>환불 안내</span>
+                </div>
+                <div class="menu-item" th:onclick="|location.href='@{/support/inquiry}'|">
+                    <img th:src="@{/images/support/support_inquiry.png}" alt="1:1 문의" class="menu-icon">
+                    <span>1:1 문의</span>
+                </div>
+            </div>
+
+            <div class="notice-section">
+                <div class="section-title">
+                    <h2>최근 공지사항</h2>
+                    <a href="/support/notice" class="more-btn">전체보기 +</a>
+                </div>
+                <ul class="notice-list">
+                    <li th:each="notice : ${noticePage.content}">
+                        <a th:href="@{/support/notice/view(id=${notice.noticeId})}">
+                            <span class="title" th:text="${notice.noticeTitle}">공지사항 제목</span>
+                            <span class="date" th:text="${#temporals.format(notice.createdAt, 'yyyy-MM-dd')}">2026-02-25</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="pagination-wrapper" th:if="${noticePage.totalPages > 1}">
+                    <ul class="pagination">
+                        <li th:classappend="${!noticePage.hasPrevious()} ? 'disabled'">
+                            <a th:href="@{/support(page=${noticePage.number - 1})}">&lt;</a>
+                        </li>
+                        <li th:each="page : ${#numbers.sequence(0, noticePage.totalPages - 1)}"
+                            th:classappend="${page == noticePage.number} ? 'active'">
+                            <a th:href="@{/support(page=${page})}" th:text="${page + 1}">1</a>
+                        </li>
+                        <li th:classappend="${!noticePage.hasNext()} ? 'disabled'">
+                            <a th:href="@{/support(page=${noticePage.number + 1})}">&gt;</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

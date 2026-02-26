@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>CULTI 고객센터 - 공지사항</title>
+    <link rel="stylesheet" th:href="@{/css/support/support.css}" />
+</head>
+<body>
+<div layout:fragment="content">
+    <section class="support-container">
+        <div class="support-header">
+            <h1>공지사항</h1>
+            <p>Culti의 새로운 소식과 안내사항을 확인하세요.</p>
+        </div>
+        
+        <table class="notice-table">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">번호</th>
+                    <th>제목</th>
+                    <th style="width: 120px;">작성일</th>
+                    <th style="width: 100px;">조회수</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="notice : ${noticePage.content}">
+                    <td th:text="${notice.noticeId}"></td>
+                    <td>
+                        <a th:href="@{/support/notice/view(id=${notice.noticeId}, page=${noticePage.number})}" 
+   th:text="${notice.noticeTitle}"></a>
+                    </td>
+                    <td th:text="${#temporals.format(notice.createdAt, 'yyyy-MM-dd')}">2026-02-25</td>
+                    <td th:text="${notice.viewCount}">0</td>
+                </tr>
+                <tr th:if="${noticePage.isEmpty()}">
+                    <td colspan="4" style="padding: 50px; color: #999;">등록된 공지사항이 없습니다.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="pagination-wrapper" th:if="${noticePage.totalPages > 1}">
+            <ul class="pagination">
+                <li th:classappend="${!noticePage.hasPrevious()} ? 'disabled'">
+                    <a th:href="@{/support/notice(page=${noticePage.number - 1})}">&lt;</a>
+                </li>
+
+                <li th:each="i : ${#numbers.sequence(0, noticePage.totalPages - 1)}"
+                    th:classappend="${i == noticePage.number} ? 'active'">
+                    <a th:href="@{/support/notice(page=${i})}" th:text="${i + 1}">1</a>
+                </li>
+
+                <li th:classappend="${!noticePage.hasNext()} ? 'disabled'">
+                    <a th:href="@{/support/notice(page=${noticePage.number + 1})}">&gt;</a>
+                </li>
+            </ul>
+        </div>
+    </section>
+</div>
+</body>
+</html>
