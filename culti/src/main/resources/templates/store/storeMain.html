@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CULTI STORE | 매점</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <style>
+        :root {
+            --culti-purple: #503396;   /* 브랜드 보라 */
+            --dark-purple: #252451;    /* 진한 보라 */
+            --white: #ffffff;
+            --light-gray: #f8f8f8;
+            --border-gray: #e2e2e2;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        body { display: flex; background-color: var(--white); color: var(--dark-purple); }
+
+        /* 좌측 사이드바 */
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            border-right: 1px solid var(--border-gray);
+            position: fixed;
+            padding: 40px 20px;
+            background-color: var(--white);
+            z-index: 100;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--culti-purple);
+            margin-bottom: 60px;
+            text-decoration: none;
+            display: block;
+        }
+        .nav-menu { list-style: none; }
+        .nav-item {
+            padding: 15px 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--dark-purple);
+            text-decoration: none;
+        }
+        .nav-item:hover { background-color: var(--light-gray); }
+        .nav-item.active {
+            background-color: var(--culti-purple);
+            color: var(--white);
+        }
+
+        /* 메인 컨텐츠 영역 */
+        .main-container {
+            margin-left: 240px;
+            flex: 1;
+            padding: 60px 80px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .header h1 { font-size: 28px; font-weight: 700; }
+
+        /* 카테고리 탭 */
+        .category-tabs {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--border-gray);
+        }
+        .tab {
+            padding: 12px 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #888;
+            background: none;
+            border: none;
+            position: relative;
+        }
+        .tab.active { color: var(--culti-purple); }
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--culti-purple);
+        }
+
+        /* 상품 그리드 */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 40px;
+        }
+        .product-card {
+            background: var(--white);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        .product-card:hover { transform: translateY(-10px); }
+
+        .img-wrapper {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background-color: var(--light-gray);
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .best-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: #FFD400;
+            color: #000;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 800;
+            border-radius: 4px;
+            z-index: 10;
+        }
+
+        .product-info { padding: 20px 5px; }
+        .product-name { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+        .product-sub { font-size: 14px; color: #666; margin-bottom: 15px; }
+        .price-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .price { font-size: 20px; font-weight: 800; color: var(--dark-purple); }
+        .cart-btn {
+            background-color: var(--culti-purple);
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .cart-btn:hover { background-color: var(--dark-purple); }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <a href="/" class="logo">CULTI</a>
+        <nav class="nav-menu">
+            <a href="/" class="nav-item">🏠 홈</a>
+            <a href="/mate/list" class="nav-item">💬 시네톡</a>
+            <a href="/booking/main" class="nav-item">📅 예매·예약</a>
+            <a href="/store/main" class="nav-item active">🍿 매점</a>
+            <a href="/place/list" class="nav-item">📍 상영관 찾기</a>
+            <a href="/special" class="nav-item">✨ 특별관</a>
+        </nav>
+    </aside>
+
+    <main class="main-container">
+        <header class="header">
+            <h1>매점</h1>
+            <div id="cartIcon" style="font-size: 24px; cursor: pointer; position: relative;">
+                🛒
+                <span id="cartCount" style="position: absolute; top: -10px; right: -10px; background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px; display: none;">0</span>
+            </div>
+        </header>
+
+        <nav class="category-tabs">
+            <button class="tab active" onclick="changeCategory(1, this)">팝콘팩토리</button>
+            <button class="tab" onclick="changeCategory(2, this)">음료</button>
+        </nav>
+
+        <div class="product-grid" id="productGrid">
+            <p style="grid-column: 1/-1; text-align: center; padding: 50px; color: #888;">CULTI 메뉴를 준비 중입니다...</p>
+        </div>
+    </main>
+
+    <script th:src="@{/js/storeMain.js}"></script>
+</body>
+</html>

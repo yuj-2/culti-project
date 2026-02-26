@@ -139,14 +139,21 @@ function updateSummary() {
     }
 }
 
-// 5. 점유 타이머
+// 5. 점유 타이머 (ID 수정 및 로직 최적화)
 function startTimer() {
-    const timerEl = document.getElementById('hold-timer');
-    if(!timerEl) return;
+    // HTML의 id="timer"와 일치하도록 수정했습니다.
+    const timerEl = document.getElementById('timer'); 
+    if(!timerEl) {
+        console.error("타이머 요소를 찾을 수 없습니다 (id='timer' 확인 필요)");
+        return;
+    }
+
     const interval = setInterval(() => {
         const min = String(Math.floor(bookingState.timer / 60)).padStart(2, '0');
         const sec = String(bookingState.timer % 60).padStart(2, '0');
-        timerEl.innerText = `좌석 임시 점유 중 ${min}:${sec}`;
+        
+        // HTML 구조에 맞게 시간만 업데이트합니다.
+        timerEl.innerText = `${min}:${sec}`;
         
         if (bookingState.timer <= 0) {
             clearInterval(interval);

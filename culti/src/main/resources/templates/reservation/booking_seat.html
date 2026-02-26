@@ -2,8 +2,9 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>좌석 선택 | culti</title>
+    <title>좌석 선택 | CULTI</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         .seat { width: 30px; height: 30px; margin: 2px; font-size: 10px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; border: 1px solid #444; transition: all 0.2s; }
         .seat.available { background: transparent; color: white; border-color: #666; }
@@ -16,32 +17,68 @@
 <body class="bg-[#1A1A1A] text-white">
     <div th:replace="~{layout/header :: headerFragment}"></div>
 
-    <main class="max-w-6xl mx-auto py-12 px-4 pb-40">
-        <div class="bg-[#252525] p-6 rounded-2xl mb-8 flex justify-between items-center border border-gray-800">
-            <div class="flex gap-10">
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-gray-400">성인</span>
-                    <div class="flex items-center bg-[#1A1A1A] border border-gray-700 rounded-lg overflow-hidden">
-                        <button type="button" onclick="updateCount('adult', -1)" class="w-10 h-10 hover:bg-gray-800">-</button>
-                        <span id="adult-count" class="w-12 text-center font-bold">0</span>
-                        <button type="button" onclick="updateCount('adult', 1)" class="w-10 h-10 hover:bg-gray-800">+</button>
+    <main class="max-w-7xl mx-auto py-12 px-4 pb-40">
+        
+        <div class="bg-[#252525] p-6 rounded-2xl mb-8 flex justify-between items-center border border-gray-800 shadow-xl">
+            
+            <div class="flex items-center gap-6">
+                <div class="relative group">
+                    <img th:src="${schedule.content.posterUrl}" 
+                         th:alt="${schedule.content.title}"
+                         class="w-16 h-22 rounded-lg object-cover border border-gray-700 shadow-lg">
+                </div>
+                
+                <div class="flex flex-col gap-1">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 bg-[#503396] text-[10px] text-white rounded font-bold" 
+                              th:text="${schedule.content.category}">카테고리</span>
+                        <h2 class="text-xl font-extrabold text-white tracking-tight" 
+                            th:text="${schedule.content.title}">영화 제목</h2>
+                    </div>
+                    <p class="text-xs text-gray-400 font-medium">
+                        <span th:text="${#temporals.format(schedule.showTime, 'yyyy.MM.dd')}">날짜</span>
+                        <span class="mx-1 text-gray-600">|</span>
+                        <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')}">00:00</span> ~ 
+                        <span th:text="${#temporals.format(schedule.endTime, 'HH:mm')}">00:00</span>
+                        <span class="mx-1 text-gray-600">|</span>
+                        <span th:text="${schedule.place.name}">장소명</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-8">
+                <div class="flex items-center gap-6 bg-[#1A1A1A] px-5 py-3 rounded-xl border border-gray-700">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-bold text-gray-400">성인</span>
+                        <div class="flex items-center bg-[#252525] rounded-lg border border-gray-600 overflow-hidden">
+                            <button type="button" onclick="updateCount('adult', -1)" class="w-8 h-8 text-white hover:bg-gray-700">-</button>
+                            <span id="adult-count" class="w-10 text-center text-sm font-bold">0</span>
+                            <button type="button" onclick="updateCount('adult', 1)" class="w-8 h-8 text-white hover:bg-gray-700">+</button>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 border-l border-gray-700 pl-6">
+                        <span class="text-xs font-bold text-gray-400">청소년</span>
+                        <div class="flex items-center bg-[#252525] rounded-lg border border-gray-600 overflow-hidden">
+                            <button type="button" onclick="updateCount('youth', -1)" class="w-8 h-8 text-white hover:bg-gray-700">-</button>
+                            <span id="youth-count" class="w-10 text-center text-sm font-bold">0</span>
+                            <button type="button" onclick="updateCount('youth', 1)" class="w-8 h-8 text-white hover:bg-gray-700">+</button>
+                        </div>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-gray-400">청소년</span>
-                    <div class="flex items-center bg-[#1A1A1A] border border-gray-700 rounded-lg overflow-hidden">
-                        <button type="button" onclick="updateCount('youth', -1)" class="w-10 h-10 hover:bg-gray-800">-</button>
-                        <span id="youth-count" class="w-12 text-center font-bold">0</span>
-                        <button type="button" onclick="updateCount('youth', 1)" class="w-10 h-10 hover:bg-gray-800">+</button>
+
+                <div class="flex flex-col items-end gap-1">
+                    <span class="text-[10px] uppercase tracking-widest text-gray-500 font-bold">좌석 임시 점유 중</span>
+                    <div class="flex items-center gap-2 text-[#9D7BFF]">
+                        <i data-lucide="clock" class="w-4 h-4"></i>
+                        <span class="text-lg font-mono font-bold tracking-tighter" id="timer">10:00</span>
                     </div>
                 </div>
             </div>
-            <div class="text-[#503396] font-mono text-lg" id="hold-timer">좌석 임시 점유 중 10:00</div>
         </div>
 
         <div class="bg-[#252525] p-12 rounded-3xl border border-gray-800 text-center overflow-x-auto">
             <div class="screen"></div>
-            <div class="mb-10 text-[10px] tracking-[10px] text-gray-600">SCREEN</div>
+            <div class="mb-10 text-[10px] tracking-[10px] text-gray-600 uppercase">Screen</div>
             
             <div id="seat-map-grid" class="inline-block"></div>
 
@@ -57,11 +94,11 @@
             <div class="max-w-6xl mx-auto flex justify-between items-center">
                 <div class="flex gap-12">
                     <div>
-                        <div class="text-[10px] text-gray-400 font-bold mb-1">선택 좌석</div>
+                        <div class="text-[10px] text-gray-400 font-bold mb-1 uppercase">선택 좌석</div>
                         <div id="display-seat-names" class="text-sm font-black">선택 안 됨</div>
                     </div>
                     <div>
-                        <div class="text-[10px] text-gray-400 font-bold mb-1">총 결제 금액</div>
+                        <div class="text-[10px] text-gray-400 font-bold mb-1 uppercase">총 결제 금액</div>
                         <div id="display-total-price" class="text-xl font-black text-[#503396]">₩0</div>
                     </div>
                 </div>
@@ -72,23 +109,23 @@
             </div>
         </div>
 
-        <form id="bookingForm" th:action="@{/reservation/booking/create}" method="post" style="display: none;">
-            <input type="hidden" name="scheduleId" th:value="${scheduleId}">
-            <input type="hidden" id="input-seat-ids" name="seatIds">
-            <input type="hidden" id="input-total-price" name="totalPrice">
-            <input type="hidden" name="userId" value="1"> 
-        </form>
+        <<form id="bookingForm" th:action="@{/reservation/booking/create}" method="post" style="display: none;">
+    <input type="hidden" name="scheduleId" th:value="${scheduleId}">
+    <input type="hidden" id="input-seat-ids" name="seatIds">
+    <input type="hidden" id="input-total-price" name="totalPrice">
+    <input type="hidden" name="userId" th:value="${#authentication.name}"> 
+</form>
     </main>
 
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    // Thymeleaf 인라인 표준 주석 문법입니다. 
-    // 서버 실행 시에는 seats 데이터로 치환되고, 에디터에서는 주석으로 처리되어 에러가 안 뜹니다.
-    const seatListFromDb = /*[[${seats}]]*/ []; 
-    
-    console.log("DB에서 불러온 좌석 데이터:", seatListFromDb);
-    /*]]>*/
-</script>
-<script th:src="@{/js/booking_seat.js}"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const seatListFromDb = /*[[${seats}]]*/ []; 
+        console.log("DB 좌석 로드 완료:", seatListFromDb);
+        /*]]>*/
+        
+        // 아이콘 초기화
+        lucide.createIcons();
+    </script>
+    <script th:src="@{/js/booking_seat.js}"></script>
 </body>
 </html>
