@@ -6,11 +6,25 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script th:src="@{/js/reservation.js}"></script>
+<script src="https://cdn.tailwindcss.com?plugins=line-clamp"></script>
 </head>
 <body class="min-h-screen bg-gray-50 font-sans">
 
     <div th:replace="~{layout/header :: headerFragment}"></div>
 
+	<div class="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+            <div class="flex items-center gap-4">
+                <button onclick="history.back()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i data-lucide="arrow-left" class="w-6 h-6 text-[#252451]"></i>
+                </button>
+                <h1 class="text-xl font-bold text-[#252451]">
+                    <span th:text="${content.title} + ' 상세페이지'"></span>
+                </h1>
+            </div>
+        </div>
+    </div>
+    
     <section class="bg-white">
         <div class="max-w-7xl mx-auto px-6 py-12 md:py-16">
             <div class="grid md:grid-cols-2 gap-8 lg:gap-12">
@@ -122,17 +136,28 @@
     <section class="max-w-7xl mx-auto px-6 py-12 md:py-16">
         <div class="bg-white rounded-2xl p-8 md:p-10 shadow-sm">
             
-           <div class="text-center mb-10" th:if="${not #lists.isEmpty(content.reviews)}">
-               <div class="inline-flex items-center justify-center gap-2 mb-3">
-                   <i data-lucide="star" class="w-8 h-8 fill-yellow-400 text-yellow-400"></i>
-                   <i data-lucide="star" class="w-8 h-8 fill-yellow-400 text-yellow-400"></i>
-                   <i data-lucide="star" class="w-8 h-8 fill-yellow-400 text-yellow-400"></i>
-                   <i data-lucide="star" class="w-8 h-8 fill-yellow-400 text-yellow-400"></i>
-                   <i data-lucide="star" class="w-8 h-8 fill-yellow-400 text-yellow-400"></i>
-               </div>
-               <p class="text-4xl font-bold text-gray-900">5.0</p>
-               <p class="text-gray-600 mt-1" th:text="'전체 리뷰 ' + ${#lists.size(content.reviews)} + '개'">전체 리뷰 1,284개</p>
-           </div>
+           <div class="text-center mb-10" th:if="${not #lists.isEmpty(content.reviews)}"
+		        th:with="avgRating=${#aggregates.avg(content.reviews.![rating])}">
+		        
+		        <div class="inline-flex items-center justify-center gap-1 mb-3">
+		            <th:block th:each="num : ${#numbers.sequence(1, 5)}">
+		                <i th:if="${avgRating ge num}" 
+		                   data-lucide="star" class="w-8 h-8 fill-yellow-400 text-yellow-400"></i>
+		                   
+		                <i th:if="${avgRating lt num and avgRating ge (num - 0.5)}" 
+		                   data-lucide="star-half" class="w-8 h-8 fill-yellow-400 text-yellow-400"></i>
+		                   
+		                <i th:if="${avgRating lt (num - 0.5)}" 
+		                   data-lucide="star" class="w-8 h-8 fill-gray-200 text-gray-200"></i>
+		            </th:block>
+		        </div>
+		        
+		        <p class="text-4xl font-bold text-gray-900" 
+		           th:text="${#numbers.formatDecimal(avgRating, 1, 1)}">5.0</p>
+		        
+		        <p class="text-gray-500 mt-1 text-sm font-medium" 
+		           th:text="'전체 관람평 ' + ${#lists.size(content.reviews)} + '개'"></p>
+		    </div>
 
            <h3 class="text-xl md:text-2xl font-bold text-gray-900 mb-6">베스트 관람평</h3>
 
@@ -148,7 +173,9 @@
 		</div>
 			
 		<div th:unless="${#lists.isEmpty(content.reviews)}">
+		    
 		    <div class="space-y-5 mb-8">
+		        
 		        <div th:each="review, stat : ${content.reviews}" th:if="${stat.index < 3}" class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
 		            
 		            <div class="flex items-center justify-between mb-4">
@@ -178,7 +205,7 @@
 		            </div>
 		
 		            <div th:classappend="${review.spoiler} ? 'hidden' : ''" class="w-full">
-		                <p class="text-gray-700 leading-relaxed text-sm whitespace-pre-line mb-4" th:text="${review.text}">리뷰 내용</p>
+                        <p class="text-gray-700 leading-relaxed text-sm whitespace-pre-line mb-4 line-clamp-3" th:text="${review.text}">리뷰 내용</p>
 		                
 		                <div th:if="${review.photoUrls != null and review.photoUrls != ''}" class="flex gap-2 flex-wrap">
 		                    <div th:each="photo : ${#strings.arraySplit(review.photoUrls, ',')}">
@@ -213,26 +240,34 @@
         
         <div class="md:hidden bg-white border-t border-gray-200 shadow-2xl">
             <div class="px-6 py-4">
-                <button class="w-full py-4 bg-gradient-to-r from-[#252451] to-[#503396] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-shadow duration-200"
-                        th:text="${content.category == '영화' or content.category == '공연' ? '예매하기 (좌석 선택)' : '예매하기'}">
-                    예매하기
+                <a th:if="${not #lists.isEmpty(content.schedules)}"
+                   th:href="@{/reservation/booking/seat(scheduleId=${content.schedules[0].scheduleId})}"
+                   class="block text-center w-full py-4 bg-gradient-to-r from-[#252451] to-[#503396] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-shadow duration-200"
+                   th:text="${content.category == '영화' or content.category == '공연' ? '예매하기 (좌석 선택)' : '예매하기'}">
+                </a>
+                <button th:if="${#lists.isEmpty(content.schedules)}"
+                        class="w-full py-4 bg-gray-400 text-white rounded-xl font-bold text-lg shadow-lg cursor-not-allowed" disabled>
+                    일정 미정
                 </button>
             </div>
         </div>
         
         <div class="hidden md:block">
-    <a th:href="@{/reservation/booking/seat(scheduleId=${content.schedules[0].scheduleId})}"
-       class="inline-block px-8 py-4 bg-gradient-to-r from-[#252451] to-[#503396] text-white rounded-full font-bold text-lg shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-200">
-        예매하기 (좌석 선택)
-    </a>
-</div>
+            <a th:if="${not #lists.isEmpty(content.schedules)}"
+               th:href="@{/reservation/booking/seat(scheduleId=${content.schedules[0].scheduleId})}"
+               class="inline-block px-8 py-4 bg-gradient-to-r from-[#252451] to-[#503396] text-white rounded-full font-bold text-lg shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-200">
+                예매하기 (좌석 선택)
+            </a>
+            <button th:if="${#lists.isEmpty(content.schedules)}"
+                    class="inline-block px-8 py-4 bg-gray-400 text-white rounded-full font-bold text-lg shadow-2xl cursor-not-allowed" disabled>
+                일정 미정
+            </button>
+        </div>
     </div>
 
     <script>
-        // 화면이 다 그려진 후 Lucide 아이콘을 활성화
         lucide.createIcons();
     </script>
-    
     
     <div th:replace="~{layout/footer::footer}"></div>
     
