@@ -1,7 +1,9 @@
 package com.culti.mate.controller;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +22,7 @@ import com.culti.auth.dto.UserDTO;
 import com.culti.auth.service.UserService;
 import com.culti.mate.DTO.MatePostDTO;
 import com.culti.mate.entity.MatePost;
+import com.culti.mate.enums.MateApplyStatus;
 import com.culti.mate.matePage.Criteria;
 import com.culti.mate.matePage.PageDTO;
 import com.culti.mate.service.MateService;
@@ -44,12 +47,15 @@ public class MateController {
 			) {
 		 List<Long> appliedPostIds = Collections.emptyList();
 		
+		 Map<Long, MateApplyStatus> appliedStatusMap = Collections.emptyMap();
+		 
 		if (userDetails != null) {
 	        String email = userDetails.getUsername();
 	        UserDTO userDTO = userService.findByEmail(email);
 	        model.addAttribute("user", userDTO);
 	        
 	        appliedPostIds = mateService.getAppliedPostIds(email);
+	        appliedStatusMap = mateService.getAppliedStatusMap(email);
 	    }
 		
 		Page<MatePost> paging;
@@ -61,6 +67,7 @@ public class MateController {
 		model.addAttribute("paging", paging);
 		model.addAttribute("category", category);
 		model.addAttribute("appliedPostIds", appliedPostIds);
+		model.addAttribute("appliedStatusMap", appliedStatusMap);
 		
 		// [1] 2 3 4 5 6 7 8 9 10 >
 		Criteria criteria = new Criteria(page, size);
@@ -76,6 +83,10 @@ public class MateController {
 	public String addPost(@ModelAttribute MatePostDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 		
+		LocalDate date = LocalDate.parse(dto.getDate());
+	    if (date != null && date.isBefore(LocalDate.now())) {
+	        throw new IllegalArgumentException("과거 날짜는 선택할 수 없습니다.");
+	    }
 		String email = userDetails.getUsername();
 		mateService.addPost(dto, email); // writer 세팅 포함해서 저장
 		

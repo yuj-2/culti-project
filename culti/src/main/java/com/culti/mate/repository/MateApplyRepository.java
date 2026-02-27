@@ -29,5 +29,12 @@ public interface MateApplyRepository extends JpaRepository<MateApply, Long>{
             where a.applicant.email = :email
         """)
 	List<Long> findAppliedPostIdsByApplicantEmail(@Param("email") String email);
+    
+    @Query("""
+            select ma.post.postId, ma.status
+            from MateApply ma
+            where ma.applicant.email = :email
+        """)
+	List<Object[]> findPostIdAndStatusByApplicantEmail(@Param("email") String email);
 	
 }

@@ -5,7 +5,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -272,6 +274,19 @@ public class MateServiceImpl implements MateService {
 	@Override
 	public List<Long> getAppliedPostIds(String applicantEmail) {
 	    return mateApplyRepository.findAppliedPostIdsByApplicantEmail(applicantEmail);
+	}
+
+	@Override
+	public Map<Long, MateApplyStatus> getAppliedStatusMap(String email) {
+		List<Object[]> rows = mateApplyRepository.findPostIdAndStatusByApplicantEmail(email);
+
+	    Map<Long, MateApplyStatus> map = new HashMap<>();
+	    for (Object[] row : rows) {
+	        Long postId = (Long) row[0];
+	        MateApplyStatus status = (MateApplyStatus) row[1];
+	        map.put(postId, status);
+	    }
+	    return map;
 	}
 
 	

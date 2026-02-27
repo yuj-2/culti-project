@@ -3,6 +3,7 @@ package com.culti.mate.service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 
@@ -111,4 +112,5 @@ public interface MateService {
 
 	List<Long> getAppliedPostIds(String email);
 
+	Map<Long, MateApplyStatus> getAppliedStatusMap(String email);
 }
