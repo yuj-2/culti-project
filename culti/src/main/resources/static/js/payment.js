@@ -28,7 +28,7 @@ function executePortOne(payMethod) {
 
     // 관리자 센터의 채널키를 객체로 관리
     const CHANNEL_KEYS = {
-    
+
     };
 
     // 시큐리티가 적용된 HTML 폼에서 이메일 정보 추출

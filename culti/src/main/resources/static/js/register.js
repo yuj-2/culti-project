@@ -271,12 +271,14 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 		
 		const emailData = document.getElementById('email').value;
-		/*
+		const token = document.querySelector("meta[name='_csrf']").content;
+		const header = document.querySelector("meta[name='_csrf_header']").content;
+		
 		fetch('/api/auth/send', {
 		  method: 'POST',
 		  headers: {
-		    'Content-Type': 'application/json', // 서버의 @RequestBody가 인식할 수 있게 설정
-			'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content // 토큰 추가  
+		    'Content-Type': 'application/json', // 서버의 @RequestBody가 인식할 수 있게 설정 
+			[header]: token 
 			},
 		  body: JSON.stringify(emailData) // 데이터를 JSON 문자열로 변환
 		})
@@ -286,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		  alert("인증번호가 발송되었습니다!");
 		})
 		.catch(error => console.error('에러 발생:', error));
-		*/
+		
 		
         // 실제 서버 통신 코드
         /*
