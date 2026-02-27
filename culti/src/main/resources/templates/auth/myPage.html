@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/layout}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,22 +13,7 @@
     <script th:src="@{/js/myPage.js}"></script>
 </head>
 <body>
-    <!-- 헤더 -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <a href="/" class="logo">
-                    <div class="logo-icon">C</div>
-                    <span class="logo-text">CULTI</span>
-                </a>
-                <nav class="nav">
-                    <a href="/">홈</a>
-                    <a href="/mypage.html" class="active">마이페이지</a>
-                    <button class="btn-logout" id="logoutBtn">로그아웃</button>
-                </nav>
-            </div>
-        </div>
-    </header>
+    <div layout:fragment="content">
 
     <!-- 메인 컨텐츠 -->
     <main class="main">
@@ -228,28 +215,29 @@
                                 
                                 <div class="form-group">
                                     <label for="profileName">이름</label>
-                                    <input type="text" id="profileName" value="홍길동">
+                                    <input type="text" id="profileName" th:value="${user.name}" disabled>
+                                    <span class="form-help">이름은 변경할 수 없습니다.</span>
                                 </div>
 
                                 <div class="form-group">
                                     <label for="profileNickname">닉네임</label>
-                                    <input type="text" id="profileNickname" value="길동이">
+                                    <input type="text" id="profileNickname" th:value="${user.nickname}">
                                 </div>
 
                                 <div class="form-group">
                                     <label for="profileEmail">이메일</label>
-                                    <input type="email" id="profileEmail" value="hong@example.com" disabled>
+                                    <input type="email" id="profileEmail" th:value="${user.email}" disabled>
                                     <span class="form-help">이메일은 변경할 수 없습니다.</span>
                                 </div>
 
                                 <div class="form-group">
                                     <label for="profilePhone">전화번호</label>
-                                    <input type="tel" id="profilePhone" value="010-1234-5678">
+                                    <input type="tel" id="profilePhone" th:value="${user.phone}">
                                 </div>
 
                                 <div class="form-group">
                                     <label for="profileBirth">생년월일</label>
-                                    <input type="date" id="profileBirth" value="1990-01-01">
+                                    <input type="date" id="profileBirth" th:value="${user.birthDate}">
                                 </div>
 
                                 <div class="form-group">
@@ -307,19 +295,6 @@
         </div>
     </main>
 
-    <!-- 푸터 -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <p>&copy; 2026 CULTI. All rights reserved.</p>
-                <div class="footer-links">
-                    <a href="/terms">이용약관</a>
-                    <a href="/privacy">개인정보처리방침</a>
-                    <a href="/help">고객센터</a>
-                </div>
-            </div>
-        </div>
-    </footer>
 
     <!-- 회원 탈퇴 확인 모달 -->
     <div class="modal-overlay" id="deleteModal">
@@ -347,6 +322,6 @@
             </div>
         </div>
     </div>
-
+</div>
 </body>
 </html>

@@ -2,8 +2,7 @@ package com.culti.mate.entity;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.CreationTimestamp;
-
+import com.culti.auth.entity.User;
 import com.culti.mate.enums.MatePostCategory;
 import com.culti.mate.enums.MatePostStatus;
 
@@ -11,9 +10,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,7 +30,7 @@ import lombok.ToString;
 @Getter
 @ToString(exclude = "writer")
 @Table(name = "mate_post")
-public class MatePost {
+public class MatePost extends PostBaseEntity{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,7 +51,7 @@ public class MatePost {
     private String location;
 
 	@Column(nullable = false)
-    private int maxPeople;
+    private Integer maxPeople;
 
 
     @Column(columnDefinition = "TEXT")
@@ -57,13 +59,13 @@ public class MatePost {
 
 
     @Enumerated(EnumType.STRING)
-    private MatePostStatus status;
+    private MatePostStatus status  = MatePostStatus.OPEN;
     
-    @Column(nullable = false)
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+//    @Column(nullable = false)
+//    @CreationTimestamp
+//    private LocalDateTime createdAt;
     
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "writer_id", nullable = false)
-//    private Users writer;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "writer_id", nullable = false)
+    private User writer;
 }

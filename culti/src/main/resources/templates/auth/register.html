@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/layout}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,17 +14,7 @@
 <script th:src="@{/js/register.js}"></script>
 </head>
 <body>
-	<!-- 헤더 -->
-	<header class="header">
-		<div class="container">
-			<div class="header-content">
-				<a href="/" class="logo">
-					<div class="logo-icon">C</div> <span class="logo-text">CULTI</span>
-				</a>
-			</div>
-		</div>
-	</header>
-
+	<div layout:fragment="content">
 	<!-- 메인 컨텐츠 -->
 	<main class="main">
 		<div class="signup-container">
@@ -225,6 +217,6 @@
 			</div>
 		</div>
 	</div>
-
+</div>
 </body>
 </html>

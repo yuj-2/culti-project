@@ -2,6 +2,8 @@ package com.culti.content.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.culti.auth.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,6 +22,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Review {
 
 	@Id
@@ -43,7 +46,14 @@ public class Review {
     @Column(name = "content", columnDefinition = "TEXT", nullable = false)
     private String text;
 
-    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+    
+    @Column(name = "is_spoiler")
+    private boolean isSpoiler;
+
+    @Column(name = "photo_urls")
+    private String photoUrls;
     
 }
