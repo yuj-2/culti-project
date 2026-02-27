@@ -1,24 +1,24 @@
 package com.culti.support.controller;
 
-import com.culti.support.entity.Notice; 
+import com.culti.auth.dto.UserDTO;
+import com.culti.auth.service.UserService; // 팀원의 유저 서비스
+import com.culti.support.entity.Faq;
 import com.culti.support.entity.Inquiry;
+import com.culti.support.entity.Notice;
+import com.culti.support.service.FaqService;
 import com.culti.support.service.InquiryService;
 import com.culti.support.service.NoticeService;
-
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
-import com.culti.support.entity.Faq;
-import com.culti.support.service.FaqService;
+import java.security.Principal;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -27,77 +27,90 @@ public class InquiryController {
 
     private final InquiryService inquiryService;
     private final NoticeService noticeService;
-    private final FaqService faqService; // FAQ 서비스 추가
+    private final FaqService faqService;
+    private final UserService userService; // 팀원의 서비스 주입
 
+    // [고객센터 메인]
     @GetMapping("")
     public String supportMain(Model model, 
-        // 기본값을 5개씩, ID 내림차순으로 설정
         @PageableDefault(size = 5, sort = "noticeId", direction = Sort.Direction.DESC) Pageable pageable) {
         
-        // 1. 기존 List 대신 Page 객체로 가져옵니다.
         Page<Notice> noticePage = noticeService.getNoticeList(pageable);
-        
-        // 2. HTML에서 페이징 처리를 할 수 있도록 Page 객체 자체를 넘깁니다.
         model.addAttribute("noticePage", noticePage);
-        
-        // 기존 List 이름도 유지하고 싶다면 content만 따로 담아줘도 됩니다.
         model.addAttribute("noticeList", noticePage.getContent()); 
         
         return "support/support";
     }
 
-    // 1. 공지사항 전체 목록 (페이징 적용)
+    // [1. 공지사항 목록]
     @GetMapping("/notice")
     public String noticeListPage(Model model, 
         @PageableDefault(size = 10, sort = "noticeId", direction = Sort.Direction.DESC) Pageable pageable) {
         
         Page<Notice> noticePage = noticeService.getNoticeList(pageable);
         model.addAttribute("noticePage", noticePage);
-        return "support/notice"; // templates/support/notice.html
+        return "support/notice";
     }
 
-    // 2. 공지사항 상세보기 (ID로 조회)
+    // [2. 공지사항 상세보기]
     @GetMapping("/notice/view")
     public String noticeDetail(@RequestParam("id") Long id, Model model) {
         Notice notice = noticeService.getNoticeDetail(id);
         model.addAttribute("notice", notice);
-        return "support/noticeDetail"; // templates/support/noticeDetail.html
+        return "support/noticeDetail";
     }
 
+ // [3. 1:1 문의 페이지 접속]
     @GetMapping("/inquiry")
-    public String inquiryPage(HttpSession session, Model model) {
-        session.setAttribute("userId", 1L); 
-        model.addAttribute("currentUserId", 1L);
+    public String inquiryPage(Principal principal, Model model) {
+        // 로그인 체크 후 유저 정보 전달
+        if (principal != null) {
+            // 팀원이 알려준 로직 적용
+            String email = principal.getName();
+            UserDTO userDTO = this.userService.findByEmail(email);
+            
+            model.addAttribute("user", userDTO); // HTML에서 ${user.nickname} 등으로 사용 가능
+            model.addAttribute("currentUserId", userDTO.getUserId()); // 기존 로직 유지
+        }
+        
         model.addAttribute("inquiry", new Inquiry()); 
         return "support/inquiry";
     }
 
+    // [4. 문의 목록 가져오기 (비동기)]
     @GetMapping("/inquiry/list")
     @ResponseBody
-    public List<Inquiry> getList(HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
-        return inquiryService.getMyInquiries(userId != null ? userId : 1L);
+    public List<Inquiry> getList(Principal principal) {
+        if (principal == null) return null;
+
+        // 로그인한 이메일로 유저를 찾아 userId 획득
+        UserDTO user = userService.findByEmail(principal.getName());
+        return inquiryService.getMyInquiries(user.getUserId());
     }
 
+    // [5. 문의 상세 보기 (비동기)]
     @GetMapping("/inquiry/detail/{id}")
     @ResponseBody
     public Inquiry getDetail(@PathVariable("id") Long id) {
         return inquiryService.getInquiryDetail(id);
     }
 
+    // [6. 문의 저장 (비동기)]
     @PostMapping("/inquiry/save")
     @ResponseBody
     public String saveInquiry(
             @RequestParam("title") String title,
             @RequestParam("content") String content,
-            HttpSession session) {
+            Principal principal) {
         
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) userId = 1L; 
+        if (principal == null) return "fail";
 
         try {
+            // 로그인한 이메일로 유저를 찾아 userId 획득
+            UserDTO user = userService.findByEmail(principal.getName());
+
             Inquiry inquiry = Inquiry.builder()
-                    .userId(userId)
+                    .userId(user.getUserId()) // 실시간 로그인 유저 ID
                     .inquiryTitle(title)
                     .inquiryContent(content)
                     .build();
@@ -109,9 +122,8 @@ public class InquiryController {
             return "fail";
         }
     }
-    
-    
-    // FAQ 목록 메서드 수정 (페이징 + 카테고리 필터 추가)
+
+    // [7. FAQ 목록 (페이징 + 카테고리)]
     @GetMapping("/faq")
     public String faqList(Model model, 
         @RequestParam(value = "category", required = false) String category,
@@ -126,17 +138,14 @@ public class InquiryController {
         
         model.addAttribute("faqPage", faqPage);
         model.addAttribute("currentCategory", category != null ? category : "전체");
-        // 카테고리 목록 (탭 생성을 위함)
         model.addAttribute("categories", List.of("전체", "예매", "전시", "취소/환불", "동행", "회원"));
         
         return "support/faq";
     }
-    
-    
-    // 환불 안내 페이지 매핑
+
+    // [8. 환불 안내 페이지]
     @GetMapping("/refund")
     public String refundInfo() {
         return "support/refund"; 
     }
-    
 }
