@@ -28,10 +28,7 @@ function executePortOne(payMethod) {
 
     // 관리자 센터의 채널키를 객체로 관리
     const CHANNEL_KEYS = {
-        KAKAO: "channel-key-37e73800-4d4e-45c6-b48e-73133dbaee29",
-        TOSS: "channel-key-208b6533-848c-4fd4-83b3-0590b86ef4c0",
-        NAVER: "channel-key-e64f15df-20b8-4b98-b80e-142f114773e6",
-        CARD: "channel-key-95ebcbee-1000-43a5-884e-0d2173d27a37"
+    
     };
 
     // 시큐리티가 적용된 HTML 폼에서 이메일 정보 추출
