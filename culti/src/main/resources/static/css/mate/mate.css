@@ -792,7 +792,7 @@
 .detail-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
   margin-top: 18px;
   padding-top: 14px;
@@ -834,3 +834,16 @@
 
 .button-danger:hover { opacity: 0.92; }
 .button-danger:active { transform: scale(0.98); }
+
+.detail-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 85%;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

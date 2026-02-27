@@ -109,4 +109,6 @@ public interface MateService {
 	public List<MateApplyMypageDTO> getReceivedApps(String email);
 	public List<MateApplyMypageDTO> getSentApps(String email);
 
+	List<Long> getAppliedPostIds(String email);
+
 }

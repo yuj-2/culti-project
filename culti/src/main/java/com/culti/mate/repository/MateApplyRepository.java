@@ -3,6 +3,8 @@ package com.culti.mate.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.culti.auth.entity.User;
 import com.culti.mate.entity.MateApply;
@@ -20,5 +22,12 @@ public interface MateApplyRepository extends JpaRepository<MateApply, Long>{
 
     // ✅ 내가 신청한 것: 내가 신청자
     List<MateApply> findByApplicant_EmailOrderByCreatedAtDesc(String email);
+    
+    @Query("""
+            select distinct a.post.postId
+            from MateApply a
+            where a.applicant.email = :email
+        """)
+	List<Long> findAppliedPostIdsByApplicantEmail(@Param("email") String email);
 	
 }

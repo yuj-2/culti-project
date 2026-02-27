@@ -267,6 +267,12 @@ public class MateServiceImpl implements MateService {
 	        case CANCELED -> "취소됨";
 	    };
 	}
+	
+	
+	@Override
+	public List<Long> getAppliedPostIds(String applicantEmail) {
+	    return mateApplyRepository.findAppliedPostIdsByApplicantEmail(applicantEmail);
+	}
 
 	
 }

@@ -282,6 +282,11 @@
   const csrfToken = /*[[${_csrf.token}]]*/ '';
 </script>
 
+<script th:inline="javascript">
+  // 내가 이미 신청한 게시글들의 postId 목록 (예: [1,3,7])
+  const appliedPostIds = /*[[${appliedPostIds}]]*/ [];
+</script>
+
   <script>
 
   let selectedPostId = null;
@@ -303,6 +308,8 @@
     	    document.getElementById('detailTitle').innerHTML =
     	      `${title} <span class="badge badge-${category.toLowerCase()}" style="margin-left:12px;">${category}</span>`;
 
+    	      const isAlreadyApplied = Array.isArray(appliedPostIds) && appliedPostIds.includes(Number(selectedPostId));
+    	      
     	    // ✅ 참여 버튼
     	    let applyButtonHtml = '';
     	    if (loginUserEmail && loginUserEmail === writerEmail) {
@@ -312,6 +319,14 @@
     	    		    <span>내가 작성한 게시글입니다</span>
     	    		  </div>
     	    		`;
+    	    } else if (isAlreadyApplied) {
+    	    	  // ✅ 이미 신청한 경우: 버튼 숨기거나 안내 문구로 대체
+    	    	  applyButtonHtml = `
+    	    	    <div class="owner-hint">
+    	    	      <i class="fa-solid fa-circle-check"></i>
+    	    	      <span>이미 신청한 게시글입니다</span>
+    	    	    </div>
+    	    	  `;
     	    } else {
     	      applyButtonHtml = isAuthenticated
     	        ? `<button class="button button-primary" onclick="openApplyModal()">참여 신청</button>`

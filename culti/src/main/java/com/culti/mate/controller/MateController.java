@@ -1,5 +1,8 @@
 package com.culti.mate.controller;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -39,10 +42,14 @@ public class MateController {
 			, @RequestParam(value = "size", defaultValue = "9") int size
 			, @RequestParam(value="category", defaultValue="all") String category
 			) {
+		 List<Long> appliedPostIds = Collections.emptyList();
+		
 		if (userDetails != null) {
 	        String email = userDetails.getUsername();
 	        UserDTO userDTO = userService.findByEmail(email);
 	        model.addAttribute("user", userDTO);
+	        
+	        appliedPostIds = mateService.getAppliedPostIds(email);
 	    }
 		
 		Page<MatePost> paging;
@@ -53,6 +60,7 @@ public class MateController {
 	    }
 		model.addAttribute("paging", paging);
 		model.addAttribute("category", category);
+		model.addAttribute("appliedPostIds", appliedPostIds);
 		
 		// [1] 2 3 4 5 6 7 8 9 10 >
 		Criteria criteria = new Criteria(page, size);
