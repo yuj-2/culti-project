@@ -151,16 +151,3 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchAndRenderCards(savedCategory, currentKeyword);
 
 });
-
-// 모달 열기 함수
-function openReviewModal() {
-    document.getElementById('review-modal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    lucide.createIcons();
-}
-
-// 모달 닫기 함수
-function closeReviewModal() {
-    document.getElementById('review-modal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-}
