@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style>
+        .ticket-card {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 500px;
+            margin: 50px auto;
+            overflow: hidden;
+            font-family: 'Pretendard', sans-serif;
+        }
+        .ticket-header {
+            background: #503396; /* 컬티 브랜드 컬러 */
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .ticket-body {
+            padding: 30px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 5px;
+        }
+        .label { color: #888; font-size: 0.9rem; }
+        .value { font-weight: bold; color: #333; }
+        .seat-badge {
+            background: #eef2ff;
+            color: #503396;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 5px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket-card">
+        <div class="ticket-header">
+            <h2>🎉 예매가 완료되었습니다!</h2>
+            <p th:text="'예매번호: ' + ${booking.bookingNumber}">B12345678</p>
+        </div>
+        
+        <div class="ticket-body">
+            <div class="info-row">
+                <span class="label">영화/공연명</span>
+                <span class="value" th:text="${booking.movieTitle}">영화 제목</span>
+            </div>
+            <div class="info-row">
+                <span class="label">상영 시간</span>
+                <span class="value" th:text="${booking.showTime}">2026-02-26 19:30</span>
+            </div>
+            <div class="info-row">
+                <span class="label">선택 좌석</span>
+                <div class="value">
+                    <span th:each="bs : ${booking.bookingSeats}" 
+                          th:text="${bs.seat.seatName}" 
+                          class="seat-badge">A1</span>
+                </div>
+            </div>
+            <div class="info-row" style="border:none; margin-top:20px;">
+                <span class="label" style="font-size:1.1rem; color:#333;">총 결제금액</span>
+                <span class="value" style="font-size:1.4rem; color:#e53e3e;" 
+                      th:text="${#numbers.formatInteger(booking.totalPrice, 3, 'COMMA')} + '원'">15,000원</span>
+            </div>
+
+            <div style="margin-top:30px; display:flex; gap:10px;">
+                <a href="/" style="flex:1; text-align:center; padding:12px; background:#eee; border-radius:8px; text-decoration:none; color:#333;">홈으로</a>
+                <a href="/myPage" style="flex:1; text-align:center; padding:12px; background:#503396; border-radius:8px; text-decoration:none; color:white;">예매확인</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/layout}">
+<head>
+<title>Culti - 공지사항 상세보기</title>
+<link rel="stylesheet" th:href="@{/css/support/support.css}" />
+</head>
+<body>
+	<div layout:fragment="content">
+		<section class="support-container">
+			<div class="support-header">
+				<h1>공지사항</h1>
+			</div>
+
+			<div class="notice-detail-box">
+				<h2 class="detail-title" th:text="${notice.noticeTitle}">제목이
+					이곳에 출력됩니다.</h2>
+
+				<div class="detail-info">
+					<span
+						th:text="'작성일: ' + ${#temporals.format(notice.createdAt, 'yyyy-MM-dd HH:mm')}">작성일:
+						2026-02-25 14:00</span> <span th:text="'조회수: ' + ${notice.viewCount}">조회수:
+						0</span>
+				</div>
+
+				<hr>
+
+				<div class="detail-content" th:utext="${notice.noticeContent}">
+					여기에 공지사항의 상세 내용이 들어갑니다.</div>
+
+				<hr>
+
+				<div class="back-btn-wrapper">
+					<button class="back-btn"
+						th:onclick="|location.href='@{/support/notice(page=${param.page != null ? param.page : 0})}'|">
+						목록으로 돌아가기</button>
+				</div>
+			</div>
+		</section>
+	</div>
+</body>
+</html>

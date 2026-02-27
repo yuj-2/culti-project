@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+<head>
+    <title>메인 대시보드</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row mb-5">
+            <div class="col-md-3">
+                <div class="card card-stats p-3 border-start border-4 border-primary">
+                    <div class="text-muted small fw-bold">오늘 예매 건수</div>
+                    <div class="h3 fw-bold mt-2">1,284</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-stats p-3 border-start border-4 border-success">
+                    <div class="text-muted small fw-bold">이번 달 매출</div>
+                    <div class="h3 fw-bold mt-2">₩42,500,000</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-stats p-3 border-start border-4 border-warning">
+                    <div class="text-muted small fw-bold">신규 회원수</div>
+                    <div class="h3 fw-bold mt-2">85</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-stats p-3 border-start border-4 border-info">
+                    <div class="text-muted small fw-bold">진행 중인 전시</div>
+                    <div class="h3 fw-bold mt-2">12</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold m-0">최근 예매 현황</h4>
+                <button class="btn btn-culti btn-sm">전체 보기</button>
+            </div>
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>예매번호</th>
+                        <th>사용자</th>
+                        <th>콘텐츠명</th>
+                        <th>결제금액</th>
+                        <th>상태</th>
+                        <th>날짜</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#RES-202401</td>
+                        <td>홍길동</td>
+                        <td><span class="badge bg-primary me-1">영화</span> 인셉션</td>
+                        <td>15,000원</td>
+                        <td><span class="badge rounded-pill bg-success">결제완료</span></td>
+                        <td>2024-05-20</td>
+                    </tr>
+                    <tr>
+                        <td>#RES-202402</td>
+                        <td>김철수</td>
+                        <td><span class="badge bg-info me-1 text-dark">전시</span> 반 고흐 인사이드</td>
+                        <td>20,000원</td>
+                        <td><span class="badge rounded-pill bg-success">결제완료</span></td>
+                        <td>2024-05-20</td>
+                    </tr>
+                    <tr>
+                        <td>#RES-202403</td>
+                        <td>이영희</td>
+                        <td><span class="badge bg-primary me-1">영화</span> 파묘</td>
+                        <td>14,000원</td>
+                        <td><span class="badge rounded-pill bg-danger">취소됨</span></td>
+                        <td>2024-05-19</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initialscale=1.0">
-
+	 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 	<link rel="stylesheet" type="text/css" th:href="@{/bootstrap/bootstrap.min.css}">
 </head>
 
@@ -16,6 +16,9 @@
 	<!-- 기본 템플릿 안에 삽입될 내용 시작 -->
 	<th:block layout:fragment="content"></th:block>
 	<!-- 기본 템플릿 안에 삽입될 내용 끝 -->
+	</div>
+	
+	<div th:replace="~{layout/footer::footer}">
 	</div>
 </body>
 </html>
