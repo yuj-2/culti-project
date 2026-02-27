@@ -153,7 +153,7 @@ public class MateController {
     public String accept(@PathVariable("id") Long applyId,
                          @AuthenticationPrincipal UserDetails userDetails) {
         mateService.accept(applyId, userDetails.getUsername());
-        return "redirect:/mate/mateMypage?section=mate&tab=received";
+        return "redirect:/mate/mateMypage?mateSection=mate&tab=received";
     }
 
     // 거절
@@ -162,7 +162,7 @@ public class MateController {
     public String reject(@PathVariable("id") Long applyId,
                          @AuthenticationPrincipal UserDetails userDetails) {
         mateService.reject(applyId, userDetails.getUsername());
-        return "redirect:/mate/mateMypage?section=mate&tab=received";
+        return "redirect:/mate/mateMypage?mateSection=mate&tab=received";
     }
 
     // 취소(내가 신청한 것)
@@ -171,7 +171,7 @@ public class MateController {
     public String cancel(@PathVariable("id") Long applyId,
                          @AuthenticationPrincipal UserDetails userDetails) {
         mateService.cancel(applyId, userDetails.getUsername());
-        return "redirect:/mate/mateMypage?section=mate&tab=sent";
+        return "redirect:/myPage?section=mate&tab=sent";
     }
 	
 }
