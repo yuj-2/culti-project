@@ -9,6 +9,7 @@
     <style>
         .text-primary { color: #503396; }
         .bg-primary { background-color: #503396; }
+        .border-primary { border-color: #503396; }
         .text-secondary { color: #252451; }
     </style>
 </head>
@@ -34,12 +35,19 @@
         <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 flex flex-col sm:flex-row items-center gap-8">
             <div class="text-center sm:text-left flex-shrink-0">
                 <div class="text-5xl font-extrabold text-primary mb-2" th:text="${averageRating != null ? averageRating : '0.0'}"></div>
-                <div class="flex items-center justify-center sm:justify-start gap-1 text-primary mb-2">
-                    <i th:each="num : ${#numbers.sequence(1, 5)}" 
-                       data-lucide="star" class="w-5 h-5"
-                       th:classappend="${averageRating != null and num <= T(java.lang.Math).round(averageRating) ? 'fill-current' : 'text-gray-300'}"></i>
+                
+                <div class="flex items-center justify-center sm:justify-start gap-1 mb-2">
+                    <th:block th:each="num : ${#numbers.sequence(1, 5)}">
+                        <i th:if="${averageRating ge num}" 
+                           data-lucide="star" class="w-6 h-6 fill-yellow-400 text-yellow-400"></i>
+                        <i th:if="${averageRating lt num and averageRating ge (num - 0.5)}" 
+                           data-lucide="star-half" class="w-6 h-6 fill-yellow-400 text-yellow-400"></i>
+                        <i th:if="${averageRating lt (num - 0.5)}" 
+                           data-lucide="star" class="w-6 h-6 fill-gray-200 text-gray-200"></i>
+                    </th:block>
                 </div>
-                <p class="text-gray-500 text-sm" th:text="'총 ' + ${totalReviews != null ? totalReviews : 0} + '개의 리뷰'"></p>
+                
+                <p class="text-gray-500 text-sm font-medium" th:text="'총 ' + ${totalReviews != null ? totalReviews : 0} + '개의 리뷰'"></p>
             </div>
             
             <div class="flex-grow w-full space-y-2">
@@ -56,15 +64,18 @@
         </div>
 
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <select id="sort-select" th:data-content-id="${content.id}" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-full sm:w-auto">
+            <select id="sort-select" th:data-content-id="${content.id}" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-full sm:w-auto font-medium">
                 <option value="latest" th:selected="${currentSort == 'latest'}">최신순</option>
                 <option value="high" th:selected="${currentSort == 'high'}">별점 높은 순</option>
                 <option value="low" th:selected="${currentSort == 'low'}">별점 낮은 순</option>
             </select>
             
             <div class="flex gap-2 w-full sm:w-auto">
-                <button class="px-4 py-2 bg-primary text-white rounded-full text-sm font-medium transition-colors w-full sm:w-auto">전체</button>
-                <button class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 transition-colors w-full sm:w-auto">포토 리뷰만</button>
+                <a th:href="@{|/reservation/detail/${content.id}/reviews?sort=${currentSort != null ? currentSort : 'latest'}&photoOnly=false|}" 
+                   th:class="${photoOnly == true} ? 'px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 transition-colors w-full sm:w-auto text-center' : 'px-4 py-2 bg-primary border border-primary text-white rounded-full text-sm font-medium shadow-sm transition-colors w-full sm:w-auto text-center'">전체</a>
+                
+                <a th:href="@{|/reservation/detail/${content.id}/reviews?sort=${currentSort != null ? currentSort : 'latest'}&photoOnly=true|}" 
+                   th:class="${photoOnly == true} ? 'px-4 py-2 bg-primary border border-primary text-white rounded-full text-sm font-medium shadow-sm transition-colors w-full sm:w-auto text-center' : 'px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 transition-colors w-full sm:w-auto text-center'">포토 리뷰만</a>
             </div>
         </div>
 
@@ -90,16 +101,35 @@
                             </div>
                         </div>
                     </div>
-                    <span class="text-sm text-gray-400" th:text="${#temporals.format(review.createdAt, 'yyyy.MM.dd')}">2026.02.20</span>
+                    <span class="text-sm text-gray-400 font-medium" th:text="${#temporals.format(review.createdAt, 'yyyy.MM.dd')}">2026.02.20</span>
                 </div>
                 
-                <p class="text-gray-700 leading-relaxed mb-4" th:text="${review.text}">리뷰 내용</p>
+                <div th:if="${review.spoiler}" class="relative w-full py-6 bg-gray-50 flex flex-col items-center justify-center rounded-lg cursor-pointer border border-gray-200 hover:bg-gray-100 transition-colors mb-4"
+                     onclick="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden')">
+                    <i data-lucide="eye-off" class="w-6 h-6 text-gray-400 mb-2"></i>
+                    <span class="text-sm font-bold text-gray-600">스포일러가 포함된 리뷰입니다.</span>
+                    <span class="text-xs text-gray-400 mt-1">클릭해서 내용 보기</span>
+                </div>
+
+                <div th:classappend="${review.spoiler} ? 'hidden' : ''" class="w-full">
+                    <p class="text-gray-700 leading-relaxed mb-4 whitespace-pre-line" th:text="${review.text}">리뷰 내용</p>
+                    
+                    <div th:if="${review.photoUrls != null and review.photoUrls != ''}" class="flex gap-2 flex-wrap mt-3">
+                        <div th:each="photo : ${#strings.arraySplit(review.photoUrls, ',')}">
+                            <img th:src="@{|/upload/review/${photo}|}" 
+                                 alt="리뷰 이미지" 
+                                 class="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-lg border border-gray-200 shadow-sm hover:opacity-90 transition-opacity cursor-pointer">
+                        </div>
+                    </div>
+                </div>
                 
-            </div> <div th:if="${!paging.isEmpty()}" class="flex justify-center mt-8 gap-2">
-                <a th:if="${paging.hasPrevious()}" th:href="@{|/reservation/detail/${content.id}/reviews?page=${paging.number - 1}&sort=${currentSort}|}" 
+            </div> 
+            
+            <div th:if="${!paging.isEmpty()}" class="flex justify-center mt-8 gap-2 font-medium">
+                <a th:if="${paging.hasPrevious()}" th:href="@{|/reservation/detail/${content.id}/reviews?page=${paging.number - 1}&sort=${currentSort != null ? currentSort : 'latest'}&photoOnly=${photoOnly == true}|}" 
                    class="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors">이전</a>
                 
-                <a th:if="${paging.hasNext()}" th:href="@{|/reservation/detail/${content.id}/reviews?page=${paging.number + 1}&sort=${currentSort}|}" 
+                <a th:if="${paging.hasNext()}" th:href="@{|/reservation/detail/${content.id}/reviews?page=${paging.number + 1}&sort=${currentSort != null ? currentSort : 'latest'}&photoOnly=${photoOnly == true}|}" 
                    class="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors">다음</a>
             </div>
 
@@ -107,12 +137,12 @@
     </div>
 
     <a th:href="@{|/reservation/detail/${content.id}/review/write|}" 
-	   class="fixed bottom-8 right-8 px-6 py-4 rounded-full text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2 group bg-primary z-50">
-	    <i data-lucide="pen-line" class="w-5 h-5 group-hover:rotate-12 transition-transform"></i>
-	    <span>리뷰 작성하기</span>
-	</a>
+       class="fixed bottom-8 right-8 px-6 py-4 rounded-full text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2 group bg-primary z-50">
+        <i data-lucide="pen-line" class="w-5 h-5 group-hover:rotate-12 transition-transform"></i>
+        <span>리뷰 작성하기</span>
+    </a>
 
     <div th:replace="~{layout/footer::footer}"></div>
-    
+    <script>lucide.createIcons();</script>
 </body>
 </html>
