@@ -1,63 +1,70 @@
 /**
+ * [수정] 인원별 티켓 단가 설정
+ */
+const TICKET_PRICES = {
+    adult: 15000,    // 성인
+    youth: 12000,    // 청소년
+    senior: 10000,   // 경로
+    special: 8000    // 우대
+};
+
+/**
  * 전역 상태 객체
  */
 const bookingState = {
     adult: 0,
     youth: 0,
-    selectedSeats: [], // {dbId, displayId, price}
+    special: 0,
+    senior: 0,
+    selectedSeats: [], // {dbId, displayId}
     timer: 600 
 };
+
+/**
+ * 총 선택 가능한 인원 합계 계산
+ */
+function getTotalNeeded() {
+    return bookingState.adult + bookingState.youth + bookingState.special + bookingState.senior;
+}
 
 // 1. 좌석 그리드 생성
 function initSeatMap() {
     const grid = document.getElementById('seat-map-grid');
     if (!grid) return;
 
-    grid.innerHTML = ''; // 기존 내용 초기화
-
-    // [에러 해결] rows 변수가 정의되지 않아 발생한 문제를 해결하기 위해 행 배열을 선언합니다.
+    grid.innerHTML = ''; 
     const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
     const reservedMock = ['A3', 'A4', 'B10', 'E7', 'H7', 'H8'];
 
-    // 1-1. 서버에서 넘어온 seatListFromDb를 행(Row)별로 그룹화 (있는 경우만)
     const seatMap = {};
-    if (typeof seatListFromDb !== 'undefined' && seatListFromDb !== null) {
+    if (typeof seatListFromDb !== 'undefined' && seatListFromDb !== null && seatListFromDb.length > 0) {
         seatListFromDb.forEach(seat => {
-            if (!seatMap[seat.seatRow]) {
-                seatMap[seat.seatRow] = [];
-            }
+            if (!seatMap[seat.seatRow]) { seatMap[seat.seatRow] = []; }
             seatMap[seat.seatRow].push(seat);
         });
 
-        // 실제 데이터를 기반으로 그리기
         rows.forEach(rowLabel => {
             if (seatMap[rowLabel]) {
                 const rowDiv = document.createElement('div');
                 rowDiv.className = "flex justify-center items-center mb-1";
-
                 const label = document.createElement('div');
                 label.className = "w-8 text-[10px] text-gray-600 font-bold";
                 label.innerText = rowLabel;
                 rowDiv.appendChild(label);
 
                 seatMap[rowLabel].sort((a, b) => a.seatCol - b.seatCol).forEach(seat => {
-                    renderSeat(seat.seatId, `${seat.seatRow}${seat.seatCol}`, seat.basePrice, seat.grade === 'VIP', rowDiv, reservedMock);
+                    renderSeat(seat.seatId, `${seat.seatRow}${seat.seatCol}`, 0, false, rowDiv, reservedMock);
                 });
                 grid.appendChild(rowDiv);
             }
         });
     } else {
-        // [임시/방어용] 데이터가 없을 경우 가짜 데이터로 생성
-        console.warn("DB 좌석 데이터를 찾을 수 없어 임시 데이터를 생성합니다.");
-        let mockDbId = 1;
         rows.forEach((row, rowIndex) => {
             const rowDiv = document.createElement('div');
             rowDiv.className = "flex justify-center items-center mb-1";
-            // ... (기본 행 레이블 생성 로직 생략)
             for (let col = 1; col <= 15; col++) {
                 const displayId = `${row}${col}`;
-                const isVip = rowIndex >= 6 && col >= 5 && col <= 11;
-                renderSeat(mockDbId++, displayId, isVip ? 18000 : 12000, isVip, rowDiv, reservedMock);
+                renderSeat(rowIndex * 15 + col, displayId, 0, false, rowDiv, reservedMock);
             }
             grid.appendChild(rowDiv);
         });
@@ -65,24 +72,23 @@ function initSeatMap() {
     startTimer();
 }
 
-// 좌석 개별 렌더링 함수
 function renderSeat(dbId, displayId, price, isVip, parent, reservedList) {
     const isReserved = reservedList.includes(displayId);
     const seat = document.createElement('div');
     seat.id = `seat-${displayId}`;
     seat.setAttribute('data-db-id', dbId);
-    seat.className = `seat ${isReserved ? 'reserved' : (isVip ? 'vip' : 'available')}`;
+    seat.className = `seat ${isReserved ? 'reserved' : 'available'}`;
     seat.innerText = isReserved ? 'X' : displayId.replace(/[^0-9]/g, '');
 
     if (!isReserved) {
-        seat.onclick = () => toggleSeat(dbId, displayId, price, seat);
+        seat.onclick = () => toggleSeat(dbId, displayId, 0, seat);
     }
     parent.appendChild(seat);
 }
 
 // 2. 좌석 토글
 function toggleSeat(dbId, displayId, price, element) {
-    const totalCount = bookingState.adult + bookingState.youth;
+    const totalCount = getTotalNeeded();
     const index = bookingState.selectedSeats.findIndex(s => s.dbId === dbId);
 
     if (index > -1) {
@@ -97,7 +103,7 @@ function toggleSeat(dbId, displayId, price, element) {
             alert(`최대 ${totalCount}석까지만 선택 가능합니다.`);
             return;
         }
-        bookingState.selectedSeats.push({ dbId, displayId, price });
+        bookingState.selectedSeats.push({ dbId, displayId });
         element.classList.add('selected');
     }
     updateSummary();
@@ -108,7 +114,7 @@ function updateCount(type, delta) {
     bookingState[type] = Math.max(0, bookingState[type] + delta);
     document.getElementById(`${type}-count`).innerText = bookingState[type];
     
-    const total = bookingState.adult + bookingState.youth;
+    const total = getTotalNeeded();
     while(bookingState.selectedSeats.length > total) {
         const removed = bookingState.selectedSeats.pop();
         const el = document.getElementById(`seat-${removed.displayId}`);
@@ -117,44 +123,77 @@ function updateCount(type, delta) {
     updateSummary();
 }
 
-// 4. 하단 요약 바 업데이트
+// 4. 하단 요약 바 업데이트 (실시간 가격 합산 적용)
 function updateSummary() {
-    const seatNames = bookingState.selectedSeats.map(s => s.displayId).sort().join(', ');
-    const total = bookingState.selectedSeats.reduce((sum, s) => sum + s.price, 0);
-
-    document.getElementById('display-seat-names').innerText = seatNames || '선택 안 됨';
-    document.getElementById('display-total-price').innerText = `₩${total.toLocaleString()}`;
-
-    const btn = document.getElementById('submit-booking-btn');
-    const totalNeeded = bookingState.adult + bookingState.youth;
+    const totalNeeded = getTotalNeeded();
+    const currentSelected = bookingState.selectedSeats.length;
+    const priceDisplayEl = document.getElementById('display-total-price');
+    const seatDisplayEl = document.getElementById('display-seat-names');
     
-    if (totalNeeded > 0 && bookingState.selectedSeats.length === totalNeeded) {
+    // 좌석 이름 업데이트
+    const seatNames = bookingState.selectedSeats.map(s => s.displayId).sort().join(', ');
+    seatDisplayEl.innerText = seatNames || '선택 안 됨';
+
+    // [핵심 수정] 실시간 가격 계산 로직
+    let currentTotalAmount = 0;
+
+    if (currentSelected > 0) {
+        // 선택한 인원 구성을 가격 배열로 풀기 (높은 가격순 정렬)
+        const pricePool = [
+            ...Array(bookingState.adult).fill(TICKET_PRICES.adult),
+            ...Array(bookingState.youth).fill(TICKET_PRICES.youth),
+            ...Array(bookingState.senior).fill(TICKET_PRICES.senior),
+            ...Array(bookingState.special).fill(TICKET_PRICES.special)
+        ].sort((a, b) => b - a);
+
+        // 현재 선택된 좌석 수만큼 요금 합산
+        for (let i = 0; i < currentSelected; i++) {
+            if (pricePool[i]) {
+                currentTotalAmount += pricePool[i];
+            }
+        }
+        
+        // ₩ 기호와 함께 출력
+        priceDisplayEl.innerText = `₩${currentTotalAmount.toLocaleString()}`;
+    } else {
+        // 선택된 좌석이 없으면 가격 미표시
+        priceDisplayEl.innerText = ""; 
+    }
+
+    // 결제 버튼 및 데이터 업데이트
+    if (totalNeeded > 0 && currentSelected === totalNeeded) {
+        updateSubmitButton(true);
+        const totalPriceInput = document.getElementById('input-total-price');
+        if (totalPriceInput) totalPriceInput.value = currentTotalAmount;
+    } else {
+        updateSubmitButton(false);
+    }
+}
+
+/**
+ * 결제 버튼 상태 업데이트 함수
+ */
+function updateSubmitButton(active) {
+    const btn = document.getElementById('submit-booking-btn');
+    if (active) {
         btn.disabled = false;
-        btn.classList.replace('bg-gray-300', 'bg-[#503396]');
+        btn.classList.replace('bg-gray-800', 'bg-[#503396]');
         btn.classList.replace('cursor-not-allowed', 'cursor-pointer');
     } else {
         btn.disabled = true;
-        btn.classList.replace('bg-[#503396]', 'bg-gray-300');
+        btn.classList.replace('bg-[#503396]', 'bg-gray-800');
         btn.classList.replace('cursor-pointer', 'cursor-not-allowed');
     }
 }
 
-// 5. 점유 타이머 (ID 수정 및 로직 최적화)
+// 5. 점유 타이머
 function startTimer() {
-    // HTML의 id="timer"와 일치하도록 수정했습니다.
     const timerEl = document.getElementById('timer'); 
-    if(!timerEl) {
-        console.error("타이머 요소를 찾을 수 없습니다 (id='timer' 확인 필요)");
-        return;
-    }
-
+    if(!timerEl) return;
     const interval = setInterval(() => {
         const min = String(Math.floor(bookingState.timer / 60)).padStart(2, '0');
         const sec = String(bookingState.timer % 60).padStart(2, '0');
-        
-        // HTML 구조에 맞게 시간만 업데이트합니다.
         timerEl.innerText = `${min}:${sec}`;
-        
         if (bookingState.timer <= 0) {
             clearInterval(interval);
             alert("점유 시간이 만료되었습니다. 다시 선택해주세요.");
@@ -164,26 +203,37 @@ function startTimer() {
     }, 1000);
 }
 
-// 6. 예매 제출
+// 6. 예매 제출 핸들러
 function handleBookingSubmit() {
-    const seatIds = bookingState.selectedSeats.map(s => s.dbId);
-    const displayNames = bookingState.selectedSeats.map(s => s.displayId);
-    const totalPriceValue = bookingState.selectedSeats.reduce((sum, s) => sum + s.price, 0);
+    const selectedSeats = bookingState.selectedSeats;
+    const seatIds = selectedSeats.map(s => s.dbId);
+    
+    // 현재 표시된 금액 가져오기
+    const priceText = document.getElementById('display-total-price').innerText;
+    const totalPriceValue = parseInt(priceText.replace(/[^0-9]/g, '')) || 0;
 
     if (seatIds.length === 0) {
         alert("좌석을 선택해 주세요.");
         return;
     }
 
-    if (confirm(`${displayNames.join(', ')} 좌석으로 예매를 진행하시겠습니까?`)) {
-        const seatIdsInput = document.getElementById('input-seat-ids');
-        const totalPriceInput = document.getElementById('input-total-price');
-        const bookingForm = document.getElementById('bookingForm');
+    const seatIdsInput = document.getElementById('input-seat-ids');
+    const totalPriceInput = document.getElementById('input-total-price');
+    
+    if (seatIdsInput) seatIdsInput.value = seatIds.join(',');
+    if (totalPriceInput) totalPriceInput.value = totalPriceValue;
 
-        if (seatIdsInput && totalPriceInput && bookingForm) {
-            seatIdsInput.value = seatIds.join(','); 
-            totalPriceInput.value = totalPriceValue;
-            bookingForm.submit();
+    const paymentData = {
+        title: document.querySelector('h3.text-xl')?.innerText || '영화 예매',
+        amount: totalPriceValue,
+        details: selectedSeats.map(s => s.displayId).sort().join(', ')
+    };
+
+    if (typeof openPaymentModal === 'function') {
+        openPaymentModal(paymentData);
+    } else {
+        if (confirm("결제를 진행하시겠습니까?")) {
+            document.getElementById('bookingForm').submit();
         }
     }
 }
