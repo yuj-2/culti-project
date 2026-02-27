@@ -32,21 +32,25 @@ private final ReviewRepository reviewRepository;
 private final ContentService contentService;
 private final UserRepository userRepository;
 	
-	public Page<Review> getReviewList(Long contentId, int page, String sortType) {
-		
-		List<Sort.Order> sorts = new ArrayList<>();
-		
-		if ("high".equals(sortType)) {
-            sorts.add(Sort.Order.desc("rating")); // 별점 높은 순
-        } else if ("low".equals(sortType)) {
-            sorts.add(Sort.Order.asc("rating"));  // 별점 낮은 순
-        } else {
-            sorts.add(Sort.Order.desc("createdAt")); // 기본: 최신순
-        }
-		
-		Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
-		
-		return reviewRepository.findByContentId(contentId, pageable);
+	public Page<Review> getReviewList(Long contentId, int page, String sortType, boolean photoOnly) {
+	    
+	    List<Sort.Order> sorts = new ArrayList<>();
+	    
+	    if ("high".equals(sortType)) {
+	        sorts.add(Sort.Order.desc("rating")); // 별점 높은 순
+	    } else if ("low".equals(sortType)) {
+	        sorts.add(Sort.Order.asc("rating"));  // 별점 낮은 순
+	    } else {
+	        sorts.add(Sort.Order.desc("createdAt")); // 기본: 최신순
+	    }
+	    
+	    Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
+	    
+	    if (photoOnly) {
+	        return reviewRepository.findByContentIdWithPhotos(contentId, pageable);
+	    } else {
+	        return reviewRepository.findByContentId(contentId, pageable);
+	    }
 	}
 	
 	// 파일 저장 + 리뷰 DB 저장 메서드

@@ -31,10 +31,11 @@ public class ReviewController {
 			@PathVariable("id") Long id,
 			@RequestParam(value = "page", defaultValue = "0") int page,
 			@RequestParam(value = "sort", defaultValue = "latest") String sort,
+			@RequestParam(value = "photoOnly", defaultValue = "false") boolean photoOnly,
 			Model model
 			) {
 		Content content = contentService.getContent(id);
-		Page<Review> paging = reviewService.getReviewList(id, page, sort);
+		Page<Review> paging = reviewService.getReviewList(id, page, sort, photoOnly);
 		
 		int totalReviews = content.getReviews().size();
         double averageRating = 0.0;
@@ -66,6 +67,8 @@ public class ReviewController {
 		model.addAttribute("content", content);
         model.addAttribute("paging", paging);
         model.addAttribute("currentSort", sort);
+        
+        model.addAttribute("photoOnly", photoOnly);
         
         return "review/review-detail";
         
