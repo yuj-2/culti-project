@@ -1,5 +1,22 @@
 package com.culti.support.controller;
 
+import java.security.Principal;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.culti.auth.dto.UserDTO;
 import com.culti.auth.service.UserService; // 팀원의 유저 서비스
 import com.culti.support.entity.Faq;
@@ -8,17 +25,8 @@ import com.culti.support.entity.Notice;
 import com.culti.support.service.FaqService;
 import com.culti.support.service.InquiryService;
 import com.culti.support.service.NoticeService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
@@ -30,6 +38,7 @@ public class InquiryController {
     private final FaqService faqService;
     private final UserService userService; // 팀원의 서비스 주입
 
+    /*
     // [고객센터 메인]
     @GetMapping("")
     public String supportMain(Model model, 
@@ -41,6 +50,7 @@ public class InquiryController {
         
         return "support/support";
     }
+    */
 
     // [1. 공지사항 목록]
     @GetMapping("/notice")
@@ -147,5 +157,54 @@ public class InquiryController {
     @GetMapping("/refund")
     public String refundInfo() {
         return "support/refund"; 
+    }
+    
+    
+ // [9. 관리자 메인 페이지]
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin")
+    public String adminMain(Principal principal, Model model) {
+        UserDTO userDTO = this.userService.findByEmail(principal.getName());
+        model.addAttribute("user", userDTO);
+        return "support/admin_main";
+    }
+
+    // [10. 관리자 문의 답변 목록]
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/inquiry")
+    public String adminInquiryPage(Model model) {
+        // 모든 문의를 가져오는 메서드가 서비스에 필요합니다.
+        List<Inquiry> allInquiries = inquiryService.getAllInquiries(); 
+        model.addAttribute("inquiries", allInquiries);
+        return "support/admin_inquiry";
+    }
+
+    // [11. 답변 저장 기능]
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/inquiry/reply")
+    public String replyInquiry(@RequestParam("inquiryId") Long id, @RequestParam("answer") String answer) {
+        inquiryService.saveAnswer(id, answer); // 서비스에 답변 저장 메서드 구현 필요
+        return "redirect:/support/admin/inquiry";
+    }
+    
+    @GetMapping("")
+    public String supportMain(Principal principal, Model model, 
+        @PageableDefault(size = 5, sort = "noticeId", direction = Sort.Direction.DESC) Pageable pageable) {
+        
+        if (principal != null) {
+            UserDTO userDTO = this.userService.findByEmail(principal.getName());
+            String role = userDTO.getRole();
+            
+            // DB에 ROLE_ADMIN 또는 ADMIN으로 저장되어 있을 수 있으므로 둘 다 체크
+            if ("ADMIN".equals(role) || "ROLE_ADMIN".equals(role)) {
+                return "redirect:/support/admin/inquiry";
+            }
+        }
+
+        Page<Notice> noticePage = noticeService.getNoticeList(pageable);
+        model.addAttribute("noticePage", noticePage);
+        model.addAttribute("noticeList", noticePage.getContent()); 
+        
+        return "support/support";
     }
 }
