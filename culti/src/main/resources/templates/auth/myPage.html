@@ -9,6 +9,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     
     <link rel="stylesheet" th:href="@{/css/myPage.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/mate/mateMypage.css}">
     
     <script th:src="@{/js/myPage.js}"></script>
 </head>
@@ -72,6 +74,20 @@
                             </svg>
                             <span>찜 목록</span>
                         </button>
+                        
+                        <!--====== 동행 매칭 관리======== -->
+                        <button class="nav-item" data-tab="mate">
+						  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+						    <circle cx="9" cy="7" r="4"></circle>
+						    <path d="M17 11l2 2l4-4"></path>
+						  </svg>
+						  <span>동행 매칭 관리</span>
+						</button>
+						<!--======== 동행 매칭 관리======  -->
+                        
+                        
+                        
                         <button class="nav-item" data-tab="cancellations">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="10"></circle>
@@ -290,6 +306,148 @@
                             <button class="btn btn-danger" id="deleteAccountBtn">회원 탈퇴</button>
                         </div>
                     </section>
+                    
+                    <!--  ================동행매칭=================== -->
+					<section class="tab-content" id="mate" data-section="mate">
+					  <input type="hidden" id="currentSection" th:value="${mateSection}">
+					
+					  <div class="mate-manage">
+					    <h1 class="content-title">동행 매칭 관리</h1>
+					
+					    <!-- Tabs (✅ href로 이동하지 않게 data-mate-tab 사용) -->
+					    <div class="tabs">
+					      <a class="tab"
+					         href="#"
+					         data-mate-tab="received"
+					         th:classappend="${mateTab}=='received' ? ' active' : ''">
+					        받은 신청
+					      </a>
+					
+					      <a class="tab"
+					         href="#"
+					         data-mate-tab="sent"
+					         th:classappend="${mateTab}=='sent' ? ' active' : ''">
+					        내가 신청한 것
+					      </a>
+					    </div>
+					
+					    <!-- Content -->
+					    <div id="mate-content">
+					
+					      <!-- ✅ 받은 신청 (항상 렌더링 + active로 보여주기) -->
+					      <div class="mate-panel"
+					           data-mate-tab="received"
+					           th:classappend="${mateTab}=='received' ? ' active' : ''">
+					
+					        <div th:if="${#lists.isEmpty(receivedApps)}" class="empty-state">
+					          <i class="fa-solid fa-user-group" style="font-size:4rem; color:#ccc;"></i>
+					          <h3>받은 신청이 없습니다</h3>
+					          <p>게시글을 작성하고 동행을 기다려보세요!</p>
+					        </div>
+					
+					        <div th:each="app : ${receivedApps}" class="application-card">
+					          <div class="application-header">
+					            <div class="application-info">
+					              <div class="application-title" th:text="${app.postTitle}">제목</div>
+					              <div class="application-meta">
+					                <span>신청자: <strong th:text="${app.applicantNickname}">닉네임</strong></span> ·
+					                <span th:text="${#temporals.format(app.createdAt,'yyyy-MM-dd')}">2026-02-26</span>
+					              </div>
+					            </div>
+					
+					            <div class="application-actions">
+					              <span class="badge"
+					                    th:classappend="' badge-' + ${app.status}"
+					                    th:text="${app.statusLabel}">
+					                대기중
+					              </span>
+					
+					              <div th:if="${app.status}=='PENDING'">
+					                <form th:action="@{/auth/{id}/accept(id=${app.id})}" method="post">
+					                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+					                  <button type="submit">수락</button>
+					                </form>
+					
+					                <form th:action="@{/auth/{id}/reject(id=${app.id})}" method="post">
+					                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+					                  <button type="submit">거절</button>
+					                </form>
+					              </div>
+					            </div>
+					          </div>
+					
+					          <div class="application-details">
+					            <div class="info-row">
+					              <i class="fa-regular fa-calendar"></i>
+					              <span th:text="${app.eventAtText}">2026-02-26 19:00</span>
+					            </div>
+					            <div class="info-row">
+					              <i class="fa-solid fa-location-dot"></i>
+					              <span th:text="${app.location}">서울 어딘가</span>
+					            </div>
+					          </div>
+					        </div>
+					      </div>
+					
+					      <!-- ✅ 내가 신청한 것 (항상 렌더링 + active로 보여주기) -->
+					      <div class="mate-panel"
+					           data-mate-tab="sent"
+					           th:classappend="${mateTab}=='sent' ? ' active' : ''">
+					
+					        <div th:if="${#lists.isEmpty(sentApps)}" class="empty-state">
+					          <i class="fa-solid fa-paper-plane" style="font-size:4rem; color:#ccc;"></i>
+					          <h3>신청한 게시글이 없습니다</h3>
+					          <p>마음에 드는 게시글에 동행을 신청해보세요!</p>
+					        </div>
+					
+					        <div th:each="app : ${sentApps}" class="application-card">
+					          <div class="application-header">
+					            <div class="application-info">
+					              <div class="application-title" th:text="${app.postTitle}">제목</div>
+					              <div class="application-meta">
+					                <span>작성자: <strong th:text="${app.writerNickname}">작성자</strong></span> ·
+					                <span th:text="${#temporals.format(app.createdAt,'yyyy-MM-dd')}">2026-02-26</span>
+					              </div>
+					            </div>
+					
+					            <div class="application-actions">
+					              <span class="badge"
+					                    th:classappend="' badge-' + ${app.status}"
+					                    th:text="${app.statusLabel}">
+					                대기중
+					              </span>
+					
+					              <div th:if="${app.status}=='PENDING'">
+					                <form th:action="@{/auth/{id}/cancel(id=${app.id})}" method="post">
+					                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+					                  <button type="submit">취소</button>
+					                </form>
+					              </div>
+					            </div>
+					          </div>
+					
+					          <div class="application-details">
+					            <div class="info-row">
+					              <i class="fa-regular fa-calendar"></i>
+					              <span th:text="${app.eventAtText}">2026-02-26 19:00</span>
+					            </div>
+					            <div class="info-row">
+					              <i class="fa-solid fa-location-dot"></i>
+					              <span th:text="${app.location}">서울 어딘가</span>
+					            </div>
+					          </div>
+					        </div>
+					      </div>
+					
+					    </div><!-- /mate-content -->
+					  </div><!-- /mate-manage -->
+					</section>				    
+	
+      				<!-- ============동행매칭==================== -->    
+                    
+                    
+                    
+                    
                 </div>
             </div>
         </div>
