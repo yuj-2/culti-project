@@ -22,8 +22,12 @@ public class EmailAuthController {
 	@PostMapping("/send")
     public String sendEmail(@RequestBody String email) {
         // 1. 이메일 발송 로직
-		this.emailService.sendSimpleEmail(email);
-        // 2. 인증번호 저장 (유효시간 설정)
+		String authCode=this.emailService.sendSimpleEmail(email);
+		
+		//2. 이메일 인증 테이블에 인증번호 저장
+		this.emailService.insertEmailVerification(email,authCode);
+		
+        // 3. 인증번호 저장 (유효시간 설정)
         return "인증번호가 발송되었습니다.";
     }
 
