@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리뷰 작성</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script th:src="@{/js/review/review-write.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/review/review-write.css}">
+</head>
+<body class="bg-[#F9FAFB]">
+    
+    <form th:action="@{|/reservation/detail/${content.id}/review/write|}" method="post" id="reviewForm" enctype="multipart/form-data">
+        
+        <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+            <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+                <button type="button" onclick="history.back()" class="p-2 -ml-2">
+                    <i data-lucide="arrow-left" class="w-6 h-6 text-gray-700"></i>
+                </button>
+                <h1 class="text-lg font-bold text-gray-900">리뷰 작성</h1>
+                <button type="submit" class="text-[#503396] font-bold px-3 py-1 hover:text-[#252451] transition-colors">등록</button>
+            </div>
+        </nav>
+
+        <main class="max-w-2xl mx-auto px-4 py-6">
+            
+            <div class="bg-white rounded-xl shadow-sm p-4 mb-6 flex items-center gap-4">
+                <img th:src="${content.posterUrl != null ? content.posterUrl : 'https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=400'}" 
+                     alt="공연 썸네일" class="w-20 h-20 rounded-lg object-cover flex-shrink-0">
+                <div class="flex-1 min-w-0">
+                    <h2 class="font-bold text-gray-900 text-base mb-1 truncate" th:text="${content.title}">오페라의 유령</h2>
+                    <p class="text-sm text-gray-500" th:text="'관람일 · ' + ${#calendars.format(#calendars.createNow(), 'yyyy년 MM월 dd일')}">관람일 · 오늘</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+			    <h3 class="text-base font-bold text-gray-900 mb-4">공연은 어떠셨나요?</h3>
+			    <div class="flex justify-center gap-3" id="starRatingContainer">
+			        <button type="button" class="star-btn" data-rating="1">
+			            <i data-lucide="star" class="w-12 h-12 text-gray-300 pointer-events-none transition-colors duration-200"></i>
+			        </button>
+			        <button type="button" class="star-btn" data-rating="2">
+			            <i data-lucide="star" class="w-12 h-12 text-gray-300 pointer-events-none transition-colors duration-200"></i>
+			        </button>
+			        <button type="button" class="star-btn" data-rating="3">
+			            <i data-lucide="star" class="w-12 h-12 text-gray-300 pointer-events-none transition-colors duration-200"></i>
+			        </button>
+			        <button type="button" class="star-btn" data-rating="4">
+			            <i data-lucide="star" class="w-12 h-12 text-gray-300 pointer-events-none transition-colors duration-200"></i>
+			        </button>
+			        <button type="button" class="star-btn" data-rating="5">
+			            <i data-lucide="star" class="w-12 h-12 text-gray-300 pointer-events-none transition-colors duration-200"></i>
+			        </button>
+			    </div>
+			    <input type="hidden" id="ratingValue" name="rating" value="0" required>
+			</div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <textarea id="reviewText" name="text" 
+                          class="w-full h-48 px-4 py-3 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#503396] focus:border-transparent transition-all"
+                          placeholder="솔직한 관람 후기를 공유해주세요. 최소 10자 이상 작성해주세요." required minlength="10" maxlength="1000"></textarea>
+                <div class="flex justify-end mt-2">
+                    <span id="charCounter" class="text-sm text-gray-400 font-medium">0 / 1000</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <h3 class="text-base font-bold text-gray-900 mb-4">사진 첨부</h3>
+                <div class="flex gap-3 flex-wrap">
+                    <label for="photoUpload" class="w-24 h-24 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 hover:border-[#503396] hover:text-[#503396] transition-all">
+                        <i data-lucide="camera" class="w-7 h-7 text-gray-400 mb-1 pointer-events-none"></i>
+                        <span class="text-xs text-gray-500 font-medium text-center pointer-events-none">사진 추가<br>(최대 3장)</span>
+                    </label>
+                    <input type="file" id="photoUpload" name="files" accept="image/*" multiple class="hidden">
+                    
+                    <div id="photoPreview" class="flex gap-3 flex-wrap"></div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <label class="flex items-center justify-between cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-gray-500"></i>
+                        <div>
+                            <div class="font-bold text-gray-900">스포일러 포함</div>
+                            <div class="text-xs text-gray-500 font-medium">줄거리가 포함된 경우 선택해주세요</div>
+                        </div>
+                    </div>
+                    <div class="relative inline-block">
+                        <input type="checkbox" id="spoilerToggle" name="isSpoiler" class="peer sr-only">
+                        <div class="w-12 h-6 bg-gray-200 rounded-full shadow-inner transition-colors duration-300 peer-checked:bg-[#503396]"></div>
+                        <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 shadow peer-checked:translate-x-6"></div>
+                    </div>
+                </label>
+            </div>
+        </main>
+    </form>
+
+    <script th:src="@{/js/review-write.js}"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
