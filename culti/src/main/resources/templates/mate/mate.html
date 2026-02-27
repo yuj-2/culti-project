@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html 
-    xmlns:th="http://www.thymeleaf.org"
-    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{layout/layout}">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/layout}">
 <head>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/mate/mate.css}">
@@ -25,9 +25,7 @@
 
     <!-- Main Content -->
     <div class="container">
-        <div class="posts-grid" id="postsGrid">
-            <!-- Posts will be inserted here by JavaScript -->
-        </div>
+
         <div class="empty-state" id="emptyState" style="display: none;">
             <p>아직 등록된 게시글이 없습니다.</p>
         </div>
@@ -35,14 +33,15 @@
     
     <!-- 작품 카드창 -->
 		<div class="posts-grid">
-		  <div class="post-card" th:each="p : ${posts}" 
+		  <div class="post-card" th:each="p : ${paging.content}" 
 		  th:attr="data-id=${p.postId},
 		   data-title=${p.title},
 	       data-category=${p.category.name()},
 	       data-eventAt=${#temporals.format(p.eventAt,'yyyy-MM-dd HH:mm')},
 	       data-location=${p.location},
 	       data-maxPeople=${p.maxPeople},
-	       data-description=${p.description}">
+	       data-description=${p.description},
+	       data-nickname=${p.writer.nickname}">
 		    <div class="post-header">
 		      <h3 class="post-title" th:text="${p.title}">제목</h3>
 		      <span class="badge"
@@ -71,12 +70,9 @@
 		</div>
 
     <!-- Floating Button -->
-    <button class="floating-button" id="createButton">
-        <svg class="icon" style="width: 1.5rem; height: 1.5rem;">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-    </button>
+	<button class="floating-button" id="createButton" sec:authorize="isAuthenticated()">
+	  <i class="fa-solid fa-plus"></i>
+	</button>
     
     
     
@@ -89,42 +85,42 @@
                 <h2 class="modal-title">동행 구하기</h2>
                 <button class="close-button" onclick="closeCreateModal()">&times;</button>
             </div>
-            <form id="createForm">
+            <!-- form!!!!!! -->
+            <form id="createForm" method="post" th:action="@{/mate/addPost}">
                 <div class="form-group">
                     <label class="form-label" for="title">작품명</label>
                     
-                    <!-- 여기 content db 불러오는 걸로 수정!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
-                    <input type="text" class="form-input" id="title" placeholder="예) 듄: 파트2" required>
+                    <input type="text" class="form-input" id="title" name="title" placeholder="예) 듄: 파트2" required>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="category">카테고리</label>
-                    <select class="form-select" id="category" required>
-                        <option value="movie">영화</option>
-                        <option value="concert">공연</option>
-                        <option value="exhibition">전시</option>
+                    <select class="form-select" id="category" name="category" required>
+                        <option value="MOVIE">영화</option>
+                        <option value="CONCERT">공연</option>
+                        <option value="EXHIBITION">전시</option>
                     </select>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label" for="date">날짜</label>
-                        <input type="date" class="form-input" id="date" required>
+                        <input type="date" class="form-input" id="date" name="date" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="time">시간</label>
-                        <input type="time" class="form-input" id="time" required>
+                        <input type="time" class="form-input" id="time" name="time" required>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="location">장소</label>
-                    <input type="text" class="form-input" id="location" placeholder="예) CGV 강남" required>
+                    <input type="text" class="form-input" id="location" name="location"  placeholder="예) CGV 강남" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="maxMembers">모집 인원</label>
-                    <select class="form-select" id="maxMembers" required>
+                    <label class="form-label" for="maxPeople">모집 인원</label>
+                    <select class="form-select" id="maxPeople" name="maxPeople" required>
                         <option value="2">2명</option>
                         <option value="3">3명</option>
                         <option value="4">4명</option>
@@ -133,14 +129,14 @@
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label" for="author">작성자 닉네임</label>
-                    <input type="text" class="form-input" id="author" placeholder="닉네임을 입력하세요" required>
-                </div>
+<!--                 <div class="form-group"> -->
+<!--                     <label class="form-label" for="nickname" >작성자 닉네임</label> -->
+<!--                     <input type="text" class="form-input" id="nickname" name="nickname" placeholder="닉네임을 입력하세요" required> -->
+<!--                 </div> -->
 
                 <div class="form-group">
                     <label class="form-label" for="description">상세 설명</label>
-                    <textarea class="form-textarea" id="description" placeholder="함께 보고 싶은 이유, 선호하는 분위기 등을 자유롭게 작성해주세요" required></textarea>
+                    <textarea class="form-textarea" id="description" name="description" placeholder="함께 보고 싶은 이유, 선호하는 분위기 등을 자유롭게 작성해주세요" required></textarea>
                 </div>
 
                 <div class="button-group">
@@ -169,7 +165,7 @@
     <!-- 헤더 -->
     <div class="modal-header">
       <h2 class="modal-title">참여 신청</h2>
-      <button class="close-button" onclick="closeApplyModal()">&times;</button>
+      <button class="close-button" onclick="closeApplyModal()" >&times;</button>
     </div>
 
     <!-- 본문 -->
@@ -188,13 +184,17 @@
         취소
       </button>
 
-      <button class="button button-primary" onclick="submitApply()">
+      <button class="button button-primary" onclick="submitApply()" >
         신청하기
       </button>
     </div>
 
   </div>
 </div>
+
+<script th:inline="javascript">
+  const isAuthenticated = false;
+</script>
 
     <script>
         
@@ -206,66 +206,7 @@
             exhibition: '전시'
         };
 
-//      // Render posts
-//         function renderPosts() {
-//           const grid = document.getElementById('postsGrid');
-//           const emptyState = document.getElementById('emptyState');
 
-//           const filteredPosts = currentCategory === 'all'
-//             ? posts
-//             : posts.filter(post => post.category === currentCategory);
-
-//           if (filteredPosts.length === 0) {
-//             grid.style.display = 'none';
-//             emptyState.style.display = 'block';
-//             return;
-//           }
-
-//           grid.style.display = 'grid';
-//           emptyState.style.display = 'none';
-
-//           grid.innerHTML = filteredPosts.map(post => {
-//             const isFull = post.currentMembers >= post.maxMembers;
-//             const badgeClass = `badge-${post.category}`;
-
-//             return `
-//               <div class="post-card" onclick="showDetail('${post.id}')">
-//                 <div class="post-header">
-//                   <h3 class="post-title">${post.title}</h3>
-//                   <span class="badge ${badgeClass}">${categoryLabels[post.category]}</span>
-//                 </div>
-
-//                 <div class="post-info">
-//                   <div class="info-row">
-//                     <i class="fa-regular fa-calendar"></i>
-//                     <span>${post.date} ${post.time}</span>
-//                   </div>
-
-//                   <div class="info-row">
-//                     <i class="fa-solid fa-location-dot"></i>
-//                     <span>${post.location}</span>
-//                   </div>
-
-//                   <div class="info-row">
-//                     <i class="fa-solid fa-users"></i>
-//                     <span>
-//                       <span class="members-count ${isFull ? 'full' : ''}">${post.currentMembers}</span>
-//                       <span style="color: #666">/${post.maxMembers}명</span>
-//                       ${isFull ? '<span class="badge badge-full">모집완료</span>' : ''}
-//                     </span>
-//                   </div>
-//                 </div>
-
-//                 <div class="post-footer">
-//                   <div class="info-row">
-//                     <i class="fa-regular fa-user"></i>
-//                     <span>${post.author}</span>
-//                   </div>
-//                 </div>
-//               </div>
-//             `;
-//           }).join('');
-//         }
 
         // Filter tabs
         document.querySelectorAll('.tab-button').forEach(button => {
@@ -285,13 +226,21 @@
 		    const eventAt = card.dataset.eventat;
 		    const location = card.dataset.location;
 		    const maxPeople = card.dataset.maxpeople;
+		    const nickname = card.dataset.nickname;
 		    const desc = card.dataset.description || '';
 		
 		    document.getElementById('detailTitle').innerHTML =
-		      `${title} <span class="badge badge-${category.toLowerCase()}">${category}</span>`;
+		      `${title} <span class="badge badge-${category.toLowerCase()}" style="margin-left:20px;">${category}</span>`;
 		
+	      const applyButtonHtml = isAuthenticated
+	      ? `<button class="button button-primary" onclick="openApplyModal()" sec:authorize="isAuthenticated()">참여 신청</button>`
+	      : `<button class="button button-primary" onclick="location.href='/auth/login'" sec:authorize="isAnonymous()">로그인 후 신청</button>`;
+		      
 		    document.getElementById('detailContent').innerHTML = `
 		      <div class="detail-grid">
+		        <div class="detail-item"><i class="fa-solid fa-user"></i>
+		          <div class="detail-content"><div class="detail-value">${nickname}</div></div>
+		        </div>
 		        <div class="detail-item"><i class="fa-regular fa-calendar detail-fa"></i>
 		          <div class="detail-content"><div class="detail-label">날짜 및 시간</div><div class="detail-value">${eventAt}</div></div>
 		        </div>
@@ -309,129 +258,14 @@
 		      </div>
 		
 		      <div class="button-group">
-		        <button class="button button-primary" onclick="openApplyModal()">참여 신청</button>
-		      </div>
+			      ${applyButtonHtml}
+			    </div>
 		    `;
 		
 		    document.getElementById('detailModal').classList.add('show');
 		  });
 		});
 
-        // Show detail modal
-//         function showDetail(postId) {
-//           const post = posts.find(p => p.id === postId);
-//           if (!post) return;
-
-//           const isFull = post.currentMembers >= post.maxMembers;
-//           const badgeClass = `badge-${post.category}`;
-
-//           // ✅ 기본값 처리
-//           const isAccepted = post.isAccepted === true;
-//           const comments = Array.isArray(post.comments) ? post.comments : [];
-
-//           document.getElementById('detailTitle').innerHTML = `
-//             ${post.title}
-//             <span class="badge ${badgeClass}" style="font-size: 0.875rem; margin-left: 0.5rem;">
-//               ${categoryLabels[post.category]}
-//             </span>
-//           `;
-
-//           const commentsHtml = isAccepted
-//             ? `
-//               <div class="detail-description">
-//                 <div class="detail-label">댓글</div>
-
-//                 <div class="comment-list">
-//                   ${
-//                     comments.length === 0
-//                       ? `<p style="color:#666; font-size:0.9rem;">아직 댓글이 없습니다.</p>`
-//                       : comments.map(c => `
-//                           <div class="comment-item">
-//                             <div class="comment-meta">
-//                               <span class="comment-writer">${c.writer}</span>
-//                               <span class="comment-date">${c.createdAt}</span>
-//                             </div>
-//                             <div class="comment-content">${c.content}</div>
-//                           </div>
-//                         `).join('')
-//                   }
-//                 </div>
-
-//                 <div class="comment-form">
-//                   <textarea id="commentInput" class="form-textarea" placeholder="댓글을 입력하세요"></textarea>
-//                   <div class="button-group" style="margin-top: 0.75rem;">
-//                     <button class="button button-primary" onclick="addComment('${post.id}')">댓글 등록</button>
-//                   </div>
-//                 </div>
-//               </div>
-//             `
-//             : `
-//               <div class="detail-description">
-//                 <div class="detail-label">댓글</div>
-//                 <p style="color:#666; font-size:0.9rem;">
-//                   ✅ 참여 신청이 수락되면 댓글을 볼 수 있어요.
-//                 </p>
-//               </div>
-//             `;
-
-//           document.getElementById('detailContent').innerHTML = `
-//             <div class="detail-grid">
-
-//               <div class="detail-item">
-//                 <i class="fa-regular fa-calendar detail-fa"></i>
-//                 <div class="detail-content">
-//                   <div class="detail-label">날짜 및 시간</div>
-//                   <div class="detail-value">${post.date} ${post.time}</div>
-//                 </div>
-//               </div>
-
-//               <div class="detail-item">
-//                 <i class="fa-solid fa-location-dot detail-fa"></i>
-//                 <div class="detail-content">
-//                   <div class="detail-label">장소</div>
-//                   <div class="detail-value">${post.location}</div>
-//                 </div>
-//               </div>
-
-//               <div class="detail-item">
-//                 <i class="fa-solid fa-users detail-fa"></i>
-//                 <div class="detail-content">
-//                   <div class="detail-label">모집 인원</div>
-//                   <div class="detail-value">
-//                     <span class="${isFull ? 'members-count full' : 'members-count'}">${post.currentMembers}</span>/${post.maxMembers}명
-//                     ${isFull ? '<span class="badge badge-full">모집완료</span>' : ''}
-//                   </div>
-//                 </div>
-//               </div>
-
-//               <div class="detail-item">
-//                 <i class="fa-regular fa-user detail-fa"></i>
-//                 <div class="detail-content">
-//                   <div class="detail-label">작성자</div>
-//                   <div class="detail-value">${post.author}</div>
-//                 </div>
-//               </div>
-
-//             </div>
-
-//             <div class="detail-description">
-//               <div class="detail-label">상세 설명</div>
-//               <p class="description-text">${post.description}</p>
-//             </div>
-
-//             <div class="button-group">
-//               <button class="button button-primary"
-//                 onclick="openApplyModal()"
-//                 ${isFull ? 'disabled' : ''}>
-//                 ${isFull ? '모집 완료' : '참여 신청'}
-//               </button>
-//             </div>
-
-//             ${commentsHtml}
-//           `;
-
-//           document.getElementById('detailModal').classList.add('show');
-//         }
 
         function closeDetailModal() {
           document.getElementById('detailModal').classList.remove('show');
@@ -452,14 +286,14 @@
        	  closeApplyModal();
        	}
 
-//         // Initial render
-//         renderPosts();
-        
-        
+      
      // ✅ 새글 모달 열기
-        document.getElementById('createButton').addEventListener('click', () => {
-          document.getElementById('createModal').classList.add('show');
-        });
+        const createBtn = document.getElementById('createButton');
+			if (createBtn) {
+			  createBtn.addEventListener('click', () => {
+			    document.getElementById('createModal').classList.add('show');
+			  });
+			}
 
         // ✅ 새글 모달 닫기
         function closeCreateModal() {

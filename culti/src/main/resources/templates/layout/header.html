@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <div th:fragment="headerFragment" >
 
@@ -50,22 +51,32 @@
 
             <a th:href="@{/calendar}" class="px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 header-nav-link">일정 캘린더</a>
             <a th:href="@{/mate/mate}" class="px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 header-nav-link">동행 찾기</a>
-            <button class="px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 header-nav-link">고객센터</button>
+            <a th:href="@{/support/notice}" class="px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 header-nav-link">고객센터</a>
+<!--             <button class="px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 header-nav-link">고객센터</button> -->
           </div>
 
           <div class="flex items-center space-x-4">
+          
             <button class="p-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all" aria-label="검색">
               <i data-lucide="search" class="w-5 h-5"></i>
             </button>
 
             <button class="hidden sm:flex items-center gap-2 px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all header-nav-link">
               <i data-lucide="user" class="w-5 h-5"></i>
-              <span>마이페이지</span>
+              <a th:href="@{/auth/myPage}">마이페이지</a>
+<!--               <span>마이페이지</span> -->
             </button>
+			
+			<a sec:authorize="isAnonymous()" th:href="@{/auth/login}" class="px-5 py-2 bg-[#503396] text-white rounded-lg hover:bg-opacity-90 shadow-lg shadow-purple-900/25 transition-all duration-200 header-login-btn">
+			로그인
+			</a>
+			<a sec:authorize="isAuthenticated()" th:href="@{/auth/logout}" class="px-5 py-2 bg-[#503396] text-white rounded-lg hover:bg-opacity-90 shadow-lg shadow-purple-900/25 transition-all duration-200 header-login-btn">
+			로그아웃
+			</a>
 
-            <button class="px-5 py-2 bg-[#503396] text-white rounded-lg hover:bg-opacity-90 shadow-lg shadow-purple-900/25 transition-all duration-200 header-login-btn">
-              로그인
-            </button>
+<!--             <button class="px-5 py-2 bg-[#503396] text-white rounded-lg hover:bg-opacity-90 shadow-lg shadow-purple-900/25 transition-all duration-200 header-login-btn"> -->
+<!--               로그인 -->
+<!--             </button> -->
           </div>
         </div>
       </div>

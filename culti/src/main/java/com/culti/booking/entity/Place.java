@@ -12,10 +12,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Getter 
-@Setter
-@Table(name = "place")
+
+@Getter @Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
+
+@Table(name = "place")
 
 public class Place {
     @Id
