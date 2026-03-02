@@ -280,7 +280,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		    'Content-Type': 'application/json', // 서버의 @RequestBody가 인식할 수 있게 설정 
 			[header]: token 
 			},
-		  body: JSON.stringify(emailData) // 데이터를 JSON 문자열로 변환
+			body: JSON.stringify({ 
+			        email: emailData // key값을 'email'로 지정
+			    })
 		})
 		.then(response => response.text()) // 서버 응답을 텍스트로 받기
 		.then(data => {
@@ -290,35 +292,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		.catch(error => console.error('에러 발생:', error));
 		
 		
-        // 실제 서버 통신 코드
-        /*
-        fetch('/api/send-verification', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email: email })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                verificationCode = data.code; // 개발용, 실제로는 서버에서만 보관
-                showVerificationInput();
-            } else {
-                showError(emailInput, emailError, data.message || '인증번호 발송에 실패했습니다.');
-                sendVerifyBtn.disabled = false;
-                sendVerifyBtn.textContent = '인증번호 발송';
-            }
-        })
-        .catch(error => {
-            console.error('인증번호 발송 오류:', error);
-            showError(emailInput, emailError, '서버 오류가 발생했습니다.');
-            sendVerifyBtn.disabled = false;
-            sendVerifyBtn.textContent = '인증번호 발송';
-        });
-        */
 
         // 데모용 코드
+		
         setTimeout(function() {
             verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
             console.log('인증번호 (데모):', verificationCode);
@@ -449,23 +425,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // 인증번호 확인
     function checkVerificationCode() {
         const enteredCode = Array.from(codeInputs).map(input => input.value).join('');
-        
+		const token = document.querySelector("meta[name='_csrf']").content;
+		const header = document.querySelector("meta[name='_csrf_header']").content;
         if (enteredCode.length === 6) {
             // 서버로 인증번호 확인 요청
-            /*
-            fetch('/api/verify-code', {
+            
+            fetch('/api/auth/verify', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+					[header]: token
                 },
                 body: JSON.stringify({ 
                     email: emailInput.value,
-                    code: enteredCode 
+                    inputAuthCode: enteredCode 
                 })
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
+                if (data==true) {
                     handleVerificationSuccess();
                 } else {
                     handleVerificationError();
@@ -475,9 +453,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('인증 확인 오류:', error);
                 handleVerificationError();
             });
-            */
+            
             
             // 데모용 코드
+			/*
             setTimeout(function() {
                 if (enteredCode === verificationCode) {
                     handleVerificationSuccess();
@@ -485,6 +464,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     handleVerificationError();
                 }
             }, 500);
+			*/
         }
     }
 

@@ -145,8 +145,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         */
         
-        // 데모용
-        alert('카카오 로그인 기능은 카카오 개발자 센터에서 앱 등록 후 사용 가능합니다.');
     });
 
     // 네이버 로그인
@@ -163,8 +161,6 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = naverLoginUrl;
         */
         
-        // 데모용
-        alert('네이버 로그인 기능은 네이버 개발자 센터에서 앱 등록 후 사용 가능합니다.');
     });
 
     // 구글 로그인
@@ -199,9 +195,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         */
-        
-        // 데모용
-        alert('구글 로그인 기능은 Google Cloud Console에서 OAuth 클라이언트 설정 후 사용 가능합니다.');
     });
 
     // Enter 키로 로그인

@@ -63,12 +63,24 @@ public class UserServiceImpl implements UserService{
 
 	    if (result.isPresent()) {
 	        User user = result.get();
-	        System.out.println("진입");
 	        return entityToDto(user);
 	        
 	    }
 	    
-	    // 3. 회원이 없거나 비밀번호가 틀리면 null 반환
+	    return null;
+	}
+
+	@Override
+	public User findEntityByEmail(String email) {
+		// 1. DB에서 이메일로 회원 조회
+	    Optional<User> result = userRepository.findByEmail(email);
+
+	    if (result.isPresent()) {
+	        User user = result.get();
+	        return user;
+	        
+	    }
+	    
 	    return null;
 	}
 

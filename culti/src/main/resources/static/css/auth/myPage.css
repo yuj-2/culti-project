@@ -1229,3 +1229,59 @@ body {
     font-size: 0.875rem;
     z-index: 10;
 }
+.social-connect-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.social-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.social-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.social-info {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.status-connected {
+    color: #28a745;
+    font-size: 0.85rem;
+    margin-right: 10px;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+}
+
+.btn-outline {
+    background: white;
+    color: #666;
+}
+
+.btn-connect {
+    background: #333;
+    color: white;
+    border: none;
+}
+
+.btn-connect:hover {
+    background: #555;
+}

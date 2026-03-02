@@ -65,4 +65,8 @@ public interface UserService {
 		
 		//[3] 이메일로 회원정보 가져오기
 		UserDTO findByEmail(String email);
+		
+		//[4] 이메일로 회원정보 가져오기 Entity 반환
+		User findEntityByEmail(String email);
+		
 }

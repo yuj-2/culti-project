@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.culti.auth.dto.UserDTO;
+import com.culti.auth.security.PrincipalDetails;
 import com.culti.auth.service.UserService;
 import com.culti.mate.service.MateService;
 
@@ -27,6 +28,7 @@ public class AuthController {
 	
 	private final UserService userService;
 	private final MateService mateService;
+	
 	
 	//로그인페이지
 	@GetMapping("/login")
@@ -46,6 +48,10 @@ public class AuthController {
 		log.info("👌 AuthController.register()... POST" );
 		Long userId = this.userService.register(userDTO);
 		//rttr.addFlashAttribute("msg", bno);
+		
+		
+		
+		
 		
 		return "redirect:/auth/register-complete";
 	}
@@ -76,12 +82,13 @@ public class AuthController {
 		//마이페이지
 		@PreAuthorize("isAuthenticated()")
 		@GetMapping("/myPage")
-		public void myPage(@AuthenticationPrincipal UserDetails userDetails, Model model
+		public void myPage(@AuthenticationPrincipal PrincipalDetails userDetails, Model model
 									, @RequestParam(name="mateTab", defaultValue="received") String mateTab,
 							          @RequestParam(name="mateSection", defaultValue="mate") String mateSection) {
 			
+			
 			String email=userDetails.getUsername();
-			UserDTO userDTO=this.userService.findByEmail(email);
+			UserDTO userDTO=userDetails.getUserDto();
 			model.addAttribute("user",userDTO);
 			
 			// ===== 동행매칭

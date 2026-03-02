@@ -1,5 +1,6 @@
 package com.culti.auth.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j; // 로그 사용을 위한 어노테이션 (Lombok 사용 시)
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -7,46 +8,75 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import com.culti.auth.dto.UserDTO;
+import com.culti.auth.entity.SocialAuth;
+import com.culti.auth.entity.User;
+import com.culti.auth.repository.SocialAuthRepository;
+import com.culti.auth.repository.UserRepository;
+import com.culti.auth.security.PrincipalDetails;
 
-@Slf4j // 로그 기능을 활성화합니다.
+import java.util.Map;
+import java.util.Optional;
+
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+
+    private final UserRepository userRepository; 
+    private final SocialAuthRepository socialAuthRepository; // 추가된 Repository
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        // 부모 클래스의 loadUser를 호출하여 사용자 정보를 가져옵니다.
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        // 1. 서비스 구분 (예: kakao)
+        // 1. 서비스 구분 및 데이터 추출
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-
-        // 2. 전체 데이터 가져오기 (Map 형태)
         Map<String, Object> attributes = oAuth2User.getAttributes();
-
-        // 3. 카카오 데이터 파싱
-        // 카카오는 id, kakao_account(email 등), profile(nickname 등) 구조로 데이터를 줍니다.
+        
+        // 카카오 데이터 파싱
         String providerId = attributes.get("id").toString();
         Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
-        Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
-        String nickname = (String) profile.get("nickname");
+        String email = (String) kakaoAccount.get("email");
 
-        // --- 콘솔 출력 구간 ---
-        System.out.println("========================================");
-        System.out.println("[OAuth2 로그인 발생]");
-        System.out.println("서비스 이름 (Registration ID): " + registrationId);
-        System.out.println("카카오 고유 ID (Provider ID): " + providerId);
-        System.out.println("사용자 닉네임: " + nickname);
-        
-        // 이메일은 카카오 설정에서 '필수'로 되어 있어야 가져올 수 있습니다.
-        if (kakaoAccount.get("email") != null) {
-            System.out.println("사용자 이메일: " + kakaoAccount.get("email"));
+        // 2. 이메일 누락 체크
+        if (email == null) {
+            throw new OAuth2AuthenticationException("이메일 제공에 동의해야 로그인이 가능합니다.");
         }
 
-        // 전체 데이터를 보고 싶을 때 (디버깅용)
-        System.out.println("전체 Attributes: " + attributes);
-        System.out.println("========================================");
+        // 3. [핵심 로직] 우리 DB(users 테이블)에 이메일이 있는지 확인
+        // 만약 DTO 대신 Entity를 직접 써도 된다면 findByEmail이 User를 반환하게 하세요.
+        Optional<User> result = this.userRepository.findByEmail(email); 
+        User user=null;
+        if (result.isPresent()) {
+			user=result.get();
+		}
+        
+        
+        if (user == null) {
+            log.info("미가입 사용자 로그인 시도: {}", email);
+            throw new OAuth2AuthenticationException("기존 회원 정보가 없습니다. 먼저 홈페이지 가입을 완료해주세요.");
+        }
 
-        return oAuth2User;
+        // 4. [연동 로직] social_auth 테이블에서 해당 유저의 카카오 연동 여부 확인
+        // existsByUserAndProvider 메서드는 Repository에 선언해야 합니다.
+        boolean isLinked = socialAuthRepository.existsByUserAndProvider(user, registrationId);
+
+        if (!isLinked) {
+            // 연동 데이터가 없으면 새로 생성해서 저장
+            SocialAuth newAuth = SocialAuth.builder()
+                    .user(user) // User 엔티티와 연관관계 매핑
+                    .provider(registrationId)
+                    .providerId(providerId)
+                    .build();
+            
+            socialAuthRepository.save(newAuth);
+            log.info("기존 회원(이메일: {})에 {} 계정 연동 완료", email, registrationId);
+        }
+
+        UserDTO userDto = UserDTO.fromEntity(user);
+        
+        // 5. 로그인 성공 처리
+        return new PrincipalDetails(userDto, attributes);
     }
 }
