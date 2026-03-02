@@ -9,5 +9,5 @@ import com.culti.auth.entity.Terms;
 
 public interface TermsRepository extends JpaRepository<Terms, Long>{
 	// 현재 활성화된(사용 중인) 약관 리스트만 가져오기
-    List<Terms> findAllByIsActiveOrderByIsRequiredDesc(String isActive);
+    List<Terms> findAllByIsActive(String isActive);
 }

@@ -132,42 +132,41 @@
 
 					<!-- 약관 동의 -->
 					<div class="form-group terms-group">
-						<label class="checkbox-label checkbox-all"> <input
-							type="checkbox" id="agreeAll"> <span>전체 약관에 동의합니다</span>
-						</label>
+    <label class="checkbox-label checkbox-all"> 
+        <input type="checkbox" id="agreeAll"> 
+        <span>전체 약관에 동의합니다</span>
+    </label>
 
-						<div class="terms-detail">
-							<label class="checkbox-label"> <input type="checkbox"
-								class="required-term" id="agreeTerms" required> <span>[필수]
-									이용약관 동의</span>
-							</label>
-							<button type="button" class="terms-link" data-modal="terms">보기</button>
-						</div>
+    <div th:each="term : ${termsList}" class="terms-detail">
+    <label class="checkbox-label"> 
+        <input type="checkbox" 
+               name="agreedTermIds" 
+               th:value="${term.id}"
+               th:classappend="${term.isRequired == 'Y'} ? 'required-term' : ''"
+               th:required="${term.isRequired == 'Y'}"> 
+        
+        <span th:text="${term.isRequired == 'Y' ? '[필수] ' + term.title : '[선택] ' + term.title}">
+            약관 제목
+        </span>
+    </label>
+    
+    <button type="button" class="terms-link" 
+            th:attr="data-term-id=${term.id}">보기</button>
 
-						<div class="terms-detail">
-							<label class="checkbox-label"> <input type="checkbox"
-								class="required-term" id="agreePrivacy" required> <span>[필수]
-									개인정보 수집 및 이용 동의</span>
-							</label>
-							<button type="button" class="terms-link" data-modal="privacy">보기</button>
-						</div>
+    <div th:id="'term-content-' + ${term.id}" 
+         style="display:none;" 
+         th:text="${term.content}"></div>
+</div>
 
-						<div class="terms-detail">
-							<label class="checkbox-label"> <input type="checkbox"
-								id="agreeMarketing"> <span>[선택] 마케팅 정보 수신 동의</span>
-							</label>
-							<button type="button" class="terms-link" data-modal="marketing">보기</button>
-						</div>
+    <div class="terms-detail">
+        <label class="checkbox-label"> 
+            <input type="checkbox" id="agreeAge" class="required-term" required> 
+            <span>[필수] 만 14세 이상입니다</span>
+        </label>
+    </div>
 
-						<div class="terms-detail">
-							<label class="checkbox-label"> <input type="checkbox"
-								id="agreeAge" class="required-term" required> <span>[필수]
-									만 14세 이상입니다</span>
-							</label>
-						</div>
-
-						<span class="error-message" id="termsError"></span>
-					</div>
+    <span class="error-message" id="termsError"></span>
+</div>
 
 					<!-- 회원가입 버튼 -->
 					<button type="submit" class="btn-signup" id="signupBtn">

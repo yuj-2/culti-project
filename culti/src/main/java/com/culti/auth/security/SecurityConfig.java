@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 	private final CustomOAuth2UserService customOAuth2UserService;
+	private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 	@Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -40,7 +41,8 @@ public class SecurityConfig {
             .csrfTokenRepository(new HttpSessionCsrfTokenRepository())) // CSRF 토큰 관리 개선
         .oauth2Login(oauth2 -> oauth2
         	    .loginPage("/auth/login")
-        	    .defaultSuccessUrl("/home", true) // 성공 시 루트(/)로 이동, true는 무조건 이 경로로 가라는 뜻
+        	    .successHandler(oAuth2LoginSuccessHandler)
+        	    //.defaultSuccessUrl("/home", true) // 성공 시 루트(/)로 이동, true는 무조건 이 경로로 가라는 뜻
         	    .userInfoEndpoint(userInfo -> userInfo
         	        .userService(customOAuth2UserService)
         	    )
