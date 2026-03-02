@@ -30,7 +30,8 @@ public class SecurityConfig {
         
      // --- CSRF 설정 (기존 로직 유지하며 세션 저장소만 명시) ---
         .csrf((csrf) -> csrf
-            .ignoringRequestMatchers(new AntPathRequestMatcher("/payment/verify/**"))
+        		.ignoringRequestMatchers(new AntPathRequestMatcher("/payment/verify/**"), 
+                        new AntPathRequestMatcher("/payment/verify")) // 단일 경로도 포함
             .csrfTokenRepository(new HttpSessionCsrfTokenRepository())) // CSRF 토큰 관리 개선
         
         // --- 세션 정책 추가 (응답 커밋 전 세션 생성 보장) ---

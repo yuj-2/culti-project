@@ -23,12 +23,17 @@ public class PaymentController {
     @PostMapping("/verify")
     public ResponseEntity<?> verifyAndSave(@RequestBody Map<String, Object> paymentData, 
                                           @AuthenticationPrincipal UserDetails user) {
-        // 세션에서 로그인한 사용자의 이메일을 가져옵니다.
+        // 세션 정보 확인
+        if (user == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
         String loginEmail = user.getUsername();
         
-        // 결제 데이터와 유저 이메일을 서비스로 넘겨 DB에 저장합니다.
-        paymentService.processPayment(paymentData, loginEmail);
+        // [수정] 결제 정보를 처리하고 생성된 bookingId를 반환받습니다.
+        Long bookingId = paymentService.processPayment(paymentData, loginEmail);
         
-        return ResponseEntity.ok("SUCCESS");
+        // [수정] JSON 형태로 전송하여 payment.js가 리다이렉트 할 수 있게 합니다.
+        return ResponseEntity.ok(Map.of("status", "SUCCESS", "bookingId", bookingId));
     }
 }

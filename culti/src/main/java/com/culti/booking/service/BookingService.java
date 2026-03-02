@@ -1,12 +1,13 @@
 package com.culti.booking.service;
 
-import java.util.UUID;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.culti.auth.entity.User; // auth.User 엔티티 사용 확인
+import com.culti.auth.entity.User;
 import com.culti.auth.repository.UserRepository;
 import com.culti.booking.dto.BookingRequestDTO;
 import com.culti.booking.dto.BookingResponseDTO;
@@ -31,8 +32,6 @@ public class BookingService {
 
     @Transactional
     public Long createBooking(BookingRequestDTO requestDTO, String email) {
-        
-        // [방어 코드 1] 필수 파라미터 null 체크 (500 에러 방지)
         if (requestDTO.getScheduleId() == null) {
             throw new IllegalArgumentException("상영 회차 정보(scheduleId)가 누락되었습니다.");
         }
@@ -40,18 +39,15 @@ public class BookingService {
             throw new IllegalArgumentException("선택된 좌석 정보(seatIds)가 없습니다.");
         }
 
-        // 1. 유저 및 스케줄 조회
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저 정보 없음: " + email));
 
         Schedule schedule = scheduleRepository.findById(requestDTO.getScheduleId())
                 .orElseThrow(() -> new IllegalArgumentException("회차 정보 없음: " + requestDTO.getScheduleId()));
 
-        // 2. Booking 객체 생성 (Builder 사용)
         Booking booking = Booking.builder()
                 .user(user)
                 .schedule(schedule)
-                // 기존 bookingNumber 필드 대신 merchantUid 사용
                 .merchantUid("CULTI_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
                 .totalPrice(requestDTO.getTotalPrice())
                 .status("PAID")
@@ -61,7 +57,6 @@ public class BookingService {
                 .discountAmount(0)
                 .build();
 
-        // 3. 좌석 연결 (BookingSeat 저장)
         for (String seatIdStr : requestDTO.getSeatIds()) {
             if (seatIdStr == null || seatIdStr.trim().isEmpty()) continue;
 
@@ -74,25 +69,38 @@ public class BookingService {
                     .booking(booking)
                     .build();
             
-            // Booking 엔티티의 리스트에 추가 (CascadeType.ALL 설정 확인 필요)
             booking.getBookingSeats().add(bookingSeat);
         }
 
-        // 4. 저장 및 ID 반환
         return bookingRepository.save(booking).getBookingId();
     }
 
+    /**
+     * [수정 완료] 에러 해결 버전
+     */
     @Transactional(readOnly = true)
     public BookingResponseDTO getBookingResult(Long id) {
+        // 1. 예약 정보 조회
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("예매 내역 없음: " + id));
 
+        // 2. 좌석 이름 리스트 추출 (seatRow와 seatCol을 합침)
+        // seatRow(String) + seatCol(Integer) 조합 예: "A" + 1 = "A1"
+        List<String> seatNames = booking.getBookingSeats().stream()
+                .map(bs -> {
+                    Seat seat = bs.getSeat();
+                    return seat.getSeatRow() + seat.getSeatCol(); 
+                })
+                .collect(java.util.stream.Collectors.toList());
+
+        // 3. DTO 빌더 구성
         return BookingResponseDTO.builder()
-                .bookingNumber(booking.getMerchantUid()) // merchantUid 필드 매핑
-                .totalPrice(booking.getTotalPrice())
+                .bookingNumber(booking.getMerchantUid())
+                // Schedule 엔티티 구조에 따라 getContent() 확인
                 .movieTitle(booking.getSchedule().getContent().getTitle()) 
-                .showTime(booking.getSchedule().getShowTime().toString())
-                .bookingSeats(booking.getBookingSeats()) 
+                .showTime(booking.getSchedule().getStartTime().toString())
+                .totalPrice(booking.getTotalPrice())
+                .seatNames(seatNames) 
                 .build();
     }
 }
