@@ -28,8 +28,15 @@ function executePortOne(payMethod) {
     // [수정] HTML에서 넘겨준 변수 사용 (PORTONE_IMP_ID)
     IMP.init(PORTONE_IMP_ID); 
 
+
     // [수정] HTML에서 넘겨준 변수 사용 (PORTONE_CHANNELS)
     const CHANNEL_KEYS = PORTONE_CHANNELS;
+
+    // 관리자 센터의 채널키를 객체로 관리
+    const CHANNEL_KEYS = {
+
+    };
+
 
     const buyerEmail = document.querySelector('input[name="userEmail"]')?.value;
     const buyerName = "CULTI_USER";

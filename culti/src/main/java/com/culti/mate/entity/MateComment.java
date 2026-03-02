@@ -1,8 +1,6 @@
 package com.culti.mate.entity;
 
-import java.time.LocalDateTime;
-
-import org.hibernate.annotations.CreationTimestamp;
+import com.culti.auth.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,7 +24,7 @@ import lombok.ToString;
 @Getter
 @ToString(exclude =  {"writer", "post"})
 @Table(name = "mate_comment")
-public class MateComment {
+public class MateComment extends PostBaseEntity{
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,13 +33,13 @@ public class MateComment {
 	@Column(nullable = false)
 	private String body;
 	
-	@Column(nullable = false)
-	@CreationTimestamp
-	private LocalDateTime createdAt;
+//	@Column(nullable = false)
+//	@CreationTimestamp
+//	private LocalDateTime createdAt;
 	
-//  @ManyToOne(fetch = FetchType.LAZY)
-//  @JoinColumn(name = "writer_id", nullable = false)
-//  private Users writer;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "writer_id", nullable = false)
+  private User writer;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "post_id", nullable = false)

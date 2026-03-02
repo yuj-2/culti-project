@@ -111,7 +111,7 @@ public class InquiryController {
     }
     
     
- // FAQ 목록 메서드 수정 (페이징 + 카테고리 필터 추가)
+    // FAQ 목록 메서드 수정 (페이징 + 카테고리 필터 추가)
     @GetMapping("/faq")
     public String faqList(Model model, 
         @RequestParam(value = "category", required = false) String category,
@@ -130,6 +130,13 @@ public class InquiryController {
         model.addAttribute("categories", List.of("전체", "예매", "전시", "취소/환불", "동행", "회원"));
         
         return "support/faq";
+    }
+    
+    
+    // 환불 안내 페이지 매핑
+    @GetMapping("/refund")
+    public String refundInfo() {
+        return "support/refund"; 
     }
     
 }
