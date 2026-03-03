@@ -55,4 +55,9 @@ public class Schedule {
     // 6. 회차 (예: 1회차, 2회차)
     @Column(name = "session_num", nullable = false)
     private Integer sessionNum;
+    
+    // 상세 장소 추가 (예: 1관, 제 1전시실)
+    @Column(length = 50, name = "room_name")
+    private String roomName;
+    
 }
