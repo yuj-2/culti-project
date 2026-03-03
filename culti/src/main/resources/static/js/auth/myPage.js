@@ -26,21 +26,45 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelEdit = document.getElementById('cancelEdit');
 	
 	// ===========동행매칭
-	const currentSectionInput = document.getElementById('currentSection');
-	const currentSection = currentSectionInput ? currentSectionInput.value : null;
+		
+	// ===== URL 파라미터로 초기 탭 결정 =====
+	const params = new URLSearchParams(window.location.search);
+	const mateSectionParam = params.get("mateSection");
 
-	if (currentSection === 'mate') {
-	  // 사이드바 active 변경
-	  navItems.forEach(nav => nav.classList.remove('active'));
-	  const mateNav = document.querySelector('.nav-item[data-tab="mate"]');
-	  if (mateNav) mateNav.classList.add('active');
+	if (mateSectionParam === "mate") {
 
-	  // 컨텐츠 active 변경
-	  tabContents.forEach(c => c.classList.remove('active'));
-	  const mateSectionEl = document.getElementById('mate');
-	  if (mateSectionEl) mateSectionEl.classList.add('active');
-	}
+		  // 사이드바 active 변경
+		  navItems.forEach(nav => nav.classList.remove('active'));
+		  const mateNav = document.querySelector('.nav-item[data-tab="mate"]');
+		  if (mateNav) mateNav.classList.add('active');
+
+		  // 컨텐츠 active 변경
+		  tabContents.forEach(c => c.classList.remove('active'));
+		  const mateSectionEl = document.getElementById('mate');
+		  if (mateSectionEl) mateSectionEl.classList.add('active');
+		}
 	
+		const mateTabParam = params.get("mateTab");
+
+			if (mateTabParam) {
+
+			  const mateTabs = document.querySelectorAll('#mate .tabs .tab[data-mate-tab]');
+			  const matePanels = document.querySelectorAll('#mate .mate-panel[data-mate-tab]');
+
+			  mateTabs.forEach(t => t.classList.remove('active'));
+			  matePanels.forEach(p => p.classList.remove('active'));
+
+			  const targetTab = document.querySelector(
+			    `#mate .tabs .tab[data-mate-tab="${mateTabParam}"]`
+			  );
+			  const targetPanel = document.querySelector(
+			    `#mate .mate-panel[data-mate-tab="${mateTabParam}"]`
+			  );
+
+			  if (targetTab) targetTab.classList.add('active');
+			  if (targetPanel) targetPanel.classList.add('active');
+			}
+			
 	// 동행매칭 내부 탭(받은/내가신청) : 리로드 없이 토글 
 	const mateTabs = document.querySelectorAll('#mate .tabs .tab[data-mate-tab]');
 	const matePanels = document.querySelectorAll('#mate .mate-panel[data-mate-tab]');
@@ -62,6 +86,14 @@ document.addEventListener('DOMContentLoaded', function() {
 	  });
 	});
 	
+	// confirm
+		document.querySelectorAll('.js-confirm').forEach(btn => {
+		  btn.addEventListener('click', (e) => {
+		    const msg = btn.dataset.msg || '진행할까요?';
+		    if (!confirm(msg)) e.preventDefault();
+		  });
+		});
+		
 	// ===========동행매칭 끝=====
 
     // ========== 네비게이션 ==========
