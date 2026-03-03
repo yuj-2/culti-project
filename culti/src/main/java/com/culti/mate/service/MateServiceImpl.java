@@ -26,7 +26,6 @@ import com.culti.mate.entity.MatePost;
 import com.culti.mate.enums.MateApplyStatus;
 import com.culti.mate.enums.MatePostCategory;
 import com.culti.mate.enums.MatePostStatus;
-import com.culti.mate.matePage.Criteria;
 import com.culti.mate.repository.MateApplyRepository;
 import com.culti.mate.repository.MateRepository;
 
@@ -42,6 +41,8 @@ public class MateServiceImpl implements MateService {
 	private final UserRepository userRepository;
 	
 	private final MateApplyRepository mateApplyRepository;
+	
+	
 
 	public Page<MatePost> getList(int page, int size){
 		//                                  0(1번페이지)
@@ -429,10 +430,26 @@ public class MateServiceImpl implements MateService {
 		  return map;
 		}
 
-	@Override
-	public Page<MatePostDTO> getPostListDto(Criteria criteria) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	 @Override
+	 public List<MatePost> getLatestPosts(int limit) {
+		    Pageable pageable = PageRequest.of(0, limit);
+		    return mateRepository
+		            .findByStatusOrderByCreatedAtDesc(MatePostStatus.OPEN, pageable)
+		            .getContent();
+		}
+
+	 @Override
+	 public Map<Long, Long> getAcceptedCountMap(List<MatePost> posts) {
+	     if (posts == null || posts.isEmpty()) {
+	         return java.util.Collections.emptyMap();
+	     }
+
+	     // 여기서 DB count 조회해서 map 만들기
+	     // return resultMap;
+
+	     return java.util.Collections.emptyMap(); // 임시라도 null 금지
+	 }
+
+
 	
 }
