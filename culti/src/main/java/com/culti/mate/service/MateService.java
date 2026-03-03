@@ -45,18 +45,20 @@ public interface MateService {
 		return entity;
 	}
 
-	// Entity -> DTO 변환 메서드
-	default MatePostDTO entityToDto(MatePost entity, LocalDateTime eventAt) {
-
+	// Entity -> DTO 변환 메서드 (acceptedCount 포함)
+	default MatePostDTO entityToDto(MatePost entity, long acceptedCount) {
 	    return MatePostDTO.builder()
 	            .postId(entity.getPostId())
 	            .title(entity.getTitle())
 	            .category(entity.getCategory())
-	            .eventAt(eventAt)
+	            .eventAt(entity.getEventAt())
 	            .location(entity.getLocation())
 	            .maxPeople(entity.getMaxPeople())
 	            .description(entity.getDescription())
 	            .writerNickname(entity.getWriter().getNickname())
+	            .status(entity.getStatus())
+	            .createdAt(entity.getCreatedAt())
+	            .acceptedCount(acceptedCount)
 	            .build();
 	}
 	
@@ -134,7 +136,10 @@ public interface MateService {
 	
 	Page<MyPostMypageDTO> getMyPostsDto(String email, int page, int size);
 
-	Page<MatePostDTO> getPostListDto(Criteria criteria);
 
 	Map<Long, Long> getAcceptedCountMap(Page<MatePost> paging);
+
+	Map<Long, Long> getAcceptedCountMap(List<MatePost> posts);
+	
+	public List<MatePost> getLatestPosts(int limit);
 }

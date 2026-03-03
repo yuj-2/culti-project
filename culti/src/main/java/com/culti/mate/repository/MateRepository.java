@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import com.culti.mate.DTO.MatePostDTO;
 import com.culti.mate.entity.MatePost;
 import com.culti.mate.enums.MatePostCategory;
+import com.culti.mate.enums.MatePostStatus;
 
 public interface MateRepository extends JpaRepository<MatePost, Long> {
 
@@ -58,5 +59,10 @@ public interface MateRepository extends JpaRepository<MatePost, Long> {
 			order by ma.createdAt desc
 			""")
 			List<Object[]> findPostIdAndStatusByApplicantEmail(@Param("email") String email);
+
+
+
+		Page<MatePost> findAllByOrderByCreatedAtDesc(Pageable pageable);
+		Page<MatePost> findByStatusOrderByCreatedAtDesc(MatePostStatus status, Pageable pageable);
 
 }
