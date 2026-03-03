@@ -1,5 +1,8 @@
 package com.culti.auth.controller;
 
+import java.util.Map;
+
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +16,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.culti.auth.dto.UserDTO;
 import com.culti.auth.service.UserService;
+import com.culti.mate.DTO.MateApplyMypageDTO;
+import com.culti.mate.DTO.MatePostDTO;
+import com.culti.mate.DTO.MyPostMypageDTO;
+import com.culti.mate.entity.MatePost;
+import com.culti.mate.matePage.Criteria;
 import com.culti.mate.service.MateService;
 
 import lombok.RequiredArgsConstructor;
@@ -78,19 +86,40 @@ public class AuthController {
 		@GetMapping("/myPage")
 		public void myPage(@AuthenticationPrincipal UserDetails userDetails, Model model
 									, @RequestParam(name="mateTab", defaultValue="received") String mateTab,
-							          @RequestParam(name="mateSection", defaultValue="mate") String mateSection) {
+								    @RequestParam(name="mateSection", defaultValue="mate") String mateSection,
+								    @RequestParam(name="pageMyPosts", defaultValue="1") int pageMyPosts,
+								    @RequestParam(name="pageApplied", defaultValue="1") int pageApplied,
+								    @RequestParam(name="pageReceived", defaultValue="1") int pageReceived,
+								    @RequestParam(name="size", defaultValue="9") int size,
+								    Criteria criteria){
 			
 			String email=userDetails.getUsername();
 			UserDTO userDTO=this.userService.findByEmail(email);
 			model.addAttribute("user",userDTO);
 			
-			// ===== 동행매칭
-			model.addAttribute("mateTab", mateTab);
-			model.addAttribute("mateSection", mateSection);
-			
-			// ====동행매칭 DB 조회해서 담기
-		    model.addAttribute("receivedApps", mateService.getReceivedApps(email));
-		    model.addAttribute("sentApps", mateService.getSentApps(email));
+			// ===== 동행매칭==================
+			// 탭 상태
+		    model.addAttribute("mateTab", mateTab);
+		    model.addAttribute("mateSection", mateSection);
+
+		    // 탭별 페이징 데이터 (3개 Page로 통일)
+		    Page<MyPostMypageDTO> myPostsPaging = mateService.getMyPostsDto(email, pageMyPosts, size);
+		    model.addAttribute("myPostsPaging", myPostsPaging);
+		    Page<MateApplyMypageDTO> appliedPaging = mateService.getMyApplied(email, pageApplied, size);
+		    Page<MateApplyMypageDTO> receivedPaging = mateService.getReceivedApplies(email, pageReceived, size);
+
+		    model.addAttribute("appliedPaging", appliedPaging);
+		    model.addAttribute("receivedPaging", receivedPaging);
+
+		    // 현재 페이지 값 (링크 만들 때 유지)
+		    model.addAttribute("pageMyPosts", pageMyPosts);
+		    model.addAttribute("pageApplied", pageApplied);
+		    model.addAttribute("pageReceived", pageReceived);
+		    model.addAttribute("size", size);
+		    // ====동행매칭=====================
+		    
+
+		    
 			
 		}
 		
@@ -108,7 +137,7 @@ public class AuthController {
 	    public String accept(@PathVariable("id") Long applyId,
 	                         @AuthenticationPrincipal UserDetails userDetails) {
 	        mateService.accept(applyId, userDetails.getUsername());
-	        return "redirect:/myPage?mateSection=mate&mateTab=received";
+	        return "redirect:/auth/myPage?mateSection=mate&mateTab=received";
 	    }
 
 	    // 거절
@@ -117,7 +146,7 @@ public class AuthController {
 	    public String reject(@PathVariable("id") Long applyId,
 	                         @AuthenticationPrincipal UserDetails userDetails) {
 	        mateService.reject(applyId, userDetails.getUsername());
-	        return "redirect:/myPage?mateSection=mate&mateTab=received";
+	        return "redirect:/auth/myPage?mateSection=mate&mateTab=received";
 	    }
 
 	    // 취소(내가 신청한 것)
@@ -126,7 +155,8 @@ public class AuthController {
 	    public String cancel(@PathVariable("id") Long applyId,
 	                         @AuthenticationPrincipal UserDetails userDetails) {
 	        mateService.cancel(applyId, userDetails.getUsername());
-	        return "redirect:/myPage?mateSection=mate&mateTab=sent";
+	        return "redirect:/auth/myPage?mateSection=mate&mateTab=sent";
 	    }
+//		=================동행매칭======================	    
 	
 }

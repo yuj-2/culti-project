@@ -207,7 +207,7 @@
 .mate-manage .badge-pending { background: #f59e0b; }
 .mate-manage .badge-accepted { background: #22c55e; }
 .mate-manage .badge-rejected { background: #ef4444; }
-.mate-manage .badge-cancelled { background: #9ca3af; }
+.mate-manage .badge-canceled { background: #9ca3af; }
 
 .mate-manage .button {
   padding: 9px 12px;
@@ -255,3 +255,166 @@
 /* 동행매칭 내부 탭 패널 show/hide */
 #mate .mate-panel { display: none; }
 #mate .mate-panel.active { display: block; }
+
+/* 버튼 그룹: 폼들이 줄 맞춰지고 간격 일정하게 */
+.mate-manage .action-buttons {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* 폼이 기본 block이라 줄바꿈 생기는 거 방지 */
+.mate-manage .action-buttons form {
+  display: inline-flex;
+  margin: 0;
+}
+
+/* 버튼 아이콘 정리 */
+.mate-manage .button i {
+  font-size: 14px;
+  margin-right: 6px;
+}
+
+/* 거절/취소 버튼은 '강한 빨강 덩어리' 대신 ghost 스타일로 */
+.mate-manage .button-ghost {
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+  box-shadow: none;
+}
+
+.mate-manage .button-ghost:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.55);
+}
+
+/* 수락 버튼도 더 고급스럽게 그라데이션 살짝 */
+.mate-manage .button-success {
+  background: linear-gradient(180deg, #34d399, #22c55e);
+  margin-bottom: 5px;
+}
+
+/* 접근성: 포커스 링 */
+.mate-manage .button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(80, 51, 150, 0.18);
+}
+
+/* 모바일에서 버튼이 너무 뭉개지지 않게 */
+@media (max-width: 480px) {
+  .mate-manage .action-buttons {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .mate-manage .button {
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+  
+  
+}
+
+
+/* ===== 날짜 칩 영역 ===== */
+.mate-manage .meta-dates {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 칩 기본 */
+.mate-manage .date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  border: 1px solid rgba(80, 51, 150, 0.14);
+  background: rgba(255, 255, 255, 0.85);
+  color: #4b5563;
+}
+
+/* 아이콘 */
+.mate-manage .date-chip i {
+  font-size: 12px;
+  opacity: 0.9;
+  color: #503396;
+}
+
+/* 날짜 글씨(굵게) */
+.mate-manage .date-chip strong {
+  font-weight: 900;
+  color: #111827;
+}
+
+/* 신청 칩 강조 */
+.mate-manage .date-chip--apply {
+  background: rgba(80, 51, 150, 0.06);
+  border-color: rgba(80, 51, 150, 0.18);
+}
+
+/* 처리 칩 강조(초록 느낌) */
+.mate-manage .date-chip--decided {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.22);
+}
+
+.mate-manage .date-chip--decided i {
+  color: #16a34a;
+}
+
+.mate-manage .application-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 헤더를 좌/우로 딱 나누기 */
+.mate-manage .application-header{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: start;
+}
+
+/* 왼쪽 정보 영역 */
+.mate-manage .application-info{
+  min-width: 240px;
+}
+
+/* 오른쪽 액션 영역: 상태/버튼을 오른쪽으로 정렬 */
+.mate-manage .application-actions{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+/* 신청자 라인 */
+.mate-manage .meta-top .meta-line{
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* 날짜칩 줄 */
+.mate-manage .meta-dates{
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 모바일에서는 위아래로 */
+@media (max-width: 768px){
+  .mate-manage .application-header{
+    grid-template-columns: 1fr;
+  }
+  .mate-manage .application-actions{
+    align-items: flex-start;
+  }
+}
+

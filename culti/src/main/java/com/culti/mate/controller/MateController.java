@@ -1,7 +1,9 @@
 package com.culti.mate.controller;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,10 +22,15 @@ import com.culti.auth.dto.UserDTO;
 import com.culti.auth.service.UserService;
 import com.culti.mate.DTO.MatePostDTO;
 import com.culti.mate.entity.MatePost;
+import com.culti.mate.enums.MateApplyStatus;
 import com.culti.mate.matePage.Criteria;
 import com.culti.mate.matePage.PageDTO;
+import com.culti.mate.repository.MateRepository;
 import com.culti.mate.service.MateService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 
@@ -34,6 +41,7 @@ public class MateController {
 	
 	private final MateService mateService; 
 	private final UserService userService;
+	private final MateRepository mateRepository;
 
 	@GetMapping("/mate")
 	public String mate(Model model
@@ -41,15 +49,18 @@ public class MateController {
 			, @RequestParam(value = "page", defaultValue = "1") int page
 			, @RequestParam(value = "size", defaultValue = "9") int size
 			, @RequestParam(value="category", defaultValue="all") String category
-			) {
+			) throws Exception {
 		 List<Long> appliedPostIds = Collections.emptyList();
 		
+		 Map<Long, MateApplyStatus> appliedStatusMap = Collections.emptyMap();
+		 
 		if (userDetails != null) {
 	        String email = userDetails.getUsername();
 	        UserDTO userDTO = userService.findByEmail(email);
 	        model.addAttribute("user", userDTO);
 	        
 	        appliedPostIds = mateService.getAppliedPostIds(email);
+	        appliedStatusMap = mateService.getAppliedStatusMap(email);
 	    }
 		
 		Page<MatePost> paging;
@@ -58,9 +69,16 @@ public class MateController {
 	    } else {
 	        paging = mateService.getListByCategory(category, page, size);
 	    }
+	    
+	    Map<Long, Long> acceptedCountMap = mateService.getAcceptedCountMap(paging);
+	    
 		model.addAttribute("paging", paging);
 		model.addAttribute("category", category);
 		model.addAttribute("appliedPostIds", appliedPostIds);
+		model.addAttribute("appliedStatusMap", appliedStatusMap);
+		model.addAttribute("acceptedCountMap", acceptedCountMap);
+		model.addAttribute("appliedStatusMapJson", new ObjectMapper().writeValueAsString(appliedStatusMap));
+	    
 		
 		// [1] 2 3 4 5 6 7 8 9 10 >
 		Criteria criteria = new Criteria(page, size);
@@ -76,6 +94,10 @@ public class MateController {
 	public String addPost(@ModelAttribute MatePostDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 		
+		LocalDate date = LocalDate.parse(dto.getDate());
+	    if (date != null && date.isBefore(LocalDate.now())) {
+	        throw new IllegalArgumentException("과거 날짜는 선택할 수 없습니다.");
+	    }
 		String email = userDetails.getUsername();
 		mateService.addPost(dto, email); // writer 세팅 포함해서 저장
 		
@@ -85,12 +107,21 @@ public class MateController {
 	// 게시글 삭제
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/deletePost")
-	public String deletePost(@RequestParam("postId") Long postId
-										,@AuthenticationPrincipal UserDetails userDetails) {
-		String email = userDetails.getUsername();
-		this.mateService.delete(postId, email);
-		
-		return "redirect:/mate/mate";
+	public String deletePost(@RequestParam("postId") Long postId,
+	                         @AuthenticationPrincipal UserDetails userDetails,
+	                         HttpServletRequest request) {
+
+	    mateService.delete(postId, userDetails.getUsername());
+
+	    String referer = request.getHeader("Referer");
+
+	    // 마이페이지에서 삭제한 경우 → 마이페이지 "내 게시글" 탭으로 강제 복귀
+	    if (referer != null && referer.contains("/auth/myPage")) {
+	        return "redirect:/auth/myPage?mateSection=mate&mateTab=myPosts";
+	    }
+
+	    // 그 외(게시판에서 삭제) → 원래 페이지로
+	    return "redirect:" + (referer != null ? referer : "/mate/mate");
 	}
 	
 	// 참여신청
@@ -116,9 +147,9 @@ public class MateController {
 
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/updateComment")
-	public String updateComment(@RequestParam Long commentId,
-								@RequestParam("comment") String comment,
-	                            @AuthenticationPrincipal UserDetails userDetails) {
+	public String updateComment(@RequestParam("commentId") Long commentId,
+            @RequestParam("comment") String comment,
+            @AuthenticationPrincipal UserDetails userDetails) {
 	    String email = userDetails.getUsername();
 	    mateService.updateComment(commentId, email, comment);
 	    return "redirect:/mate/mate";
@@ -126,60 +157,26 @@ public class MateController {
 
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/deleteComment")
-	public String deleteComment(@RequestParam Long commentId,
-	                            @AuthenticationPrincipal UserDetails userDetails) {
+	public String deleteComment(@RequestParam("commentId") Long commentId,
+            @AuthenticationPrincipal UserDetails userDetails) {
 	    String email = userDetails.getUsername();
 	    mateService.deleteComment(commentId, email);
 	    return "redirect:/mate/mate";
 	}
 	
-	
-	
-	
-	
-		
-//	마이페이지로 옮겨야 함
-	@GetMapping("/mateMypage")
-	public void mateMypage(@RequestParam(name="tab", defaultValue="received") String tab,
-							        @RequestParam(name="section", defaultValue="mate") String section,
-							        @AuthenticationPrincipal UserDetails userDetails,
-							        Model model) {
-		String email=userDetails.getUsername();
-		UserDTO userDTO=this.userService.findByEmail(email);
-		model.addAttribute("user",userDTO);
-		model.addAttribute("tab", tab);
-		model.addAttribute("section", section);
+	@GetMapping("/open/{postId}")
+	public String openPost(@PathVariable("postId") Long postId,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
 
-	    // DB 조회해서 담기
-	    model.addAttribute("receivedApps", mateService.getReceivedApps(email));
-	    model.addAttribute("sentApps", mateService.getSentApps(email));
+	    MatePost post = mateRepository.findById(postId)
+	        .orElseThrow(() -> new IllegalArgumentException("게시글 없음: " + postId));
+
+	    // “all” 탭 기준으로 열고 싶으면 categoryOrNull = null
+	    int pageAll = mateService.calcPageForPost(postId, size, null);
+
+	    return "redirect:/mate/mate?category=all&page=" + pageAll + "&size=" + size + "&openPostId=" + postId;
 	}
 	
-	// 수락
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/{id}/accept")
-    public String accept(@PathVariable("id") Long applyId,
-                         @AuthenticationPrincipal UserDetails userDetails) {
-        mateService.accept(applyId, userDetails.getUsername());
-        return "redirect:/mate/mateMypage?mateSection=mate&tab=received";
-    }
 
-    // 거절
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/{id}/reject")
-    public String reject(@PathVariable("id") Long applyId,
-                         @AuthenticationPrincipal UserDetails userDetails) {
-        mateService.reject(applyId, userDetails.getUsername());
-        return "redirect:/mate/mateMypage?mateSection=mate&tab=received";
-    }
-
-    // 취소(내가 신청한 것)
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/{id}/cancel")
-    public String cancel(@PathVariable("id") Long applyId,
-                         @AuthenticationPrincipal UserDetails userDetails) {
-        mateService.cancel(applyId, userDetails.getUsername());
-        return "redirect:/myPage?section=mate&tab=sent";
-    }
 	
 }
