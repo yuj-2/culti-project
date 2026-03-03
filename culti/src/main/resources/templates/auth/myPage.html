@@ -415,6 +415,12 @@
 								</div>
 					          </div>
 					        </div>
+					        <button type="button"
+							        class="btn-more"
+							        data-more-btn
+							        th:if="${receivedPaging != null and receivedPaging.totalElements > 4}">
+							  더보기<i class="fa-solid fa-chevron-down"></i>
+							</button>
 					      </div>
 					
 					      <!-- 내가 신청한 것 (항상 렌더링 + active로 보여주기) -->
@@ -482,6 +488,12 @@
 								</div>
 					          </div>
 					        </div>
+					        <button type="button"
+							        class="btn-more"
+							        data-more-btn
+							       th:if="${appliedPaging != null and appliedPaging.totalElements > 3}">
+							  더보기
+							</button>
 					      </div>
 					      
 					      
@@ -550,6 +562,12 @@
 						      </div>
 						    </div>
 						  </div>
+						  <button type="button"
+						        class="btn-more"
+						        data-more-btn
+						        th:if="${myPostsPaging != null and myPostsPaging.totalElements > 4}">
+						  더보기
+						</button>
 						</div>
 					      
 					

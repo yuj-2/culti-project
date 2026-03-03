@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import com.culti.auth.entity.User;
 import com.culti.mate.DTO.MateApplyDTO;
 import com.culti.mate.DTO.MateApplyMypageDTO;
+import com.culti.mate.DTO.MateCommentDTO;
 import com.culti.mate.DTO.MatePostDTO;
 import com.culti.mate.DTO.MyPostMypageDTO;
 import com.culti.mate.DTO.PageResultDTO;
@@ -109,7 +110,6 @@ public interface MateService {
 
 	public void apply(Long postId, String email, String message);
 
-	public void addComment(Long postId, String email, String content);
 
 	public void updateComment(Long commentId, String email, String content);
 
@@ -142,4 +142,8 @@ public interface MateService {
 	Map<Long, Long> getAcceptedCountMap(List<MatePost> posts);
 	
 	public List<MatePost> getLatestPosts(int limit);
+	
+	List<MateCommentDTO> getComments(Long postId);
+	
+	MateCommentDTO addComment(Long postId, String email, String content);
 }
