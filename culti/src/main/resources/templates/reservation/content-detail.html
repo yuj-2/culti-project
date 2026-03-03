@@ -56,35 +56,45 @@
 
                     <div class="space-y-4 text-gray-700">
                         <div class="flex items-start gap-3">
-                            <i data-lucide="calendar" class="w-5 h-5 text-[#503396] mt-0.5 flex-shrink-0"></i>
-                            <div>
-                                <p class="font-medium text-gray-900">공연 기간</p>
-                                <p class="text-gray-600 mt-1" 
-                           th:text="${#temporals.format(content.startDate, 'yyyy.MM.dd')} + ' ~ ' + ${#temporals.format(content.endDate, 'yyyy.MM.dd')}">
-                        </p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-start gap-3">
-                            <i data-lucide="clock" class="w-5 h-5 text-[#503396] mt-0.5 flex-shrink-0"></i>
-                            <div>
-                                <p class="font-medium text-gray-900">공연 시간</p>
-                                
-                                <p class="text-gray-600 mt-1" th:if="${#lists.isEmpty(content.schedules)}">
-                                    상세 시간 미정
-                                </p>
-
-                                <div class="text-gray-600 mt-1 space-y-1" th:unless="${#lists.isEmpty(content.schedules)}">
-                                    <p th:each="schedule : ${content.schedules}">
-                                        <span class="font-semibold text-[#503396]" 
-                                              th:text="${#temporals.format(schedule.showTime, 'MM.dd')} + ' [' + ${schedule.sessionNum} + '회차] '">
-                                        </span>
-                                        <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')} + ' ~ ' + ${#temporals.format(schedule.endTime, 'HH:mm')}">
-                                        </span>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+						    <i data-lucide="calendar" class="w-5 h-5 text-[#503396] mt-0.5 flex-shrink-0"></i>
+						    <div>
+						        <p class="font-medium text-gray-900">
+						            <span th:if="${content.category == '영화'}">상영 기간</span>
+						            <span th:if="${content.category == '공연'}">공연 기간</span>
+						            <span th:if="${content.category == '전시'}">전시 기간</span>
+						            <span th:if="${content.category == '팝업스토어'}">운영 기간</span>
+						        </p>
+						        <p class="text-gray-600 mt-1" 
+						           th:text="${#temporals.format(content.startDate, 'yyyy.MM.dd')} + ' ~ ' + ${#temporals.format(content.endDate, 'yyyy.MM.dd')}">
+						        </p>
+						    </div>
+						</div>
+						
+						<div class="flex items-start gap-3">
+						    <i data-lucide="clock" class="w-5 h-5 text-[#503396] mt-0.5 flex-shrink-0"></i>
+						    <div>
+						        <p class="font-medium text-gray-900">
+						            <span th:if="${content.category == '영화'}">상영 시간</span>
+						            <span th:if="${content.category == '공연'}">공연 시간</span>
+						            <span th:if="${content.category == '전시'}">전시 시간</span>
+						            <span th:if="${content.category == '팝업스토어'}">운영 시간</span>
+						        </p>
+						        
+						        <p class="text-gray-600 mt-1" th:if="${#lists.isEmpty(content.schedules)}">
+						            상세 시간 미정
+						        </p>
+						
+						        <div class="text-gray-600 mt-1 space-y-1" th:unless="${#lists.isEmpty(content.schedules)}">
+						            <p th:each="schedule : ${content.schedules}">
+						                <span class="font-semibold text-[#503396]" 
+						                      th:text="${#temporals.format(schedule.showTime, 'MM.dd')} + ' [' + ${schedule.sessionNum} + '회차] '">
+						                </span>
+						                <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')} + ' ~ ' + ${#temporals.format(schedule.endTime, 'HH:mm')}">
+						                </span>
+						            </p>
+						        </div>
+						    </div>
+						</div>
                         
                         <div class="flex items-start gap-3">
                             <i data-lucide="map-pin" class="w-5 h-5 text-[#503396] mt-0.5 flex-shrink-0"></i>
