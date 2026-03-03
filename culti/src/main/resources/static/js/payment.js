@@ -6,10 +6,59 @@
 
     const MY_IMP_CODE = "imp06217828"; // 가맹점 식별코드
 
+<<<<<<< HEAD
     function init() {
         if (window.IMP) {
             window.IMP.init(MY_IMP_CODE);
             console.log("✅ 포트원 초기화 완료:", MY_IMP_CODE);
+=======
+/**
+ * 포트원 결제 실행 (채널 키 방식 최적화)
+ */
+function executePortOne(payMethod) {
+    const IMP = window.IMP;
+    // [중요] 관리자 센터의 '내 식별코드'와 일치하는지 다시 확인하세요.
+    IMP.init("imp06217828"); 
+
+    // 관리자 센터의 채널키를 객체로 관리
+    const CHANNEL_KEYS = {
+      
+    };
+
+    // 시큐리티가 적용된 HTML 폼에서 이메일 정보 추출
+    const buyerEmail = document.querySelector('input[name="userEmail"]')?.value;
+    const buyerName = "CULTI_USER"; // 필요 시 세션 유저 이름으로 연동
+
+    if (!buyerEmail) {
+        alert("로그인 세션이 만료되었거나 정보가 없습니다. 다시 로그인해 주세요.");
+        return;
+    }
+
+    // 결제 수단 대문자 변환하여 키 매칭
+    const selectedKey = CHANNEL_KEYS[payMethod.toUpperCase()];
+    
+    if (!selectedKey) {
+        alert("해당 결제 수단의 채널 키 설정이 필요합니다.");
+        return;
+    }
+
+    // V2 방식: pg/pay_method 파라미터 없이 channelKey만 사용
+    let payConfig = {
+        channelKey: selectedKey,
+        merchant_uid: "CULTI_" + new Date().getTime(),
+        name: currentPaymentData.title,
+        amount: currentPaymentData.amount,
+        buyer_email: buyerEmail, 
+        buyer_name: buyerName,
+        m_redirect_url: window.location.origin + "/reservation/booking/seat"
+    };
+
+    console.log("결제 요청 데이터:", payConfig);
+
+    IMP.request_pay(payConfig, function (rsp) {
+        if (rsp.success) {
+            verifyAndSubmit(rsp);
+>>>>>>> branch 'feature/bookingstore' of https://github.com/yuj-2/culti-project.git
         } else {
             console.error("❌ iamport.js 로드 실패");
         }
