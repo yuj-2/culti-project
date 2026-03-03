@@ -1,10 +1,9 @@
 package com.culti.booking.controller;
 
+import java.security.Principal;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,18 +23,17 @@ public class PaymentController {
 
     @PostMapping("/verify")
     public ResponseEntity<?> verifyAndSave(
-            @RequestBody BookingRequestDTO dto,
-            @AuthenticationPrincipal UserDetails user) {
+            @RequestBody BookingRequestDTO requestDTO,
+            Principal principal
+    ) {
 
-        if (user == null) {
-            return ResponseEntity.status(401).body("로그인이 필요합니다.");
-        }
+        String email = principal.getName();
 
         Long bookingId = paymentService.processPayment(
-                dto,
-                user.getUsername(),
-                dto.getImpUid(),
-                dto.getMerchantUid()
+                requestDTO,
+                email,
+                requestDTO.getImpUid(),
+                requestDTO.getMerchantUid()
         );
 
         return ResponseEntity.ok(Map.of(
@@ -43,4 +41,4 @@ public class PaymentController {
                 "bookingId", bookingId
         ));
     }
-  }
+}

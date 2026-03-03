@@ -25,5 +25,14 @@ public class FaqService {
         return faqRepository.findByFaqCategory(category, pageable); 
     }
     
+    // [관리자 모드 - 자주 묻는 질문]
+    public void saveFaq(Faq faq) {
+        faqRepository.save(faq);
+    }
+
+    public void deleteFaq(Long id) {
+        faqRepository.deleteById(id);
+    }
+    
     
 }

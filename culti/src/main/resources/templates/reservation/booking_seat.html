@@ -109,19 +109,52 @@ iframe[name^="iamport"] {
                     </div>
                 </div>
                 
-                <div class="flex items-center justify-around bg-[#252525] px-10 py-6 rounded-2xl border border-gray-700 shadow-inner w-full">
-                    <div th:each="type : ${ {'adult', 'youth', 'senior', 'special'} }" class="flex items-center gap-4">
-                        <span class="text-[11px] font-bold text-gray-500 uppercase" 
-                              th:text="${type == 'adult' ? '성인' : type == 'youth' ? '청소년' : type == 'senior' ? '경로' : '우대'}">분류</span>
-                        <div class="counter-box scale-110">
-                            <button type="button" class="counter-btn" th:data-type="${type}" onclick="handleUpdateCount(this, -1)">-</button>
-                            <span th:id="|${type}-count|" class="count-val" 
-                                  th:style="${type == 'senior' || type == 'special'} ? 'color:#FFD700' : ''">0</span>
-                            <button type="button" class="counter-btn" th:data-type="${type}" onclick="handleUpdateCount(this, 1)">+</button>
-                        </div>
-                        <div th:if="${type != 'special'}" class="h-6 w-[1px] bg-gray-700 ml-4"></div>
-                    </div>
-                </div>
+       <div class="flex items-center justify-around bg-[#252525] px-10 py-6 rounded-2xl border border-gray-700 shadow-inner w-full">
+
+    <!-- 성인 -->
+    <div class="flex items-center gap-4">
+        <span class="text-[11px] font-bold text-gray-500 uppercase">성인</span>
+        <div class="counter-box scale-110">
+            <button type="button" class="counter-btn" data-type="adult" onclick="handleUpdateCount(this, -1)">-</button>
+            <span id="adult-count" class="count-val">0</span>
+            <button type="button" class="counter-btn" data-type="adult" onclick="handleUpdateCount(this, 1)">+</button>
+        </div>
+        <div class="h-6 w-[1px] bg-gray-700 ml-4"></div>
+    </div>
+
+    <!-- 청소년 -->
+    <div class="flex items-center gap-4">
+        <span class="text-[11px] font-bold text-gray-500 uppercase">청소년</span>
+        <div class="counter-box scale-110">
+            <button type="button" class="counter-btn" data-type="youth" onclick="handleUpdateCount(this, -1)">-</button>
+            <span id="youth-count" class="count-val">0</span>
+            <button type="button" class="counter-btn" data-type="youth" onclick="handleUpdateCount(this, 1)">+</button>
+        </div>
+        <div class="h-6 w-[1px] bg-gray-700 ml-4"></div>
+    </div>
+
+    <!-- 경로 -->
+    <div class="flex items-center gap-4">
+        <span class="text-[11px] font-bold text-gray-500 uppercase">경로</span>
+        <div class="counter-box scale-110">
+            <button type="button" class="counter-btn" data-type="senior" onclick="handleUpdateCount(this, -1)">-</button>
+            <span id="senior-count" class="count-val" style="color:#FFD700">0</span>
+            <button type="button" class="counter-btn" data-type="senior" onclick="handleUpdateCount(this, 1)">+</button>
+        </div>
+        <div class="h-6 w-[1px] bg-gray-700 ml-4"></div>
+    </div>
+
+    <!-- 우대 -->
+    <div class="flex items-center gap-4">
+        <span class="text-[11px] font-bold text-gray-500 uppercase">우대</span>
+        <div class="counter-box scale-110">
+            <button type="button" class="counter-btn" data-type="special" onclick="handleUpdateCount(this, -1)">-</button>
+            <span id="special-count" class="count-val" style="color:#FFD700">0</span>
+            <button type="button" class="counter-btn" data-type="special" onclick="handleUpdateCount(this, 1)">+</button>
+        </div>
+    </div>
+
+</div>
             </div>
 
             <div class="relative border-t border-gray-800 pt-16 text-center">
@@ -164,8 +197,11 @@ iframe[name^="iamport"] {
 
                 <div class="flex gap-2">
                     <button type="button" class="flex-1 py-4 bg-[#252525] rounded-2xl font-bold hover:bg-[#333] transition-colors border border-gray-700" onclick="history.back()">이전</button>
-                    <button id="submit-booking-btn" disabled onclick="handleBookingSubmit()"
-                            class="flex-[2] py-4 bg-gray-800 text-white rounded-2xl font-black cursor-not-allowed transition-all shadow-lg active:scale-95">결제하기</button>
+                    <button id="submit-booking-btn"
+        onclick="executePortOne('KAKAO')"
+        class="flex-[2] py-4 bg-[#503396] text-white rounded-2xl font-black transition-all shadow-lg active:scale-95 hover:bg-[#3f287a]">
+    결제하기
+</button>
                 </div>
             </div>
         </aside>
@@ -178,9 +214,9 @@ iframe[name^="iamport"] {
         <input type="hidden" id="input-seat-ids" value="">
     </div>
 
-    <div th:replace="~{layout/payment_modal :: paymentModal}"></div>
-
-    <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+<script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+<script th:src="@{/js/payment.js}"></script>
+<script th:src="@{/js/booking_seat.js}"></script>
 
     <script th:inline="javascript">
         /*<![CDATA[*/
@@ -204,11 +240,6 @@ iframe[name^="iamport"] {
             }
         }
     </script>
-
-
-
-<script th:src="@{/js/payment.js}"></script>
-
-<script th:src="@{/js/booking_seat.js}"></script>
+	
 </body>
 </html>

@@ -13,9 +13,15 @@ public class BookingRequestDTO {
 
     private Long scheduleId;
     private List<String> seatIds;
+
+    // 🔥 4종 인원
+    private Integer adultCount;
+    private Integer youthCount;
+    private Integer seniorCount;
+    private Integer specialCount;
+
     private Integer totalPrice;
 
-    // 🔥 추가
     private String impUid;
     private String merchantUid;
 }
