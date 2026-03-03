@@ -35,7 +35,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                                         HttpServletResponse response,
                                         Authentication authentication)
             throws IOException, ServletException {
-
+    	
+    	System.out.println("소셜로그인성공메서드진입");
+    	
         OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
         OAuth2User oAuth2User = authToken.getPrincipal();
 
@@ -64,11 +66,11 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         // ✅ 연동 모드인 경우
         if ("link".equals(mode)) {
-
+        	System.out.println("연동모드");
             if (linkUserId == null) {
                 throw new RuntimeException("연동 대상 사용자 정보가 세션에 없습니다.");
             }
-
+            
             User user = userRepository.findById(linkUserId)
                     .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
@@ -78,6 +80,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                             .provider(provider)
                             .providerId(providerId)
                             .build()
+                            
             );
 
             setDefaultTargetUrl("/auth/myPage?linked=success");
@@ -98,8 +101,17 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             return oAuth2User.getAttribute("sub");
         }
         if ("naver".equals(provider)) {
-            Map<String, Object> response = oAuth2User.getAttribute("response");
-            return response.get("id").toString();
+
+            Map<String, Object> attributes = oAuth2User.getAttributes();
+            Map<String, Object> response =
+                    (Map<String, Object>) attributes.get("response");
+
+            if (response != null) {
+                return response.get("id").toString();
+            }
+
+            // response가 없는 경우 (평탄화된 경우)
+            return attributes.get("id").toString();
         }
         throw new IllegalArgumentException("Unsupported provider: " + provider);
     }

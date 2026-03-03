@@ -286,7 +286,6 @@ document.addEventListener('DOMContentLoaded', function() {
 		.then(response => response.text()) // 서버 응답을 텍스트로 받기
 		.then(data => {
 		  console.log("서버 응답:", data);
-		  alert("인증번호가 발송되었습니다!");
 		})
 		.catch(error => console.error('에러 발생:', error));
 		
@@ -333,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (timeLeft <= 0) {
                 clearVerificationTimer();
-                showError(null, verificationError, '인증 시간이 만료���었습니다. 다시 시도해주세요.');
+                showError(null, verificationError, '인증 시간이 만료되었습니다. 다시 시도해주세요.');
             }
         }, 1000);
     }

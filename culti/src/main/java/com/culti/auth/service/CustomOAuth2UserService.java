@@ -18,6 +18,8 @@ import com.culti.auth.repository.SocialAuthRepository;
 import com.culti.auth.repository.UserRepository;
 import com.culti.auth.security.PrincipalDetails;
 
+import jakarta.servlet.http.HttpSession;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -28,6 +30,8 @@ import java.util.Optional;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final SocialAuthRepository socialAuthRepository;
+    private final UserRepository userRepository;
+    private final HttpSession session;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest)
@@ -39,7 +43,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
         String providerId;
-
+        
+        Long linkUserId = (Long) session.getAttribute("LINK_USER_ID");
+        
         if ("kakao".equals(provider)) {
             providerId = attributes.get("id").toString();
 
@@ -57,29 +63,37 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         Optional<SocialAuth> socialAuthOpt =
             socialAuthRepository.findWithUserByProviderAndProviderId(provider, providerId);
-
+        User user=null;
         if (socialAuthOpt.isEmpty()) {
-            throw new OAuth2AuthenticationException("not_linked");
+           
+        	Optional<User> result=this.userRepository.findByUserId(linkUserId);
+        	
+        	if (result.isPresent()) {
+				user=result.get();
+			}
+        	
+        }else {
+        	 user = socialAuthOpt.get().getUser(); // 이미 fetch join → 안전
+
+             // ✅ Entity → DTO 변환
+             // 이미 있는코드지만... 임시방편으로
+             
         }
-
-        User user = socialAuthOpt.get().getUser(); // 이미 fetch join → 안전
-
-        // ✅ Entity → DTO 변환
-        // 이미 있는코드지만... 임시방편으로
         UserDTO dto = UserDTO.builder()
-				.userId(user.getUserId())
-				.password(user.getPassword())
-				.phone(user.getPhone())
-				.name(user.getName())
-				.status(user.getStatus())
-				.role(user.getRole())
-				.birthDate(user.getBirthDate())
-				.gender(user.getGender())
-				.createdAt(user.getCreatedAt())
-				.nickname(user.getNickname())
-				.email(user.getEmail())
-				.build();
+ 				.userId(user.getUserId())
+ 				.password(user.getPassword())
+ 				.phone(user.getPhone())
+ 				.name(user.getName())
+ 				.status(user.getStatus())
+ 				.role(user.getRole())
+ 				.birthDate(user.getBirthDate())
+ 				.gender(user.getGender())
+ 				.createdAt(user.getCreatedAt())
+ 				.nickname(user.getNickname())
+ 				.email(user.getEmail())
+ 				.build();
 
-        return new PrincipalDetails(dto, attributes);
+         return new PrincipalDetails(dto, attributes);
+       
     }
 }

@@ -84,7 +84,7 @@ public class AuthController {
 		 if (userDetails == null) {
 		        return "redirect:/auth/login?error=login_required";
 		    }
-
+		 	System.out.println("컨트롤러진입");
 		    session.setAttribute("OAUTH2_MODE", "link");
 		    session.setAttribute("LINK_USER_ID", userDetails.getUserDto().getUserId());
 
