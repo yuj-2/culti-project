@@ -1,13 +1,22 @@
 package com.culti.booking.service;
 
-import java.util.Map;
 import java.util.ArrayList;
+import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import com.culti.auth.entity.User;
 import com.culti.auth.repository.UserRepository;
+import com.culti.booking.dto.BookingRequestDTO;
 import com.culti.booking.entity.Booking;
 import com.culti.booking.entity.BookingSeat;
 import com.culti.booking.entity.Seat;
@@ -20,77 +29,131 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PaymentService {
+
+    @Value("${portone.v2.api-secret}")
+    private String v2ApiSecret;
 
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final ScheduleRepository scheduleRepository;
     private final SeatRepository seatRepository;
 
-    /**
-     * 결제 정보 검증 및 DB 저장 프로세스
-     * @return 생성된 Booking의 ID (결과 페이지 리다이렉트용)
-     */
-    @Transactional
-    public Long processPayment(Map<String, Object> paymentData, String loginEmail) {
-        // 1. 유저 정보 조회
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    public Long processPayment(
+            BookingRequestDTO requestDTO,
+            String loginEmail,
+            String impUid,
+            String merchantUid
+    ) {
+
+        if (impUid == null || impUid.isBlank()) {
+            throw new RuntimeException("impUid 누락");
+        }
+
+        // 🔥 V2 결제 검증
+        validatePaymentWithPortOne(
+                impUid,
+                requestDTO.getTotalPrice()
+        );
+
         User user = userRepository.findByEmail(loginEmail)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException("사용자 없음"));
 
-        // 2. 스케줄 정보 조회 (payment.js의 scheduleId와 매칭)
-        // 만약 JS에서 'scheduleId'로 보낸다면 키값을 맞춰야 합니다.
-        Object scheduleIdObj = paymentData.get("scheduleId") != null ? 
-                               paymentData.get("scheduleId") : paymentData.get("content_id");
-                               
-        Long scheduleId = Long.parseLong(scheduleIdObj.toString());
-        Schedule schedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new RuntimeException("상영 스케줄을 찾을 수 없습니다."));
+        Schedule schedule = scheduleRepository.findById(
+                requestDTO.getScheduleId()
+        ).orElseThrow(() -> new RuntimeException("스케줄 없음"));
 
-        // 3. 결제 데이터 추출
-        Integer amount = Integer.parseInt(paymentData.get("total_price").toString());
-        String merchantUid = (String) paymentData.get("merchant_uid");
-        String impUid = (String) paymentData.get("imp_uid");
-        String category = (String) paymentData.get("category");
-        
-        // 좌석 ID 리스트 (예: "101,102")
-        String seatIdsStr = (String) paymentData.get("seatIds"); 
-        if (seatIdsStr == null) seatIdsStr = (String) paymentData.get("seat_info");
-        
-        String[] seatIdArray = seatIdsStr.split(",");
-
-        // 4. Booking 엔티티 생성
         Booking booking = Booking.builder()
                 .user(user)
                 .schedule(schedule)
+                .bookingNumber("B" + System.currentTimeMillis())
                 .merchantUid(merchantUid)
                 .impUid(impUid)
-                .category(category)
-                .totalPrice(amount)
+                .totalPrice(requestDTO.getTotalPrice())
                 .status("PAID")
                 .paymentStatus("COMPLETED")
-                .paymentMethod("CARD")
-                .ticketCount(seatIdArray.length)
+                .paymentMethod("KAKAOPAY")
+                .ticketCount(requestDTO.getSeatIds().size())
                 .discountAmount(0)
-                .bookingSeats(new ArrayList<>()) // 리스트 초기화
+                .category(schedule.getContent().getCategory())
+                .bookingSeats(new ArrayList<>())
                 .build();
 
-        // 5. 개별 좌석(BookingSeat) 저장 로직
-        for (String seatId : seatIdArray) {
-            Seat seat = seatRepository.findById(Long.parseLong(seatId.trim()))
-                    .orElseThrow(() -> new RuntimeException("좌석 정보를 찾을 수 없습니다."));
+        for (String seatStr : requestDTO.getSeatIds()) {
+
+            String row = seatStr.substring(0, 1);
+            int col = Integer.parseInt(seatStr.substring(1));
+
+            Seat seat = seatRepository.findByPlaceIdAndSeatRowAndSeatCol(
+                    schedule.getPlace().getPlaceId(),
+                    row,
+                    col
+            ).orElseThrow(() ->
+                    new RuntimeException("좌석 정보를 찾을 수 없습니다: " + seatStr)
+            );
 
             BookingSeat bookingSeat = BookingSeat.builder()
                     .seat(seat)
                     .booking(booking)
                     .build();
-            
-            // Cascade 설정에 따라 같이 저장되도록 리스트에 추가
+
             booking.getBookingSeats().add(bookingSeat);
         }
 
-        // [핵심 수정] 저장 후 생성된 엔티티를 받아서 ID를 반환합니다.
-        Booking savedBooking = bookingRepository.save(booking);
-        
-        return savedBooking.getBookingId(); // 컨트롤러의 Type mismatch 에러 해결!
+        Booking saved = bookingRepository.save(booking);
+
+        return saved.getBookingId();
+    }
+
+    /**
+     * 🔥 PortOne V2 결제 검증
+     */
+    private void validatePaymentWithPortOne(
+            String impUid,
+            Integer expectedAmount
+    ) {
+
+        String url = "https://api.portone.io/payments/" + impUid;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "PortOne " + v2ApiSecret);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<Map> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                Map.class
+        );
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            throw new RuntimeException("포트원 조회 실패");
+        }
+
+        Map body = response.getBody();
+
+        if (body == null) {
+            throw new RuntimeException("결제 응답 없음");
+        }
+
+        // 🔥 여기 수정
+        Map amountMap = (Map) body.get("amount");
+
+        if (amountMap == null) {
+            throw new RuntimeException("금액 정보 없음");
+        }
+
+        Number totalAmount = (Number) amountMap.get("total");
+
+        int actualAmount = totalAmount.intValue();
+
+        if (expectedAmount == null || expectedAmount != actualAmount) {
+            throw new RuntimeException("금액 위변조 감지");
+        }
     }
 }

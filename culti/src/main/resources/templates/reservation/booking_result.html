@@ -23,7 +23,7 @@
             filter: drop-shadow(0 20px 40px rgba(0,0,0,0.12));
             border-radius: 25px;
             background: white;
-            margin-bottom: 50px; /* 버튼과의 여유 공간 */
+            margin-bottom: 50px;
         }
 
         /* 왼쪽 메인 영역 (보라색) */
@@ -39,7 +39,7 @@
             border-right: 2px dashed rgba(255,255,255,0.3);
         }
 
-        /* [요청] 오른쪽 바코드 영역: 흰색 배경 */
+        /* 오른쪽 바코드 영역 */
         .ticket-stub {
             flex: 2.5;
             background: #ffffff;
@@ -87,49 +87,47 @@
             font-weight: 700;
         }
 
-        /* [요청] 푸터와 안 겹치게 오른쪽 맨 끝으로 버튼 배치 */
+        /* 버튼 배치 영역 */
         .outer-button-area {
             width: 1100px; 
             display: flex;
             justify-content: flex-end; 
             gap: 15px;
-            margin-bottom: 30px; /* 푸터 상단과의 간격 확보 */
+            margin-bottom: 30px;
         }
 
-        /* 상세 예매 내역 확인 버튼 디자인 (둥근 테두리 스타일) */
         .btn-detail {
-            padding: 10px 25px;
+            padding: 12px 25px;
             border-radius: 30px;
             font-weight: 500;
             text-decoration: none;
             font-size: 0.95rem;
             transition: 0.3s ease;
-            background: rgba(255, 255, 255, 0.1); /* 투명도 있는 배경 */
-            color: #888; /* 이미지 속 회색 텍스트 */
-            border: 1px solid #ddd; /* 옅은 테두리 */
+            background: transparent;
+            color: #666;
+            border: 1px solid #ccc;
         }
         
-        /* 홈으로 버튼 (이미지 속 흰색 둥근 버튼) */
         .btn-go-home {
-            padding: 10px 30px;
+            padding: 12px 30px;
             border-radius: 30px;
             font-weight: 700;
             text-decoration: none;
             font-size: 0.95rem;
             background: #ffffff;
             color: #503396;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .btn-detail:hover {
-            color: #503396;
-            border-color: #503396;
+            background: #eee;
+            border-color: #999;
         }
 
         /* 바코드 스타일 */
         .stub-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 30px; color: #503396; letter-spacing: 2px; }
-        .barcode-img { width: 110px; height: auto; }
-        .stub-num { font-size: 0.8rem; color: #999; margin-top: 20px; font-family: 'Courier New', monospace; }
+        .barcode-img { width: 140px; height: auto; }
+        .stub-num { font-size: 0.8rem; color: #999; margin-top: 15px; font-family: 'Courier New', monospace; }
     </style>
 </head>
 <body>
@@ -137,7 +135,7 @@
         <div class="ticket-container">
             <div class="ticket-main">
                 <div class="brand-logo">CULTI CINEMA</div>
-                <div class="movie-title" th:text="${booking.movieTitle}">인터스텔라 리마스터</div>
+                <div class="movie-title" th:text="${booking.movieTitle}">영화 제목</div>
                 
                 <div class="info-grid">
                     <div class="info-item">
@@ -146,28 +144,28 @@
                     </div>
                     <div class="info-item">
                         <span class="label">BOOKING NO.</span>
-                        <span class="value" th:text="${booking.bookingNumber}">CULTI_1772175130142</span>
+                        <span class="value" th:text="${booking.bookingNumber}">CULTI_00000000</span>
                     </div>
                     <div class="info-item">
                         <span class="label">SEATS</span>
                         <div class="value">
-                            <span th:each="name : ${booking.seatNames}" th:text="${name}" class="seat-badge">B6</span>
+                            <span th:each="name : ${booking.seatNames}" th:text="${name}" class="seat-badge">좌석</span>
                         </div>
                     </div>
                     <div class="info-item">
                         <span class="label">TOTAL PRICE</span>
                         <span class="value" style="font-size: 2.2rem; font-weight: 800;" 
-                              th:text="${#numbers.formatInteger(booking.totalPrice, 3, 'COMMA')} + '원'">30,000원</span>
+                              th:text="${#numbers.formatInteger(booking.totalPrice, 3, 'COMMA')} + '원'">0원</span>
                     </div>
                 </div>
             </div>
 
             <div class="ticket-stub">
                 <div class="stub-title">TICKET STUB</div>
-                <img th:src="'https://bwipjs-api.metafloor.com/?bcid=code128&text=' + ${booking.bookingNumber} + '&scale=2&rotate=R&includetext=false'" 
+                <img th:src="'https://bwipjs-api.metafloor.com/?bcid=code128&text=' + ${booking.bookingNumber} + '&scale=3&rotate=N&includetext=false'" 
                      class="barcode-img" alt="Barcode">
-                <div th:text="${booking.bookingNumber}" class="stub-num">CULTI_1772175130142</div>
-                <div style="margin-top: 20px; font-weight: 800; color: #503396;">CULTI ONLY</div>
+                <div th:text="${booking.bookingNumber}" class="stub-num">CULTI_00000000</div>
+                <div style="margin-top: 25px; font-weight: 800; color: #503396; opacity: 0.5;">CULTI ONLY</div>
             </div>
         </div>
 
@@ -176,5 +174,11 @@
             <a href="/member/mypage/booking" class="btn-detail">상세 예매 내역 확인하기</a>
         </div>
     </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        console.log("예매 결과 데이터 로드 완료:", /*[[${booking.bookingNumber}]]*/ '');
+        /*]]>*/
+    </script>
 </body>
 </html>

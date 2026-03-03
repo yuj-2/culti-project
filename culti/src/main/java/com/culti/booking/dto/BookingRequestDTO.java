@@ -10,10 +10,12 @@ import lombok.ToString;
 @Setter
 @ToString
 public class BookingRequestDTO {
+
     private Long scheduleId;
-    private List<String> seatIds; // ★ Long에서 String으로 변경!
+    private List<String> seatIds;
     private Integer totalPrice;
-    private Long userId;
-    
-    
+
+    // 🔥 추가
+    private String impUid;
+    private String merchantUid;
 }
