@@ -1,9 +1,7 @@
 package com.culti.auth.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -13,10 +11,8 @@ import org.springframework.stereotype.Service;
 import com.culti.auth.entity.EmailVerification;
 import com.culti.auth.repository.EmailVerificationRepository;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
@@ -24,7 +20,8 @@ import jakarta.persistence.Id;
 public class EmailServiceImpl implements EmailService{
 	
 	private final EmailVerificationRepository emailVerificationRepository;
-    private final JavaMailSender emailSender; // 스프링이 자동으로 주입해줍니다.
+    private final JavaMailSender emailSender;
+
     
     @Override
     public String sendSimpleEmail(String toEmail) {
@@ -56,7 +53,7 @@ public class EmailServiceImpl implements EmailService{
 	@Override
 	public void insertEmailVerification(String email,String authCode) {
 		
-		
+		System.out.println(email);
 		
 		// TODO Auto-generated method stub
 		EmailVerification emailVerification=EmailVerification.builder()
@@ -68,5 +65,22 @@ public class EmailServiceImpl implements EmailService{
 		
 		this.emailVerificationRepository.save(emailVerification);
 		
+	}
+
+	@Override
+	public String returnAuthCode(String email) {
+		
+		Optional<EmailVerification> result=this.emailVerificationRepository.findFirstByEmailOrderByIdDesc(email);
+		
+	    if (result.isPresent()) {
+	    	System.out.println("이메일 리턴 메서드 진입");
+	    	
+	        EmailVerification emailVerification = result.get();
+	        
+	        return emailVerification.getAuthCode();
+	    }
+		
+		
+		return null;
 	}
 }

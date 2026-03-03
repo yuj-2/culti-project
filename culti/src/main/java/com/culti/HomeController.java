@@ -20,7 +20,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class HomeController {
 
+
 	private final MateService mateService; 
+
 	
 	@GetMapping("/home")
 	public void home(Model model) {

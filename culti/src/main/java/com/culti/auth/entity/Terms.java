@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "terms")
 @Getter
 @NoArgsConstructor
-public class Terms {
+public class Terms extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +27,7 @@ public class Terms {
     private String title;
 
     @Lob // TEXT 타입 매핑
-    @Column(name = "terms_content", nullable = false)
+    @Column(name = "terms_content", columnDefinition = "LONGTEXT", nullable = false)
     private String content;
 
     @Column(name = "is_required", length = 1, nullable = false)
@@ -39,6 +39,4 @@ public class Terms {
     @Column(name = "is_active", length = 1, nullable = false)
     private String isActive; // 'Y' or 'N' (CHAR(1))
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
 }
