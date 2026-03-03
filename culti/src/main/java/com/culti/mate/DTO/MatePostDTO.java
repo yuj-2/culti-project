@@ -24,6 +24,7 @@ public class MatePostDTO {
     private Long postId;
 
     private String title;
+    
 
     private MatePostCategory category;   
 
@@ -36,6 +37,8 @@ public class MatePostDTO {
 
     private String description;
 
+    private long acceptedCount; 
+    
     private String writerNickname;
 
     private MatePostStatus status;   

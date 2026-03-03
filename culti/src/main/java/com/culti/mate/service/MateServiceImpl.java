@@ -5,7 +5,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,11 +19,14 @@ import com.culti.auth.entity.User;
 import com.culti.auth.repository.UserRepository;
 import com.culti.mate.DTO.MateApplyMypageDTO;
 import com.culti.mate.DTO.MatePostDTO;
+import com.culti.mate.DTO.MyPostMypageDTO;
+import com.culti.mate.DTO.PageResultDTO;
 import com.culti.mate.entity.MateApply;
 import com.culti.mate.entity.MatePost;
 import com.culti.mate.enums.MateApplyStatus;
 import com.culti.mate.enums.MatePostCategory;
 import com.culti.mate.enums.MatePostStatus;
+import com.culti.mate.matePage.Criteria;
 import com.culti.mate.repository.MateApplyRepository;
 import com.culti.mate.repository.MateRepository;
 
@@ -74,14 +79,17 @@ public class MateServiceImpl implements MateService {
 	@Override
 	public void delete(Long postId, String email) {
 		MatePost post = mateRepository.findById(postId)
-	            .orElseThrow(() -> new IllegalArgumentException("게시글 없음: " + postId));
+		        .orElseThrow(() -> new IllegalArgumentException("게시글 없음: " + postId));
 
-	    // 작성자 본인인지 체크
-	    if (!post.getWriter().getEmail().equals(email)) {
-	        throw new SecurityException("삭제 권한이 없습니다.");
-	        
-	    }
-	    mateRepository.deleteById(postId);
+		    if (!post.getWriter().getEmail().equals(email)) {
+		        throw new SecurityException("삭제 권한이 없습니다.");
+		    }
+
+		    // 자식 먼저 삭제
+		    mateApplyRepository.deleteByPost_PostId(postId);
+
+		    // 부모 삭제
+		    mateRepository.deleteById(postId);
 	    
 	}
 
@@ -151,39 +159,44 @@ public class MateServiceImpl implements MateService {
 		// TODO Auto-generated method stub
 		
 	}
+	
 
 	// 신청 수락
 	@Transactional
 	public void accept(Long applyId, String email) {
 
 	    MateApply apply = mateApplyRepository.findById(applyId)
-	        .orElseThrow(() -> new IllegalArgumentException("신청 없음"));
+	            .orElseThrow(() -> new IllegalArgumentException("신청이 존재하지 않습니다."));
 
-	    // 게시글 작성자만 가능
-	    if (!apply.getPost().getWriter().getEmail().equals(email)) {
-	        throw new SecurityException("권한 없음");
+	    MatePost post = apply.getPost();
+
+	    // 글쓴이만 수락 가능
+	    if (!post.getWriter().getEmail().equals(email)) {
+	        throw new IllegalStateException("권한이 없습니다.");
 	    }
-	    
+
+	    // PENDING만 처리 가능
 	    if (apply.getStatus() != MateApplyStatus.PENDING) {
 	        throw new IllegalStateException("이미 처리된 신청입니다.");
 	    }
-	    
-	    long approvedCount =
-	    	    mateApplyRepository.countByPostAndStatus(
-	    	        apply.getPost(), MateApplyStatus.ACCEPTED);
 
-    	if (approvedCount >= apply.getPost().getMaxPeople()) {
-    	    throw new IllegalStateException("모집 인원이 모두 찼습니다.");
-    	}
-    	
-    	apply.accept();
+	    // 현재 확정 인원(글쓴이 제외 = 신청 ACCEPTED 수)
+	    long acceptedCount = mateApplyRepository.countByPostAndStatus(post, MateApplyStatus.ACCEPTED);
 
-    	if (approvedCount + 1 >= apply.getPost().getMaxPeople()) {
-    	    apply.getPost().close();
-    	}
-	    mateApplyRepository.save(apply);
+	    // 정원 초과 방지
+	    if (acceptedCount >= post.getMaxPeople()) {
+	        throw new IllegalStateException("이미 모집이 마감되었습니다.");
+	    }
+
+	    // 수락 처리 (여기서 status=ACCEPTED, decidedAt=now 처리됨)
+	    apply.accept();
+
+	    // 이번 수락으로 정원 꽉 차면 마감
+	    if (acceptedCount + 1 >= post.getMaxPeople()) {
+	        post.close(); // setStatus 말고 close()
+	    }
 	}
-	
+
 	// 거절
 	@Transactional
 	public void reject(Long applyId, String email) {
@@ -256,6 +269,9 @@ public class MateServiceImpl implements MateService {
 	            .location(p.getLocation())
 	            .status(a.getStatus().name()) // "PENDING"
 	            .statusLabel(statusLabel(a.getStatus()))
+	            .decidedAt(a.getDecidedAt())
+	            .message(a.getMessage())
+	            .category(p.getCategory().name())
 	            .build();
 	}
 	
@@ -274,5 +290,149 @@ public class MateServiceImpl implements MateService {
 	    return mateApplyRepository.findAppliedPostIdsByApplicantEmail(applicantEmail);
 	}
 
+	@Override
+	public Map<Long, MateApplyStatus> getAppliedStatusMap(String email) {
+		List<Object[]> rows = mateApplyRepository.findPostIdAndStatusByApplicantEmail(email);
+
+	    Map<Long, MateApplyStatus> map = new HashMap<>();
+	    for (Object[] row : rows) {
+	        Long postId = (Long) row[0];
+	        MateApplyStatus status = (MateApplyStatus) row[1];
+	        map.put(postId, status);
+	    }
+	    return map;
+	}
+
+	@Override
+	public List<MyPostMypageDTO> getMyPosts(String email) {
+	    return mateRepository.findByWriter_EmailOrderByCreatedAtDesc(email)
+	            .stream()
+	            .map(this::toMyPostDto)
+	            .toList();
+	}
+	
+	private MyPostMypageDTO toMyPostDto(MatePost p) {
+	    return MyPostMypageDTO.builder()
+	            .postId(p.getPostId()) // 네 엔티티 PK명이 postId면 이거
+	            .title(p.getTitle())
+	            .category(p.getCategory() != null ? p.getCategory().name() : "")
+	            .categoryLabel(categoryLabel(p.getCategory()))
+	            .createdAt(p.getCreatedAt())
+	            .eventAtText(p.getEventAt() != null
+	                    ? p.getEventAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+	                    : "")
+	            .location(p.getLocation())
+	            .status(p.getStatus() != null ? p.getStatus().name() : "")
+	            .statusLabel(postStatusLabel(p.getStatus()))
+	            
+	            .build();
+	}
+	
+	private String categoryLabel(MatePostCategory c) {
+	    if (c == null) return "";
+	    return switch (c) {
+	        case MOVIE -> "영화";
+	        case CONCERT -> "공연";
+	        case EXHIBITION -> "전시";
+	    };
+	}
+
+	private String postStatusLabel(MatePostStatus s) {
+	    if (s == null) return "";
+	    return switch (s) {
+	        case OPEN -> "모집중";
+	        case CLOSED -> "마감";
+	    };
+	}
+	
+	@Override
+	public int calcPageForPost(Long postId, int size, MatePostCategory category) {
+
+	    long beforeCount;
+
+	    if (category == null) {
+	        // 전체(all) 기준
+	        beforeCount = mateRepository.countByPostIdGreaterThan(postId);
+	    } else {
+	        // 특정 카테고리 기준
+	        beforeCount = mateRepository.countByCategoryAndPostIdGreaterThan(category, postId);
+	    }
+
+	    long position = beforeCount + 1;
+
+	    return (int)((position - 1) / size) + 1;
+	}
+	
+	@Override
+	public PageResultDTO<MyPostMypageDTO, MatePost>
+	getMyPostsPage(String email, int page, int size) {
+
+	    Pageable pageable =
+	            PageRequest.of(page - 1, size, Sort.by("postId").descending());
+
+	    Page<MatePost> result =
+	            mateRepository.findByWriter_Email(email, pageable);
+
+	    return new PageResultDTO<>(
+	            result,
+	            this::toMyPostDto   // MatePost → MyPostMypageDTO 변환
+	    );
+	}
+	
+	public Page<MatePost> getMyPosts(String email, int page, int size) {
+	    Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+	    return mateRepository.findByWriter_Email(email, pageable);
+	}
+
+	@Override
+	public Page<MateApplyMypageDTO> getMyApplied(String email, int page, int size) {
+	    Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+	    return mateApplyRepository.findByApplicant_Email(email, pageable)
+	            .map(this::toMyPageDto);   // ✅ message 포함 DTO
+	}
+
+	@Override
+	public Page<MateApplyMypageDTO> getReceivedApplies(String email, int page, int size) {
+	    Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+	    return mateApplyRepository.findByPost_Writer_Email(email, pageable)
+	            .map(this::toMyPageDto);
+	}
+
+	@Override
+	public Page<MyPostMypageDTO> getMyPostsDto(String email, int page, int size) {
+	    Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+	    return mateRepository.findByWriter_Email(email, pageable)
+	            .map(this::toMyPostDto); // eventAtText 포함
+	}
+
+	public Map<Long, Long> getAcceptedCountMap(Page<MatePost> paging) {
+
+		  List<Long> postIds = paging.getContent().stream()
+		      .map(MatePost::getPostId)
+		      .toList();
+
+		  Map<Long, Long> map = new HashMap<>();
+		  if (postIds.isEmpty()) return map;
+
+		  List<Object[]> rows = mateApplyRepository
+		      .countByPostIdsAndStatusGroupByPostId(postIds, MateApplyStatus.ACCEPTED);
+
+		  for (Object[] r : rows) {
+		    Long postId = (Long) r[0];
+		    Long cnt = (Long) r[1];
+		    map.put(postId, cnt);
+		  }
+
+		  // 없는 글은 0으로 처리하고 싶으면(선택)
+		  for (Long id : postIds) map.putIfAbsent(id, 0L);
+
+		  return map;
+		}
+
+	@Override
+	public Page<MatePostDTO> getPostListDto(Criteria criteria) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

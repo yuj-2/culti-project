@@ -18,6 +18,7 @@ public class MateApplyDTO {
     private Long id;
 
     private String postTitle;
+    
     private String location;
     private String eventAtText;
 
@@ -28,4 +29,5 @@ public class MateApplyDTO {
     private String statusLabel;
 
     private LocalDateTime createdAt;
+    private LocalDateTime decidedAt;
 }
