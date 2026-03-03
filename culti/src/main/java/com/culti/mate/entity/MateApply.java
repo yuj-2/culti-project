@@ -2,8 +2,6 @@ package com.culti.mate.entity;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.CreationTimestamp;
-
 import com.culti.auth.entity.User;
 import com.culti.mate.enums.MateApplyStatus;
 
@@ -18,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,19 +29,24 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @ToString(exclude =  {"applicant", "post"})
-@Table(name = "mate_apply")
+@Table(
+		  name = "mate_apply",
+		  uniqueConstraints = {
+		    @UniqueConstraint(columnNames = {"post_id", "applicant_id"})
+		  }
+		)
 public class MateApply extends PostBaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long applyId;
 	
-	@Column
+	@Column(columnDefinition = "TEXT")
 	private String message;
 	
 	@Column
 	@Enumerated(EnumType.STRING)
-	private MateApplyStatus status;
+	private MateApplyStatus status = MateApplyStatus.PENDING;
 	
 	@Column
 	private LocalDateTime decidedAt;
@@ -59,4 +63,19 @@ public class MateApply extends PostBaseEntity {
 	@JoinColumn(name = "applicant_id", nullable = false)
 	private User applicant;
 	
+	
+	public void accept() {
+	    this.status = MateApplyStatus.ACCEPTED;
+	    this.decidedAt = LocalDateTime.now();
+	}
+
+	public void reject() {
+	    this.status = MateApplyStatus.REJECTED;
+	    this.decidedAt = LocalDateTime.now();
+	}
+
+	public void cancel() {
+	    this.status = MateApplyStatus.CANCELED;
+	    this.decidedAt = LocalDateTime.now();
+	}
 }

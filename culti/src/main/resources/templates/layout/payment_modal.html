@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<div th:fragment="paymentModal" id="paymentModal" class="modal" 
+     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center; backdrop-filter: blur(8px);">
+    
+    <input type="hidden" id="user-email" th:value="${#authentication.name}">
+    <input type="hidden" id="session-user-name" th:value="${#authentication.name}">
+
+    <div style="background:white; width:780px; border-radius:30px; overflow:hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display:flex; flex-direction:column; animation: modalAppear 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
+        
+        <div style="padding:25px 40px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <button onclick="closeModal()" style="background:none; border:none; cursor:pointer; color:#666;">
+                    <i data-lucide="arrow-left" style="width:24px; height:24px;"></i>
+                </button>
+                <h2 style="color:#111; font-size:1.4rem; font-weight:800; margin:0;">Checkout</h2>
+            </div>
+            <button onclick="closeModal()" style="background:#f3f4f6; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; color:#999;">
+                <i data-lucide="x" style="width:18px; height:18px;"></i>
+            </button>
+        </div>
+
+        <div style="display:flex; padding:40px; gap:40px;">
+            
+            <div style="flex:1.2;">
+                <div style="background:#f8f9ff; border:1px solid #eef0ff; border-radius:24px; padding:35px; position:relative;">
+                    <h3 id="md-title" style="color:#252451; font-size:1.5rem; font-weight:900; margin-bottom:25px; letter-spacing:-0.5px;" th:text="${schedule.content.title}">영화 제목</h3>
+                    
+                    <div style="display:flex; flex-direction:column; gap:18px; color:#555; font-size:1rem;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <i data-lucide="map-pin" style="width:18px; color:#503396;"></i>
+                            <span th:text="${schedule.place.name}">장소 정보</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <i data-lucide="calendar" style="width:18px; color:#503396;"></i>
+                            <span th:text="${#temporals.format(schedule.showTime, 'yyyy년 MM월 dd일')}">날짜 정보</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <i data-lucide="clock" style="width:18px; color:#503396;"></i>
+                            <span th:text="${#temporals.format(schedule.showTime, 'HH:mm')}">시간 정보</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <i data-lucide="users" style="width:18px; color:#503396;"></i>
+                            <span style="font-weight:600;">좌석: <span id="md-detail" style="color:#503396;"></span></span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:35px; padding-top:25px; border-top:1px dashed #ced4da; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:#666; font-weight:700; font-size:1.1rem;">총 결제 금액</span>
+                        <span style="color:#252451; font-size:1.8rem; font-weight:900;">₩<span id="md-amount">0</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="flex:1;">
+                <h4 style="color:#111; font-size:1.1rem; font-weight:800; margin-bottom:20px;">Payment Method</h4>
+                
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div onclick="executePortOne('CARD')" class="pay-option" style="height:70px; border:1px solid #e5e7eb; border-radius:18px; padding:0 20px; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div style="background:#f3f4f6; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center;">
+                                <i data-lucide="credit-card" style="width:20px; color:#252451;"></i>
+                            </div>
+                            <span style="font-weight:700; font-size:1rem; color:#111;">신용/체크카드</span>
+                        </div>
+                        <i data-lucide="chevron-right" style="width:16px; color:#ccc;"></i>
+                    </div>
+
+                    <div onclick="executePortOne('KAKAO')" class="pay-option" style="height:70px; border:1px solid #e5e7eb; border-radius:18px; padding:0 20px; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div style="background:#ffeb00; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center;">
+                                <img src="https://developers.kakao.com/tool/resource/static/img/button/pay/payment_icon_yellow_small.png" style="height:14px;">
+                            </div>
+                            <span style="font-weight:700; font-size:1rem; color:#111;">카카오페이</span>
+                        </div>
+                        <i data-lucide="chevron-right" style="width:16px; color:#ccc;"></i>
+                    </div>
+
+                    <div onclick="executePortOne('NAVER')" class="pay-option" style="height:70px; border:1px solid #e5e7eb; border-radius:18px; padding:0 20px; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div style="background:#03c75a; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-weight:900; font-size:0.8rem;">
+                                N Pay
+                            </div>
+                            <span style="font-weight:700; font-size:1rem; color:#111;">네이버페이</span>
+                        </div>
+                        <i data-lucide="chevron-right" style="width:16px; color:#ccc;"></i>
+                    </div>
+
+                    <div onclick="executePortOne('TOSS')" class="pay-option" style="height:70px; border:1px solid #e5e7eb; border-radius:18px; padding:0 20px; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div style="background:#ebf5ff; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center;">
+                                <i data-lucide="wallet" style="width:20px; color:#0064ff;"></i>
+                            </div>
+                            <span style="font-weight:700; font-size:1rem; color:#111;">토스페이</span>
+                        </div>
+                        <i data-lucide="chevron-right" style="width:16px; color:#ccc;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:#f9fafb; padding:25px 40px; text-align:center;">
+            <p style="margin:0; color:#999; font-size:0.85rem; font-weight:500;">
+                안전한 결제 보안을 위해 <span style="color:#503396; font-weight:700;">PortOne</span> 암호화 시스템을 적용 중입니다.
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes modalAppear {
+        from { opacity: 0; transform: scale(0.95) translateY(20px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .pay-option { transition: all 0.2s ease; background: white; }
+    .pay-option:hover {
+        border-color: #503396 !important;
+        background: #fdfcff;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(80, 51, 150, 0.1);
+    }
+</style>
+</html>

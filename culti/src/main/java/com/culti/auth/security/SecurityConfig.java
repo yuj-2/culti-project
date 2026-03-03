@@ -7,9 +7,11 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -21,13 +23,19 @@ public class SecurityConfig {
 	@Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
+        .authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
+                .requestMatchers(new AntPathRequestMatcher("/reservation/booking/**")).authenticated() // 경로 확인
+                .requestMatchers(new AntPathRequestMatcher("/payment/**")).authenticated()
                 .requestMatchers(new AntPathRequestMatcher("/**")).permitAll())
-            /* /h2-console/시작하는 모든 요청 URL은 CSRF 검증을 하지 않는다. */
-            
-            /*
-            .csrf((csrf) -> csrf
-                    .ignoringRequestMatchers(new AntPathRequestMatcher("/h2-console/**")))*/
+        
+     // --- CSRF 설정 (기존 로직 유지하며 세션 저장소만 명시) ---
+        .csrf((csrf) -> csrf
+            .ignoringRequestMatchers(new AntPathRequestMatcher("/payment/verify/**"))
+            .csrfTokenRepository(new HttpSessionCsrfTokenRepository())) // CSRF 토큰 관리 개선
+        
+        // --- 세션 정책 추가 (응답 커밋 전 세션 생성 보장) ---
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .headers((headers) -> headers
     				.addHeaderWriter(new XFrameOptionsHeaderWriter(
     						XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))

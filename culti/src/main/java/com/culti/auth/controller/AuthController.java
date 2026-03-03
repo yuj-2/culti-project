@@ -6,15 +6,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.culti.auth.dto.UserDTO;
 import com.culti.auth.service.UserService;
+import com.culti.mate.service.MateService;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -26,6 +26,7 @@ import lombok.extern.log4j.Log4j2;
 public class AuthController {
 	
 	private final UserService userService;
+	private final MateService mateService;
 	
 	//로그인페이지
 	@GetMapping("/login")
@@ -75,11 +76,21 @@ public class AuthController {
 		//마이페이지
 		@PreAuthorize("isAuthenticated()")
 		@GetMapping("/myPage")
-		public void myPage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+		public void myPage(@AuthenticationPrincipal UserDetails userDetails, Model model
+									, @RequestParam(name="mateTab", defaultValue="received") String mateTab,
+							          @RequestParam(name="mateSection", defaultValue="mate") String mateSection) {
 			
 			String email=userDetails.getUsername();
 			UserDTO userDTO=this.userService.findByEmail(email);
 			model.addAttribute("user",userDTO);
+			
+			// ===== 동행매칭
+			model.addAttribute("mateTab", mateTab);
+			model.addAttribute("mateSection", mateSection);
+			
+			// ====동행매칭 DB 조회해서 담기
+		    model.addAttribute("receivedApps", mateService.getReceivedApps(email));
+		    model.addAttribute("sentApps", mateService.getSentApps(email));
 			
 		}
 		
@@ -87,5 +98,35 @@ public class AuthController {
 		public void findPassword() {
 			
 		}
+		
+		
+//		=================동행매칭======================
+		
+		// 수락
+	    @PreAuthorize("isAuthenticated()")
+	    @PostMapping("/{id}/accept")
+	    public String accept(@PathVariable("id") Long applyId,
+	                         @AuthenticationPrincipal UserDetails userDetails) {
+	        mateService.accept(applyId, userDetails.getUsername());
+	        return "redirect:/myPage?mateSection=mate&mateTab=received";
+	    }
+
+	    // 거절
+	    @PreAuthorize("isAuthenticated()")
+	    @PostMapping("/{id}/reject")
+	    public String reject(@PathVariable("id") Long applyId,
+	                         @AuthenticationPrincipal UserDetails userDetails) {
+	        mateService.reject(applyId, userDetails.getUsername());
+	        return "redirect:/myPage?mateSection=mate&mateTab=received";
+	    }
+
+	    // 취소(내가 신청한 것)
+	    @PreAuthorize("isAuthenticated()")
+	    @PostMapping("/{id}/cancel")
+	    public String cancel(@PathVariable("id") Long applyId,
+	                         @AuthenticationPrincipal UserDetails userDetails) {
+	        mateService.cancel(applyId, userDetails.getUsername());
+	        return "redirect:/myPage?mateSection=mate&mateTab=sent";
+	    }
 	
 }

@@ -24,6 +24,45 @@ document.addEventListener('DOMContentLoaded', function() {
     // 프로필 폼
     const profileForm = document.getElementById('profileForm');
     const cancelEdit = document.getElementById('cancelEdit');
+	
+	// ===========동행매칭
+	const currentSectionInput = document.getElementById('currentSection');
+	const currentSection = currentSectionInput ? currentSectionInput.value : null;
+
+	if (currentSection === 'mate') {
+	  // 사이드바 active 변경
+	  navItems.forEach(nav => nav.classList.remove('active'));
+	  const mateNav = document.querySelector('.nav-item[data-tab="mate"]');
+	  if (mateNav) mateNav.classList.add('active');
+
+	  // 컨텐츠 active 변경
+	  tabContents.forEach(c => c.classList.remove('active'));
+	  const mateSectionEl = document.getElementById('mate');
+	  if (mateSectionEl) mateSectionEl.classList.add('active');
+	}
+	
+	// 동행매칭 내부 탭(받은/내가신청) : 리로드 없이 토글 
+	const mateTabs = document.querySelectorAll('#mate .tabs .tab[data-mate-tab]');
+	const matePanels = document.querySelectorAll('#mate .mate-panel[data-mate-tab]');
+
+	mateTabs.forEach(tab => {
+	  tab.addEventListener('click', function(e) {
+	    e.preventDefault(); // ✅ href 이동(리로드) 막기
+
+	    const target = this.dataset.mateTab;
+
+	    // 탭 active 변경
+	    mateTabs.forEach(t => t.classList.remove('active'));
+	    this.classList.add('active');
+
+	    // 패널 active 변경
+	    matePanels.forEach(p => p.classList.remove('active'));
+	    const targetPanel = document.querySelector(`#mate .mate-panel[data-mate-tab="${target}"]`);
+	    if (targetPanel) targetPanel.classList.add('active');
+	  });
+	});
+	
+	// ===========동행매칭 끝=====
 
     // ========== 네비게이션 ==========
     navItems.forEach(item => {
