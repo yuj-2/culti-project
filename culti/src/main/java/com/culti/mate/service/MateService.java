@@ -11,10 +11,14 @@ import com.culti.auth.entity.User;
 import com.culti.mate.DTO.MateApplyDTO;
 import com.culti.mate.DTO.MateApplyMypageDTO;
 import com.culti.mate.DTO.MatePostDTO;
+import com.culti.mate.DTO.MyPostMypageDTO;
+import com.culti.mate.DTO.PageResultDTO;
 import com.culti.mate.entity.MateApply;
 import com.culti.mate.entity.MatePost;
 import com.culti.mate.enums.MateApplyStatus;
+import com.culti.mate.enums.MatePostCategory;
 import com.culti.mate.enums.MatePostStatus;
+import com.culti.mate.matePage.Criteria;
 
 
 public interface MateService {
@@ -56,7 +60,7 @@ public interface MateService {
 	            .build();
 	}
 	
-	private MateApplyDTO maToDTO(MateApply ma) {
+	default  MateApplyDTO maToDTO(MateApply ma) {
 
 	    return MateApplyDTO.builder()
 	            .id(ma.getApplyId())
@@ -72,10 +76,12 @@ public interface MateService {
 	            .status(ma.getStatus())
 	            .statusLabel(convertStatus(ma.getStatus()))
 	            .createdAt(ma.getCreatedAt())
+	            .decidedAt(ma.getDecidedAt())
 	            .build();
 	}
+
 	
-	private String convertStatus(MateApplyStatus status) {
+	default  String convertStatus(MateApplyStatus status) {
 	    return switch (status) {
 	        case PENDING -> "대기중";
 	        case ACCEPTED -> "수락됨";
@@ -113,4 +119,22 @@ public interface MateService {
 	List<Long> getAppliedPostIds(String email);
 
 	Map<Long, MateApplyStatus> getAppliedStatusMap(String email);
+
+	List<MyPostMypageDTO> getMyPosts(String email);
+
+	
+	int calcPageForPost(Long postId, int size, MatePostCategory category);
+	
+	PageResultDTO<MyPostMypageDTO, MatePost> getMyPostsPage(String email, int page, int size);
+	
+	Page<MatePost> getMyPosts(String email, int page, int size);
+
+	Page<MateApplyMypageDTO> getReceivedApplies(String email, int page, int size);
+	Page<MateApplyMypageDTO> getMyApplied(String email, int page, int size);
+	
+	Page<MyPostMypageDTO> getMyPostsDto(String email, int page, int size);
+
+	Page<MatePostDTO> getPostListDto(Criteria criteria);
+
+	Map<Long, Long> getAcceptedCountMap(Page<MatePost> paging);
 }

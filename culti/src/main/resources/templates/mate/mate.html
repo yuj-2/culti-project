@@ -68,20 +68,22 @@
            th:each="p : ${paging.content}"
            th:attr="data-id=${p.postId},
                     data-title=${p.title},
-                    data-category=${p.category.name()},
+                    data-category=${p.category},
                     data-eventAt=${#temporals.format(p.eventAt,'yyyy-MM-dd HH:mm')},
                     data-location=${p.location},
                     data-maxPeople=${p.maxPeople},
                     data-description=${p.description},
                     data-nickname=${p.writer.nickname},
-                    data-email=${p.writer.email}">
+					data-email=${p.writer.email},
+                    data-acceptedcount=${acceptedCountMap[p.postId]}
+                    ">
         <div class="post-header">
           <h3 class="post-title" th:text="${p.title}">제목</h3>
 
           <!-- badge label: MOVIE/CONCERT/EXHIBITION -> movie/concert/exhibition -->
           <span class="badge"
                 th:text="${p.category}"
-                th:classappend="' badge-' + ${#strings.toLowerCase(p.category.name())}">
+                th:classappend="' badge-' + ${#strings.toLowerCase(p.category)}">
           </span>
         </div>
 
@@ -98,14 +100,17 @@
 
           <div class="info-row">
             <i class="fa-solid fa-users"></i>
-            <span><span th:text="${p.maxPeople}">0</span>명</span>
+            <span>
+			  <span th:text="${acceptedCountMap[p.postId]}">0</span> /
+			  <span th:text="${p.maxPeople}">0</span>명
+			</span>
           </div>
         </div>
       </div>
     </div>
   </main>
 
-  <!-- ✅ Floating Action Button (React FAB 느낌) -->
+  <!--  Floating Action Button (React FAB 느낌) -->
   <button class="fab" id="createButton" sec:authorize="isAuthenticated()">
     <i class="fa-solid fa-plus"></i>
   </button>
@@ -244,7 +249,7 @@
 </div>
   
 
-  <!-- ✅ Pagination -->
+  <!-- Pagination -->
 <div class="pagination-wrap">
   <nav class="pagination" th:if="${paging.totalPages > 1}">
 
@@ -273,7 +278,7 @@
   </nav>
 </div>
 
-  <!-- ✅ JS: 로그인 여부는 서버에서 내려주기 -->
+  <!-- JS: 로그인 여부는 서버에서 내려주기 -->
   <script th:inline="javascript">
     const isAuthenticated = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
   </script>
@@ -292,212 +297,189 @@
   const appliedPostIds = /*[[${appliedPostIds}]]*/ [];
 </script>
 <script th:inline="javascript">
-  const appliedStatusMap = /*[[${appliedStatusMap}]]*/ {};
+const appliedStatusMap = JSON.parse(/*[[${appliedStatusMapJson}]]*/ "{}");
 </script>
 
   <script>
-
   let selectedPostId = null;
-    // ✅ Detail modal open
+
+  function bindPostCardClicks() {
     document.querySelectorAll('.post-card').forEach(card => {
-    	card.addEventListener('click', () => {
-    		selectedPostId = card.dataset.id;
-    	    const title = card.dataset.title || '';
-    	    const category = card.dataset.category || '';
-    	    const eventAt = card.dataset.eventat || '';
-    	    const location = card.dataset.location || '';
-    	    const maxPeople = card.dataset.maxpeople || '';
-    	    const nickname = card.dataset.nickname || '';
-    	    const desc = card.dataset.description || '';
+      card.addEventListener('click', () => {
+        selectedPostId = Number(card.dataset.id);
 
-    	    // ✅ writerEmail 먼저!
-    	    const writerEmail = card.dataset.email || '';
+        const title = card.dataset.title || '';
+        const category = card.dataset.category || '';
+        const eventAt = card.dataset.eventat || '';
+        const location = card.dataset.location || '';
+        const maxPeople = card.dataset.maxpeople || '';
+        const nickname = card.dataset.nickname || '';
+        const desc = card.dataset.description || '';
+        const acceptedCount = card.dataset.acceptedcount || '0';
+        const writerEmail = card.dataset.email || '';
 
-    	    document.getElementById('detailTitle').innerHTML =
-    	      `${title} <span class="badge badge-${category.toLowerCase()}" style="margin-left:12px;">${category}</span>`;
+        document.getElementById('detailTitle').innerHTML =
+          `${title} <span class="badge badge-${category.toLowerCase()}" style="margin-left:12px;">${category}</span>`;
 
-    	      const isAlreadyApplied = Array.isArray(appliedPostIds) && appliedPostIds.includes(Number(selectedPostId));
-    	      selectedPostId = Number(card.dataset.id);
-    	      const status = appliedStatusMap[selectedPostId]; 
-    	    // ✅ 참여 버튼
-    	    let applyButtonHtml = '';
-    	    if (loginUserEmail && loginUserEmail === writerEmail) {
-    	    	applyButtonHtml = `
-    	    		  <div class="owner-hint">
-    	    		    <i class="fa-solid fa-circle-info"></i>
-    	    		    <span>내가 작성한 게시글입니다</span>
-    	    		  </div>
-    	    		`;
-    	    } else if (status) {
+        const status = appliedStatusMap[selectedPostId];
 
-    	    	  if (status === "PENDING") {
-    	    	    applyButtonHtml = `
-    	    	      <div class="status status-pending">
-    	    	        <i class="fa-solid fa-hourglass-half"></i>
-    	    	        <span>수락 대기중</span>
-    	    	      </div>
-    	    	    `;
-    	    	  }
+        // 참여 버튼
+        let applyButtonHtml = '';
+        if (loginUserEmail && loginUserEmail === writerEmail) {
+          applyButtonHtml = `
+            <div class="owner-hint">
+              <i class="fa-solid fa-circle-info"></i>
+              <span>내가 작성한 게시글입니다</span>
+            </div>
+          `;
+        } else if (status) {
+          if (status === "PENDING") {
+            applyButtonHtml = `
+              <div class="status status-pending">
+                <i class="fa-solid fa-hourglass-half"></i>
+                <span>수락 대기중</span>
+              </div>
+            `;
+          } else if (status === "ACCEPTED") {
+            applyButtonHtml = `
+              <div class="status status-accepted">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>참여 확정됨</span>
+              </div>
+            `;
+          } else if (status === "REJECTED") {
+            applyButtonHtml = `
+              <div class="status status-rejected">
+                <i class="fa-solid fa-circle-xmark"></i>
+                <span>거절됨</span>
+              </div>
+            `;
+          } else if (status === "CANCELED") {
+            applyButtonHtml = `
+              <div class="status status-canceled">
+                <i class="fa-solid fa-ban"></i>
+                <span>신청 취소됨</span>
+              </div>
+            `;
+          }
+        } else {
+          applyButtonHtml = isAuthenticated
+            ? `<button class="button button-primary" onclick="openApplyModal()">참여 신청</button>`
+            : `<button class="button button-primary" onclick="location.href='/auth/login'">로그인 후 신청</button>`;
+        }
 
-    	    	  else if (status === "ACCEPTED") {
-    	    	    applyButtonHtml = `
-    	    	      <div class="status status-accepted">
-    	    	        <i class="fa-solid fa-circle-check"></i>
-    	    	        <span>참여 확정됨</span>
-    	    	      </div>
-    	    	    `;
-    	    	  }
+        // 삭제 버튼
+        let deleteButtonHtml = '';
+        if (loginUserEmail && loginUserEmail === writerEmail) {
+          deleteButtonHtml = `
+            <button type="button" class="button button-danger"
+                    onclick="openDeleteConfirmModal(${selectedPostId})">
+              삭제
+            </button>
+          `;
+        }
 
-    	    	  else if (status === "REJECTED") {
-    	    	    applyButtonHtml = `
-    	    	      <div class="status status-rejected">
-    	    	        <i class="fa-solid fa-circle-xmark"></i>
-    	    	        <span>거절됨</span>
-    	    	      </div>
-    	    	    `;
-    	    	  }
-    	    	  else if (status === "CANCELED") {
-    	    		  applyButtonHtml = `
-    	    		    <div class="status status-canceled">
-    	    		      <i class="fa-solid fa-ban"></i>
-    	    		      <span>신청 취소됨</span>
-    	    		    </div>
-    	    		  `;
-    	    		}
+        const hasApply = applyButtonHtml && applyButtonHtml.trim().length > 0;
+        const hasDelete = deleteButtonHtml && deleteButtonHtml.trim().length > 0;
+        const actionClass = (!hasApply || !hasDelete) ? 'detail-actions only-one' : 'detail-actions';
 
-    	    	
-    	    } else {
-    	      applyButtonHtml = isAuthenticated
-    	        ? `<button class="button button-primary" onclick="openApplyModal()">참여 신청</button>`
-    	        : `<button class="button button-primary" onclick="location.href='/auth/login'">로그인 후 신청</button>`;
-    	    }
+        document.getElementById('detailContent').innerHTML = `
+          <div class="detail-grid">
+            <div class="detail-item"><i class="fa-solid fa-user"></i>
+              <div class="detail-content"><div class="detail-value">${nickname}</div></div>
+            </div>
+            <div class="detail-item"><i class="fa-regular fa-calendar detail-fa"></i>
+              <div class="detail-content"><div class="detail-label">날짜 및 시간</div><div class="detail-value">${eventAt}</div></div>
+            </div>
+            <div class="detail-item"><i class="fa-solid fa-location-dot detail-fa"></i>
+              <div class="detail-content"><div class="detail-label">장소</div><div class="detail-value">${location}</div></div>
+            </div>
+            <div class="detail-item"><i class="fa-solid fa-users detail-fa"></i>
+              <div class="detail-content"><div class="detail-label">모집 인원</div><div class="detail-value">${acceptedCount}/${maxPeople}명</div></div>
+            </div>
+          </div>
 
-    	    // ✅ 삭제 버튼
-    	    let deleteButtonHtml = '';
-    	    if (loginUserEmail && loginUserEmail === writerEmail) {
-    	      deleteButtonHtml = `
-    	        <button type="button" class="button button-danger"
-    	                onclick="openDeleteConfirmModal(${card.dataset.id})">
-    	          삭제
-    	        </button>
-    	      `;
-    	    }
-    	    
-    	    const hasApply = applyButtonHtml && applyButtonHtml.trim().length > 0;
-    	    const hasDelete = deleteButtonHtml && deleteButtonHtml.trim().length > 0;
-    	    const actionClass = (!hasApply || !hasDelete) ? 'detail-actions only-one' : 'detail-actions';
+          <div class="detail-description">
+            <div class="detail-label">상세 설명</div>
+            <p class="description-text">${desc}</p>
+          </div>
 
-    	    document.getElementById('detailContent').innerHTML = `
-    	      <div class="detail-grid">
-    	        <div class="detail-item"><i class="fa-solid fa-user"></i>
-    	          <div class="detail-content"><div class="detail-value">${nickname}</div></div>
-    	        </div>
-    	        <div class="detail-item"><i class="fa-regular fa-calendar detail-fa"></i>
-    	          <div class="detail-content"><div class="detail-label">날짜 및 시간</div><div class="detail-value">${eventAt}</div></div>
-    	        </div>
-    	        <div class="detail-item"><i class="fa-solid fa-location-dot detail-fa"></i>
-    	          <div class="detail-content"><div class="detail-label">장소</div><div class="detail-value">${location}</div></div>
-    	        </div>
-    	        <div class="detail-item"><i class="fa-solid fa-users detail-fa"></i>
-    	          <div class="detail-content"><div class="detail-label">모집 인원</div><div class="detail-value">${maxPeople}명</div></div>
-    	        </div>
-    	      </div>
+          <div class="button-group">
+            ${applyButtonHtml}
+          </div>
+          <div class="${actionClass}">
+            ${deleteButtonHtml}
+          </div>
+        `;
 
-    	      <div class="detail-description">
-    	        <div class="detail-label">상세 설명</div>
-    	        <p class="description-text">${desc}</p>
-    	      </div>
-
-    	      <div class="button-group">
-    	        ${applyButtonHtml}
-    	      </div>
-    	      <div class="${actionClass}">
-    	        ${deleteButtonHtml}
-    	      </div>
-    	    `;
-
-    	    document.getElementById('detailModal').classList.add('show');
-    	  });
-    	});
-
-    function closeDetailModal() {
-      document.getElementById('detailModal').classList.remove('show');
-    }
-
-    function openApplyModal() {
-    	  document.getElementById('applyMessage').value = '';
-    	  document.getElementById('applyModal').classList.add('show');
-    	}
-
-    function closeApplyModal() {
-      document.getElementById('applyModal').classList.remove('show');
-    }
-
-    function submitApply() {
-    	  const message = document.getElementById('applyMessage').value.trim();
-
-    	  if (!selectedPostId) {
-    	    alert("게시글을 먼저 선택해주세요.");
-    	    return;
-    	  }
-
-    	  if (!message) {
-    	    alert("메시지를 입력해주세요.");
-    	    return;
-    	  }
-
-    	  // form 값 채우기
-    	  document.getElementById('applyPostId').value = selectedPostId;
-    	  document.getElementById('applyMessageField').value = message;
-
-    	  // CSRF 넣기
-    	  const csrfInput = document.getElementById('applyCsrfField');
-    	  csrfInput.setAttribute('name', csrfParam);
-    	  csrfInput.value = csrfToken;
-
-    	  // 제출
-    	  document.getElementById('applyForm').submit();
-    	}
-
-    // ✅ Create modal open
-    const createBtn = document.getElementById('createButton');
-    if (createBtn) {
-      createBtn.addEventListener('click', () => {
-        document.getElementById('createModal').classList.add('show');
-      });
-    }
-
-    function closeCreateModal() {
-      document.getElementById('createModal').classList.remove('show');
-      document.getElementById('createForm').reset();
-    }
-
-    // ✅ overlay click close
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) overlay.classList.remove('show');
+        document.getElementById('detailModal').classList.add('show');
       });
     });
+  }
 
-    
-    function openDeleteConfirmModal(postId) {
-    	  // hidden 값 세팅
-    	  document.getElementById('deletePostId').value = postId;
+  function openPostModalFromQuery() {
+    const params = new URLSearchParams(window.location.search);
+    const openPostId = params.get('openPostId');
+    if (!openPostId) return;
 
-    	  // CSRF hidden field 세팅 (name 동적으로 넣기)
-    	  const csrfInput = document.getElementById('deleteCsrfField');
-    	  csrfInput.setAttribute('name', csrfParam);
-    	  csrfInput.value = csrfToken;
+    const card = document.querySelector(`.post-card[data-id="${openPostId}"]`);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.click();
+    } else {
+      console.warn('해당 게시글이 현재 목록에 없습니다. postId=', openPostId);
+    }
+  }
 
-    	  // 모달 열기
-    	  document.getElementById('deleteConfirmModal').classList.add('show');
-    	}
+  // ✅ DOM 로드 후: 바인딩 먼저 -> 쿼리 오픈
+  window.addEventListener('DOMContentLoaded', () => {
+    bindPostCardClicks();
+    openPostModalFromQuery();
+  });
 
-    	function closeDeleteConfirmModal() {
-    	  document.getElementById('deleteConfirmModal').classList.remove('show');
-    	}
-  </script>
+  // ===== 아래 기존 함수들은 그대로 둬도 됨 =====
+  function closeDetailModal() {
+    document.getElementById('detailModal').classList.remove('show');
+  }
 
+  function openApplyModal() {
+    document.getElementById('applyMessage').value = '';
+    document.getElementById('applyModal').classList.add('show');
+  }
+
+  function closeApplyModal() {
+    document.getElementById('applyModal').classList.remove('show');
+  }
+
+  function submitApply() {
+    const message = document.getElementById('applyMessage').value.trim();
+    if (!selectedPostId) return alert("게시글을 먼저 선택해주세요.");
+    if (!message) return alert("메시지를 입력해주세요.");
+
+    document.getElementById('applyPostId').value = selectedPostId;
+    document.getElementById('applyMessageField').value = message;
+
+    const csrfInput = document.getElementById('applyCsrfField');
+    csrfInput.setAttribute('name', csrfParam);
+    csrfInput.value = csrfToken;
+
+    document.getElementById('applyForm').submit();
+  }
+
+  function openDeleteConfirmModal(postId) {
+    document.getElementById('deletePostId').value = postId;
+
+    const csrfInput = document.getElementById('deleteCsrfField');
+    csrfInput.setAttribute('name', csrfParam);
+    csrfInput.value = csrfToken;
+
+    document.getElementById('deleteConfirmModal').classList.add('show');
+  }
+
+  function closeDeleteConfirmModal() {
+    document.getElementById('deleteConfirmModal').classList.remove('show');
+  }
+</script>
 </div>
 </body>
 </html>

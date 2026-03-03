@@ -76,4 +76,6 @@ public class MatePost extends PostBaseEntity{
     public void open() {
         this.status = MatePostStatus.OPEN;
     }
+
+
 }

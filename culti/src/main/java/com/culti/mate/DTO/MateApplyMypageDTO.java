@@ -15,8 +15,12 @@ public class MateApplyMypageDTO {
     private String postTitle;
     private String applicantNickname; // received에서 필요
     private String writerNickname;    // sent에서 필요
-
+    private String message;  
+    private String category;
+    
+    
     private LocalDateTime createdAt;
+    private LocalDateTime decidedAt;
 
     private String eventAtText;
     private String location;
