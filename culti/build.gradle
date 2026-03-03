@@ -61,3 +61,10 @@ tasks.named('test') {
    useJUnitPlatform()
    enabled = false 
 }
+sourceSets {
+    main {
+        resources {
+            srcDirs = ["src/main/resources"]
+        }
+    }
+}

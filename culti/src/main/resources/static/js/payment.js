@@ -147,7 +147,7 @@ function verifyPayment(
 
     console.log("🔍 서버 검증 요청");
 
-    fetch("/api/payment/verify", {
+    fetch("/payment/verify", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

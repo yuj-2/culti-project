@@ -23,19 +23,15 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-        .authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
-                .requestMatchers(new AntPathRequestMatcher("/reservation/booking/**")).authenticated()
-                // 1. 결제 검증 API 경로는 로그인 여부와 상관없이 접근 가능해야 안전합니다 (포트원 서버 통신 대비)
+        .authorizeHttpRequests((auth) -> auth
+                // /api를 뺀 주소로 정확히 매칭하세요.
                 .requestMatchers(new AntPathRequestMatcher("/payment/verify/**")).permitAll() 
-                .requestMatchers(new AntPathRequestMatcher("/payment/**")).authenticated()
+                .requestMatchers(new AntPathRequestMatcher("/reservation/booking/**")).authenticated()
                 .requestMatchers(new AntPathRequestMatcher("/**")).permitAll())
         
         .csrf((csrf) -> csrf
-                // 2. 결제 검증 POST 요청이 CSRF 토큰 때문에 차단되지 않도록 예외 경로 설정
-                .ignoringRequestMatchers(
-                    new AntPathRequestMatcher("/payment/verify/**"),
-                    new AntPathRequestMatcher("/payment/verify")
-                )
+                // POST 요청 허용을 위해 CSRF 예외 대상에도 추가합니다.
+                .ignoringRequestMatchers(new AntPathRequestMatcher("/payment/verify/**"))
                 .csrfTokenRepository(new HttpSessionCsrfTokenRepository()))
         
         .sessionManagement(session -> session

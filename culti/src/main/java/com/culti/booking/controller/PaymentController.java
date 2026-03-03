@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/payment")
+@RequestMapping("/payment")
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -26,6 +26,7 @@ public class PaymentController {
             @RequestBody BookingRequestDTO requestDTO,
             Principal principal
     ) {
+    	 System.out.println("principal: " + principal);  // 🔥 여기
 
         String email = principal.getName();
 

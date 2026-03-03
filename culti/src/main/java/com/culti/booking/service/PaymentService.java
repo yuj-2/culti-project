@@ -32,10 +32,10 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class PaymentService {
 
-    @Value("${portone.api-key}")
+    @Value("${portone.api.key}")
     private String apiKey;
 
-    @Value("${portone.api-secret}")
+    @Value("${portone.api.secret}")
     private String apiSecret;
 
     private final BookingRepository bookingRepository;
@@ -47,6 +47,7 @@ public class PaymentService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public Long processPayment(
+    		
             BookingRequestDTO requestDTO,
             String loginEmail,
             String impUid,

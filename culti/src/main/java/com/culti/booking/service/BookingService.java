@@ -35,10 +35,10 @@ public class BookingService {
     private final UserRepository userRepository;
     private final ScheduleSeatRepository scheduleSeatRepository;
 
-    @Value("${portone.api-key}")
+    @Value("${portone.api.key}")
     private String portoneApiKey;
 
-    @Value("${portone.api-secret}")
+    @Value("${portone.api.secret}")
     private String portoneApiSecret;
 
     private final RestTemplate restTemplate = new RestTemplate();
