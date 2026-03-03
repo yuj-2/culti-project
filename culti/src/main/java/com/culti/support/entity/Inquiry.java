@@ -5,9 +5,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import jakarta.persistence.*;
 import lombok.*;
 
+/*
 enum InquiryStatus {
     PENDING, ANSWERED
 }
+*/
 
 @Entity
 @Table(name = "inquiry")
@@ -33,8 +35,9 @@ public class Inquiry {
     @Column(name = "inquiry_answer")
     private String inquiryAnswer;
 
+    // Inquiry.java 내 해당 부분 수정
     @Enumerated(EnumType.STRING)
-    @Column(name = "inquiry_status")
+    @Column(name = "inquiry_status", nullable = true, insertable = true, updatable = true) // nullable 추가
     private InquiryStatus inquiryStatus = InquiryStatus.PENDING;
 
     @CreationTimestamp

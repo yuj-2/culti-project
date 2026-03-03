@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>CULTI 관리자 - 고객센터 - FAQ 관리</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+:root {
+	--main-purple: #503396;
+}
+
+body {
+	background-color: #f4f6f9;
+	font-family: 'Pretendard', sans-serif;
+}
+
+/* 사이드바 스타일 유지 */
+.sidebar {
+	width: 260px;
+	height: 100vh;
+	position: fixed;
+	background: var(--main-purple);
+	color: white;
+}
+
+.sidebar .nav-link {
+	color: rgba(255, 255, 255, 0.7);
+	padding: 15px 20px;
+	transition: 0.3s;
+	text-decoration: none;
+	display: block;
+}
+
+.sidebar .nav-link:hover, .sidebar .nav-link.active {
+	background: rgba(0, 0, 0, 0.1);
+	color: white;
+}
+
+.main-content {
+	margin-left: 260px;
+	padding: 30px;
+}
+
+.card {
+	border-radius: 15px;
+	border: none;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.table thead {
+	background-color: #f8f9fa;
+}
+
+.btn-main {
+	background-color: var(--main-purple);
+	color: white;
+	border-radius: 8px;
+}
+
+.btn-main:hover {
+	background-color: #3d2675;
+	color: white;
+}
+
+/* FAQ 전용 스타일 */
+.category-badge {
+	background-color: #eeeaf7;
+	color: var(--main-purple);
+	border: 1px solid #dcd3f0;
+	font-weight: 600;
+	font-size: 0.8rem;
+}
+
+.faq-answer-preview {
+	font-size: 0.85rem;
+	color: #6c757d;
+	display: block;
+	margin-top: 5px;
+}
+</style>
+</head>
+<body>
+
+	<div class="sidebar">
+		<div class="p-4 text-center">
+			<h4 class="fw-bold">CULTI ADMIN</h4>
+			<p class="small opacity-50">관리자 모드</p>
+		</div>
+		<nav class="nav flex-column">
+			<a class="nav-link" th:href="@{/support/admin/inquiry}"> <i
+				class="fas fa-question-circle me-2"></i> 1:1 문의 관리
+			</a> <a class="nav-link" th:href="@{/support/admin/notice}"> <i
+				class="fas fa-bullhorn me-2"></i> 공지사항 관리
+			</a> <a class="nav-link active" th:href="@{/support/admin/faq}"> <i
+				class="fas fa-info-circle me-2"></i> FAQ 관리
+			</a>
+			<hr class="mx-3 opacity-25">
+        	<a class="nav-link" th:href="@{/support}"><i class="fas fa-home me-2"></i>관리자 페이지 메인</a>
+        	<a class="nav-link text-warning" href="javascript:void(0);" onclick="confirmLogout()">
+    			<i class="fas fa-sign-out-alt me-2"></i>관리자 계정 로그아웃
+			</a>
+		</nav>
+	</div>
+
+	<div class="main-content">
+		<div class="d-flex justify-content-between align-items-center mb-4">
+			<h3 class="fw-bold">
+				<i class="fas fa-info-circle me-2"></i>FAQ 관리
+			</h3>
+			<a th:href="@{/support/admin/faq/write}" class="btn btn-main px-4">
+				<i class="fas fa-plus me-2"></i>새 FAQ 등록
+			</a>
+		</div>
+
+		<div class="card p-4">
+			<table class="table table-hover align-middle">
+				<thead>
+					<tr>
+						<th style="width: 100px;">카테고리</th>
+						<th>질문 및 답변 내용</th>
+						<th style="width: 120px; text-align: center;">관리</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="faq : ${faqPage.content}">
+						<td><span class="badge category-badge"
+							th:text="${faq.faqCategory}">예매</span></td>
+						<td>
+							<div class="fw-bold" th:text="${faq.faqContent}">자주 묻는 질문
+								제목(내용)입니다.</div> <small class="faq-answer-preview"> <i
+								class="fas fa-arrow-right me-1 opacity-50"></i> <span
+								th:text="${#strings.abbreviate(faq.faqAnswer, 80)}">답변
+									미리보기 내용입니다...</span>
+						</small>
+						</td>
+						<td class="text-center"><a
+							th:href="@{/support/admin/faq/delete/{id}(id=${faq.faqId})}"
+							class="btn btn-sm btn-outline-danger"
+							onclick="return confirm('이 FAQ를 삭제하시겠습니까?');"> <i
+								class="fas fa-trash-alt"></i> 삭제
+						</a></td>
+					</tr>
+					<tr th:if="${faqPage.totalElements == 0}">
+						<td colspan="3" class="text-center py-5 text-muted">등록된 FAQ가
+							없습니다.</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<nav aria-label="Page navigation" class="mt-4"
+				th:if="${faqPage.totalPages > 1}">
+				<ul class="pagination justify-content-center">
+					<li class="page-item"
+						th:classappend="${!faqPage.hasPrevious} ? 'disabled'"><a
+						class="page-link"
+						th:href="@{/support/admin/faq(page=${faqPage.number - 1})}">이전</a>
+					</li>
+					<li class="page-item disabled"><span class="page-link"
+						th:text="${faqPage.number + 1} + ' / ' + ${faqPage.totalPages}"></span>
+					</li>
+					<li class="page-item"
+						th:classappend="${!faqPage.hasNext} ? 'disabled'"><a
+						class="page-link"
+						th:href="@{/support/admin/faq(page=${faqPage.number + 1})}">다음</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function confirmLogout() {
+    if (confirm("정말로 로그아웃 하시겠습니까?")) {
+        // 우리가 새로 만든 LogoutController의 @GetMapping("/admin/logout")을 호출합니다.
+        location.href = "/admin/logout";
+    }
+}
+</script>
+</body>
+</html>

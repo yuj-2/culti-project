@@ -1,7 +1,17 @@
 /* inquiry.js */
 
+const csrfToken = $("meta[name='_csrf']").attr("content");
+const csrfHeader = $("meta[name='_csrf_header']").attr("content");
+$.ajaxSetup({
+    beforeSend: function(xhr) {
+        if (csrfToken && csrfHeader) xhr.setRequestHeader(csrfHeader, csrfToken);
+    }
+});
+
 let currentStep = 'title';
 let inquiryData = { title: '', content: '' };
+
+
 
 $(document).ready(function() {
     // 페이지 로드 시 목록 불러오기
@@ -70,7 +80,7 @@ function startNewInquiry() {
     $('.send_btn').show(); // 전송 버튼 보이기
                  
     currentStep = 'title';
-    appendBotMessage("안녕하세요! 어떤 도움이 필요하신가요?<br>먼저 문의하실 <b>제목</b>을 입력해주세요.");
+    appendBotMessage("안녕하세요! 어떤 도움이 필요하신가요?<br>먼저 문의하실 사항의 <b>제목</b>을 입력해주세요.");
 }
 
 // 3. 기존 문의 클릭 (상세 조회)
@@ -109,7 +119,7 @@ function handleUserInput() {
     if(currentStep === 'title') {
         inquiryData.title = val;
         currentStep = 'content';
-        appendBotMessage("상세한 <b>문의 내용</b>을 입력해 주시겠어요?");
+        appendBotMessage("<b>문의 내용</b>을 입력하세요.");
         $('#userInput').attr('placeholder', '상세 내용을 입력하세요...');
     } 
     else if(currentStep === 'content') {
@@ -166,21 +176,40 @@ function askConfirmAgain() {
     $('#userInput').attr('disabled', true);
 }
 
+
 // 최종 저장
 function saveInquiry() {
-    $.post("/support/inquiry/save", { 
+    // 서버 컨트롤러(@RequestParam)에서 지정한 이름인 
+    // "title"과 "content"로 정확히 맞춰서 보냅니다.
+    const sendData = { 
         title: inquiryData.title, 
         content: inquiryData.content 
-    }, function(res) {
-        if(res.trim() === "success") {
+    };
+
+    $.post("/support/inquiry/save", sendData)
+    .done(function(res) {
+        // 컨트롤러가 return "success"; 를 하므로 문자열 비교
+        if(res === "success") {
             appendBotMessage("<b>문의가 정상적으로 접수되었습니다.</b><br>운영자가 확인 후 답변 드릴 예정입니다. 감사합니다!");
             $('#chatFooter').hide();
             loadInquiryList(); 
         } else {
             appendBotMessage("저장 중 오류가 발생했습니다. 다시 시도해주세요.");
         }
+    })
+    .fail(function(xhr) {
+        console.error("Error Status:", xhr.status);
+        if(xhr.status === 400) {
+            // 이제 이 에러가 나지 않을 거예요!
+            appendBotMessage("서버 데이터 전송 오류가 발생했습니다.");
+        } else if(xhr.status === 403) {
+            appendBotMessage("권한이 없거나 세션이 만료되었습니다. 다시 로그인해 주세요.");
+        } else {
+            appendBotMessage("시스템 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        }
     });
 }
+
 
 // 말풍선 추가 함수들
 function appendBotMessage(msg, time = "") {

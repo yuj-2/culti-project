@@ -45,4 +45,16 @@ public class NoticeService {
         return notice;
     }
     
+
+    // [관리자 모드 - 공지사항]
+    public void saveNotice(Notice notice) {
+        // 공지사항 생성 시간을 현재 시간으로 설정 (엔티티에 @CreatedDate가 없다면 수동 설정)
+        // notice.setCreatedAt(LocalDateTime.now()); 
+        noticeRepository.save(notice);
+    }
+
+    public void deleteNotice(Long id) {
+        noticeRepository.deleteById(id);
+    }
+    
 }
