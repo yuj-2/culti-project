@@ -159,8 +159,9 @@ public class InquiryController {
         return "support/refund"; 
     }
     
-    
- // [9. 관리자 메인 페이지]
+    // =========================================================   
+    // [9. 관리자 메인 페이지]
+    // =========================================================
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin")
     public String adminMain(Principal principal, Model model) {
@@ -207,4 +208,104 @@ public class InquiryController {
         
         return "support/support";
     }
+    
+    // =========================================================
+    // [ 12. 관리자 모드 - 공지사항 관리 ]
+    // =========================================================
+    // 1. 공지사항 관리 메인 목록 (localhost/support/admin/notice)
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/notice")
+    public String adminNoticePage(Model model, 
+        @PageableDefault(size = 10, sort = "noticeId", direction = Sort.Direction.DESC) Pageable pageable) {
+        
+        Page<Notice> noticePage = noticeService.getNoticeList(pageable);
+        model.addAttribute("noticePage", noticePage);
+        return "support/admin_notice"; // admin_notice.html 필요
+    }
+
+    // 2. 공지사항 작성 페이지 이동
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/notice/write")
+    public String noticeWritePage() {
+        return "support/admin_notice_write"; // admin_notice_write.html 필요
+    }
+
+    // 3. 공지사항 저장 로직
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/notice/save")
+    public String saveNotice(Principal principal, 
+                             @RequestParam("title") String title, 
+                             @RequestParam("content") String content) {
+        
+        // 1. 현재 로그인한 관리자 정보 가져오기
+        UserDTO userDTO = userService.findByEmail(principal.getName());
+        
+        // 2. 빌더 사용 (엔티티 생성자에 정의된 필드만 사용)
+        Notice notice = Notice.builder()
+                .userId(userDTO.getUserId()) // 필수 값!
+                .noticeTitle(title)
+                .noticeContent(content)
+                // .viewCount(0) <- 이 줄을 삭제하세요. 엔티티 생성자에서 이미 0으로 처리함
+                .build();
+                
+        noticeService.saveNotice(notice); 
+        return "redirect:/support/admin/notice";
+    }
+
+    // 4. 공지사항 삭제 로직
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/notice/delete/{id}")
+    public String deleteNotice(@PathVariable("id") Long id) {
+        noticeService.deleteNotice(id);
+        return "redirect:/support/admin/notice";
+    }
+
+    // =========================================================
+    // [ 관리자 모드 - FAQ 관리 ]
+    // =========================================================
+    // 1. FAQ 관리 메인 목록 (localhost/support/admin/faq)
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/faq")
+    public String adminFaqPage(Model model, 
+        @PageableDefault(size = 10, sort = "faqId", direction = Sort.Direction.DESC) Pageable pageable) {
+        
+        Page<Faq> faqPage = faqService.getFaqList(pageable);
+        model.addAttribute("faqPage", faqPage);
+        return "support/admin_faq"; // admin_faq.html 필요
+    }
+
+    // 2. FAQ 작성 페이지 이동
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/faq/write")
+    public String faqWritePage(Model model) {
+        model.addAttribute("categories", List.of("예매", "전시", "취소/환불", "동행", "회원"));
+        return "support/admin_faq_write"; // admin_faq_write.html 필요
+    }
+
+    // 3. FAQ 저장 로직
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/faq/save")
+    public String saveFaq(@RequestParam("category") String category, 
+                           @RequestParam("content") String content, // 질문 내용
+                           @RequestParam("answer") String answer) { // 답변 내용
+        
+        // 엔티티의 @Builder 생성자 파라미터 이름(faqCategory, faqContent, faqAnswer)과 일치시켜야 합니다.
+        Faq faq = Faq.builder()
+                .faqCategory(category) 
+                .faqContent(content)   // 질문(Content)
+                .faqAnswer(answer)     // 답변(Answer)
+                .build();
+                
+        faqService.saveFaq(faq);
+        return "redirect:/support/admin/faq";
+    }
+
+    // 4. FAQ 삭제 로직
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/faq/delete/{id}")
+    public String deleteFaq(@PathVariable("id") Long id) {
+        faqService.deleteFaq(id);
+        return "redirect:/support/admin/faq";
+    }
+    
 }
