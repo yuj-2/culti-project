@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+<head>
+    <title>콘텐츠 수정</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold m-0"><i class="fas fa-edit me-2 text-muted"></i>콘텐츠 정보 수정</h4>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form th:action="@{/admin/content/edit}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="id" th:value="${content.id}">
+
+				    <h5 class="fw-bold mb-3 border-bottom pb-2 text-primary">1. 기본 정보</h5>
+				    
+				    <div class="row mb-3">
+				        <div class="col-md-3">
+				            <label for="category" class="form-label fw-bold">카테고리</label>
+				            <select class="form-select" id="category" name="category" required>
+				                <option value="영화" th:selected="${content.category == '영화'}">영화</option>
+				                <option value="공연" th:selected="${content.category == '공연'}">공연</option>
+				                <option value="전시" th:selected="${content.category == '전시'}">전시</option>
+				                <option value="팝업스토어" th:selected="${content.category == '팝업스토어'}">팝업스토어</option>
+				            </select>
+				        </div>
+				        <div class="col-md-6">
+				            <label for="title" class="form-label fw-bold">콘텐츠 제목</label>
+				            <input type="text" class="form-control" id="title" name="title" th:value="${content.title}" required>
+				        </div>
+				        <div class="col-md-3">
+				            <label for="ageLimit" class="form-label fw-bold">연령 제한</label>
+				            <select class="form-select" id="ageLimit" name="ageLimit" required>
+				                <option value="전체관람가" th:selected="${content.ageLimit == '전체관람가'}">전체관람가</option>
+				                <option value="12세이상관람가" th:selected="${content.ageLimit == '12세이상관람가'}">12세이상관람가</option>
+				                <option value="15세이상관람가" th:selected="${content.ageLimit == '15세이상관람가'}">15세이상관람가</option>
+				                <option value="청소년관람불가" th:selected="${content.ageLimit == '청소년관람불가'}">청소년관람불가</option>
+				            </select>
+				        </div>
+				    </div>
+				
+				    <div class="row mb-3">
+				        <div class="col-md-4">
+				            <label for="placeId" class="form-label fw-bold">개최 장소 (Place)</label>
+				            <select class="form-select" id="placeId" name="placeId" required>
+				                <option th:each="place : ${places}" 
+								        th:value="${place.placeId}" 
+								        th:text="${place.name}"
+								        th:selected="${not #lists.isEmpty(content.schedules) and content.schedules[0].place != null and place.placeId == content.schedules[0].place.placeId}">
+								</option>
+				            </select>
+				        </div>
+				        <div class="col-md-4">
+				            <label for="runningTime" class="form-label fw-bold">러닝타임 (분)</label>
+				            <input type="number" class="form-control" id="runningTime" name="runningTime" th:value="${content.runningTime}">
+				        </div>
+				    </div>
+				
+				    <div class="row mb-4">
+				        <div class="col-md-6">
+				            <label for="startDate" class="form-label fw-bold">시작일</label>
+				            <input type="date" class="form-control" id="startDate" name="startDate" th:value="${content.startDate}" required>
+				        </div>
+				        <div class="col-md-6">
+				            <label for="endDate" class="form-label fw-bold">종료일</label>
+				            <input type="date" class="form-control" id="endDate" name="endDate" th:value="${content.endDate}" required>
+				        </div>
+				    </div>
+				
+				    <div class="mb-4">
+				        <label for="posterFile" class="form-label fw-bold">포스터 이미지 수정</label>
+                        <div class="mb-2" th:if="${content.posterUrl}">
+                            <small class="text-muted d-block mb-1">현재 등록된 포스터:</small>
+                            <img th:src="${content.posterUrl}" alt="현재 포스터" style="height: 150px; border-radius: 8px;" class="shadow-sm border">
+                        </div>
+				        <input class="form-control" type="file" id="posterFile" name="posterFile" accept="image/*">
+                        <div class="form-text">이미지를 변경할 경우에만 파일을 선택해 주세요.</div>
+				    </div>
+				
+				    <div class="mb-5">
+				        <label for="description" class="form-label fw-bold">줄거리 / 소개</label>
+				        <textarea class="form-control" id="description" name="description" rows="5" th:text="${content.description}" required></textarea>
+				    </div>
+				
+				    <h5 class="fw-bold mb-3 border-bottom pb-2 d-flex justify-content-between align-items-center text-primary">
+				        <span>2. 회차 및 상세 상영관(Schedule) 관리</span>
+				        <button type="button" class="btn btn-sm btn-outline-primary" id="addScheduleBtn">+ 회차 추가</button>
+				    </h5>
+				    
+				    <div id="schedule-container">
+					    <div class="card bg-light mb-3 schedule-item border-0" th:each="schedule, stat : ${content.schedules}">
+					        <div class="card-body row align-items-end">
+					            <input type="hidden" th:name="|schedules[${stat.index}].scheduleId|" th:value="${schedule.scheduleId}">
+					            
+					            <div class="col-md-2">
+					                <label class="form-label fw-bold text-secondary small">회차</label>
+					                <input type="number" class="form-control" th:name="|schedules[${stat.index}].sessionNum|" th:value="${schedule.sessionNum}" required>
+					            </div>
+					            
+					            <div class="col-md-3">
+					                <label class="form-label fw-bold text-secondary small">상세 장소(몇관)</label>
+					                <input type="text" class="form-control" th:name="|schedules[${stat.index}].roomName|" th:value="${schedule.roomName}">
+					            </div>
+					            
+					            <div class="col-md-3">
+					                <label class="form-label fw-bold text-secondary small">시작 시간</label>
+					                <input type="datetime-local" class="form-control" 
+					                       th:name="|schedules[${stat.index}].startTime|" 
+					                       th:value="${schedule.startTime != null ? #temporals.format(schedule.startTime, 'yyyy-MM-dd''T''HH:mm') : ''}" required>
+					            </div>
+					            
+					            <div class="col-md-3">
+					                <label class="form-label fw-bold text-secondary small">종료 시간</label>
+					                <input type="datetime-local" class="form-control" 
+					                       th:name="|schedules[${stat.index}].endTime|" 
+					                       th:value="${schedule.endTime != null ? #temporals.format(schedule.endTime, 'yyyy-MM-dd''T''HH:mm') : ''}" required>
+					            </div>
+					            
+					            <div class="col-md-1">
+					                <button type="button" class="btn btn-outline-danger w-100 delete-schedule-btn"><i class="fas fa-trash"></i></button>
+					            </div>
+					        </div>
+					    </div>
+					    
+					    <div th:if="${#lists.isEmpty(content.schedules)}" class="card bg-light mb-3 schedule-item border-0">
+					        <div class="card-body row align-items-end">
+					            <div class="col-md-2">
+					                <label class="form-label fw-bold text-secondary small">회차</label>
+					                <input type="number" class="form-control" name="schedules[0].sessionNum" placeholder="예: 1" required>
+					            </div>
+					            <div class="col-md-3">
+					                <label class="form-label fw-bold text-secondary small">상세 장소</label>
+					                <input type="text" class="form-control" name="schedules[0].roomName" placeholder="예: 1관">
+					            </div>
+					            <div class="col-md-3">
+					                <label class="form-label fw-bold text-secondary small">시작 시간</label>
+					                <input type="datetime-local" class="form-control" name="schedules[0].startTime" required>
+					            </div>
+					            <div class="col-md-3">
+					                <label class="form-label fw-bold text-secondary small">종료 시간</label>
+					                <input type="datetime-local" class="form-control" name="schedules[0].endTime" required>
+					            </div>
+					            <div class="col-md-1">
+					                <button type="button" class="btn btn-outline-danger w-100 delete-schedule-btn"><i class="fas fa-trash"></i></button>
+					            </div>
+					        </div>
+					    </div>
+					</div>
+				
+				    <div class="d-flex justify-content-end gap-2 mt-4 border-top pt-4">
+				        <button type="button" class="btn btn-light border px-4" onclick="history.back()">취소</button>
+				        <button type="submit" class="btn btn-primary px-4" style="background-color: #503396; border-color: #503396;">콘텐츠 정보 수정완료</button>
+				    </div>
+				</form>
+                <script th:src="@{/js/admin/content-form.js}"></script>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

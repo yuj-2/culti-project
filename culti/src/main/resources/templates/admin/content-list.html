@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+<head>
+    <title>영화/전시 관리</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold m-0"><i class="fas fa-list me-2 text-muted"></i>콘텐츠 및 가격 관리</h4>
+            
+            <div class="btn-group shadow-sm" role="group">
+                <a th:href="@{/admin/content/list(category='ALL')}" class="btn btn-light border">전체</a>
+                <a th:href="@{/admin/content/list(category='영화')}" class="btn btn-light border" style="color: #503396;">영화</a>
+                <a th:href="@{/admin/content/list(category='공연')}" class="btn btn-light border" style="color: #503396;">공연</a>
+                <a th:href="@{/admin/content/list(category='전시')}" class="btn btn-light border" style="color: #503396;">전시</a>
+                <a th:href="@{/admin/content/list(category='팝업스토어')}" class="btn btn-light border" style="color: #503396;">팝업스토어</a>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="table table-hover align-middle text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th width="10%">분류</th>
+                        <th width="35%">콘텐츠명</th>
+                        <th width="25%">진행 기간</th>
+                        <th width="30%">상태 / 가격설정</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="content : ${contentList}">
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${content.category == '영화' ? 'bg-primary' : (content.category == '공연' ? 'bg-success' : 'bg-info text-dark')}" 
+                                  th:text="${content.category}">
+                            </span>
+                        </td>
+                        <td class="text-start fw-bold">
+						    <a th:href="@{/admin/content/edit(id=${content.id})}" class="text-decoration-none text-dark" style="transition: color 0.2s;" onmouseover="this.style.color='#503396'" onmouseout="this.style.color='#212529'">
+						        <span th:text="${content.title}"></span>
+						        <i class="fas fa-external-link-alt ms-1 text-muted" style="font-size: 0.8rem;"></i>
+						    </a>
+						</td>
+                        <td class="text-muted small">
+                            <span th:text="${content.startDate}"></span> ~ <span th:text="${content.endDate}"></span>
+                        </td>
+                        <td>
+                            <span th:if="${content.category == '영화'}" class="badge bg-secondary">가격 고정</span>
+
+                            <th:block th:if="${content.category == '공연'}">
+							    <a th:if="${#lists.isEmpty(content.contentPrices)}" 
+							       th:href="@{/admin/price/performance(id=${content.id})}"
+							       class="btn btn-sm btn-culti">
+							        <i class="fas fa-won-sign me-1"></i> 등급별 가격 등록
+							    </a>
+							    
+							    <a th:unless="${#lists.isEmpty(content.contentPrices)}" 
+							       th:href="@{/admin/price/performance(id=${content.id})}"
+							       class="btn btn-sm btn-outline-secondary"
+							       onclick="return confirm('이미 등록된 가격이 있습니다. 가격을 수정하시겠습니까?');">
+							        <i class="fas fa-edit me-1"></i> 가격 수정
+							    </a>
+							</th:block>
+							
+							<th:block th:if="${content.category == '전시' or content.category == '팝업스토어'}">
+							    <a th:if="${#lists.isEmpty(content.contentPrices)}" 
+							       th:href="@{/admin/price/single(id=${content.id})}"
+							       class="btn btn-sm btn-outline-success">
+							        <i class="fas fa-ticket-alt me-1"></i> 티켓 가격 등록
+							    </a>
+							    <a th:unless="${#lists.isEmpty(content.contentPrices)}" 
+							       th:href="@{/admin/price/single(id=${content.id})}"
+							       class="btn btn-sm btn-outline-secondary"
+							       onclick="return confirm('이미 등록된 단일 가격이 있습니다. 수정하시겠습니까?');">
+							        <i class="fas fa-edit me-1"></i> 가격 수정
+							    </a>
+							</th:block>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(contentList)}">
+                        <td colspan="4" class="py-5 text-muted">등록된 콘텐츠가 없습니다. 콘텐츠를 먼저 등록해 주세요.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

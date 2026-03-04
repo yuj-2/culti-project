@@ -1,82 +1,69 @@
 package com.culti.booking.service;
 
-import java.util.Map;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Base64;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.culti.auth.entity.User; //
-import com.culti.auth.repository.UserRepository;
 import com.culti.booking.entity.Booking;
-import com.culti.booking.entity.BookingSeat;
-import com.culti.booking.entity.Seat;
 import com.culti.booking.repository.BookingRepository;
-import com.culti.booking.repository.ScheduleRepository;
-import com.culti.booking.repository.SeatRepository; // Seat 조회를 위해 필요
-import com.culti.content.entity.Schedule;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.minidev.json.JSONObject;
 
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
-
     private final BookingRepository bookingRepository;
-    private final UserRepository userRepository;
-    private final ScheduleRepository scheduleRepository;
-    private final SeatRepository seatRepository; // 추가
+    // schedule_seat 테이블 수정을 위해 필요
+    // private final ScheduleSeatRepository scheduleSeatRepository; 
+
+    @Value("${toss.secret.key}")
+    private String secretKey;
 
     @Transactional
-    public void processPayment(Map<String, Object> paymentData, String loginEmail) {
-        // 1. 유저 정보 조회 (auth.User 타입)
-        User user = userRepository.findByEmail(loginEmail)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+    public void confirmPayment(String paymentKey, String orderId, Long amount) throws Exception {
+        String authorizations = Base64.getEncoder().encodeToString((secretKey + ":").getBytes());
 
-        // 2. 스케줄 정보 조회
-        Long scheduleId = Long.parseLong(paymentData.get("content_id").toString());
-        Schedule schedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new RuntimeException("상영 스케줄을 찾을 수 없습니다."));
+        URL url = new URL("https://api.tosspayments.com/v1/payments/confirm");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestProperty("Authorization", "Basic " + authorizations);
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
 
-        // 3. 결제 데이터 추출
-        Integer amount = Integer.parseInt(paymentData.get("total_price").toString());
-        String merchantUid = (String) paymentData.get("merchant_uid");
-        String impUid = (String) paymentData.get("imp_uid");
-        String category = (String) paymentData.get("category");
-        
-        // 좌석 ID 리스트 (예: "101,102")
-        String seatIdsStr = (String) paymentData.get("seat_info");
-        String[] seatIdArray = seatIdsStr.split(",");
+        JSONObject obj = new JSONObject();
+        obj.put("orderId", orderId);
+        obj.put("amount", amount);
+        obj.put("paymentKey", paymentKey);
 
-        // 4. Booking 엔티티 생성
-        Booking booking = Booking.builder()
-                .user(user)
-                .schedule(schedule)
-                .merchantUid(merchantUid)
-                .impUid(impUid)
-                .category(category)
-                .totalPrice(amount)
-                .status("PAID")
-                .paymentStatus("COMPLETED")
-                .paymentMethod("CARD")
-                .ticketCount(seatIdArray.length)
-                .discountAmount(0)
-                .build();
-
-        // 5. 개별 좌석(BookingSeat) 저장 로직
-        for (String seatId : seatIdArray) {
-            // 전달받은 좌석 ID로 실제 Seat 엔티티를 조회합니다.
-            Seat seat = seatRepository.findById(Long.parseLong(seatId))
-                    .orElseThrow(() -> new RuntimeException("좌석 정보를 찾을 수 없습니다."));
-
-            BookingSeat bookingSeat = BookingSeat.builder()
-                    .seat(seat)
-                    .booking(booking)
-                    .build();
-            
-            // Booking 엔티티 내 List에 추가 (Cascade 설정으로 같이 저장됨)
-            booking.getBookingSeats().add(bookingSeat);
+        try (OutputStream os = connection.getOutputStream()) {
+            os.write(obj.toString().getBytes("utf-8"));
         }
 
-        bookingRepository.save(booking);
+        // [해결] responseCode 변수를 여기서 선언하고 할당합니다.
+        int responseCode = connection.getResponseCode();
+
+        if (responseCode == 200) {
+            // 1. booking 테이블에서 해당 예매 정보 찾기
+            Booking booking = bookingRepository.findByBookingNumber(orderId)
+                .orElseThrow(() -> new RuntimeException("예매 정보를 찾을 수 없습니다."));
+            
+            // 2. 예매 상태 업데이트 (PENDING -> PAID)
+            booking.setStatus("PAID");
+            booking.setPaymentMethod("CARD"); // 토스에서 받은 결제수단으로 동적 할당 가능
+            
+            // 3. 영화 예매라면 좌석 상태도 'AVAILABLE'에서 'OCCUPIED'로 바꿔야 함
+            // 예: scheduleSeatService.updateStatusByBooking(booking.getBookingId(), "OCCUPIED");
+            
+            System.out.println("결제 및 예매 확정 완료: " + orderId);
+        } else {
+            // 실패 시 에러 처리
+            throw new RuntimeException("토스 결제 승인 실패. 코드: " + responseCode);
+        }
     }
 }

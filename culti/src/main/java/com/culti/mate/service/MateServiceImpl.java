@@ -18,15 +18,18 @@ import org.springframework.stereotype.Service;
 import com.culti.auth.entity.User;
 import com.culti.auth.repository.UserRepository;
 import com.culti.mate.DTO.MateApplyMypageDTO;
+import com.culti.mate.DTO.MateCommentDTO;
 import com.culti.mate.DTO.MatePostDTO;
 import com.culti.mate.DTO.MyPostMypageDTO;
 import com.culti.mate.DTO.PageResultDTO;
 import com.culti.mate.entity.MateApply;
+import com.culti.mate.entity.MateComment;
 import com.culti.mate.entity.MatePost;
 import com.culti.mate.enums.MateApplyStatus;
 import com.culti.mate.enums.MatePostCategory;
 import com.culti.mate.enums.MatePostStatus;
 import com.culti.mate.repository.MateApplyRepository;
+import com.culti.mate.repository.MateCommentRepository;
 import com.culti.mate.repository.MateRepository;
 
 import jakarta.transaction.Transactional;
@@ -42,6 +45,7 @@ public class MateServiceImpl implements MateService {
 	
 	private final MateApplyRepository mateApplyRepository;
 	
+	private final MateCommentRepository mateCommentRepository;  
 	
 
 	public Page<MatePost> getList(int page, int size){
@@ -143,11 +147,6 @@ public class MateServiceImpl implements MateService {
 		
 	}
 
-	@Override
-	public void addComment(Long postId, String email, String content) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public void updateComment(Long commentId, String email, String content) {
@@ -430,7 +429,6 @@ public class MateServiceImpl implements MateService {
 		  return map;
 		}
 
-	 @Override
 	 public List<MatePost> getLatestPosts(int limit) {
 		    Pageable pageable = PageRequest.of(0, limit);
 		    return mateRepository
@@ -438,7 +436,6 @@ public class MateServiceImpl implements MateService {
 		            .getContent();
 		}
 
-	 @Override
 	 public Map<Long, Long> getAcceptedCountMap(List<MatePost> posts) {
 	     if (posts == null || posts.isEmpty()) {
 	         return java.util.Collections.emptyMap();
@@ -448,6 +445,67 @@ public class MateServiceImpl implements MateService {
 	     // return resultMap;
 
 	     return java.util.Collections.emptyMap(); // 임시라도 null 금지
+	 }
+
+	 
+	 @Override
+	 @Transactional
+	 public MateCommentDTO addComment(Long postId, String email, String content) {
+
+	     MatePost post = mateRepository.findById(postId)
+	             .orElseThrow(() -> new IllegalArgumentException("게시글 없음: " + postId));
+
+	     User writer = userRepository.findByEmail(email)
+	             .orElseThrow(() -> new IllegalArgumentException("사용자 없음: " + email));
+
+	     // 댓글 권한: 게시글 작성자 OR 신청 ACCEPTED인 사람
+	     boolean isOwner = post.getWriter().getEmail().equals(email);
+	     boolean isAccepted = mateApplyRepository.existsByPostAndApplicant_EmailAndStatus(
+	             post, email, MateApplyStatus.ACCEPTED
+	     );
+
+	     if (!isOwner && !isAccepted) {
+	         throw new SecurityException("댓글 권한이 없습니다.");
+	     }
+
+	     MateComment saved = mateCommentRepository.save(
+	             MateComment.builder()
+	                     .post(post)
+	                     .writer(writer)
+	                     .body(content)
+	                     .build()
+	     );
+
+	     return MateCommentDTO.builder()
+	             .commentId(saved.getCommentId())
+	             .postId(postId)
+	             .content(saved.getBody())
+	             .writerNickname(saved.getWriter().getNickname())
+	             .writerEmail(saved.getWriter().getEmail())
+	             .createdAt(saved.getCreatedAt())
+	             .build();
+	 }
+	 
+	 @Override
+	 public List<MateCommentDTO> getComments(Long postId) {
+
+	     MatePost post = mateRepository.findById(postId)
+	             .orElseThrow(() -> new RuntimeException("게시글 없음"));
+
+	     List<MateComment> comments =
+	             mateCommentRepository.findByPostOrderByCreatedAtAsc(post);
+
+	     return comments.stream()
+	             .map((MateComment c) -> MateCommentDTO.builder()
+	                     .commentId(c.getCommentId())   // ✅ 엔티티 실제 getter 확인
+	                     .postId(postId)
+	                     .content(c.getBody())       //  엔티티 실제 getter 확인
+	                     .writerNickname(c.getWriter().getNickname())
+	                     .writerEmail(c.getWriter().getEmail())
+	                     .createdAt(c.getCreatedAt())
+	                     .build()
+	             )
+	             .toList(); // JDK17 OK
 	 }
 
 

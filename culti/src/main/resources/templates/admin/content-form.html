@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+<head>
+    <title>콘텐츠 등록</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold m-0">신규 콘텐츠 등록</h4>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form th:action="@{/admin/content/new}" method="post" enctype="multipart/form-data">
+    
+				    <h5 class="fw-bold mb-3 border-bottom pb-2">1. 기본 정보</h5>
+				    
+				    <div class="row mb-3">
+				        <div class="col-md-3">
+				            <label for="category" class="form-label fw-bold">카테고리</label>
+				            <select class="form-select" id="category" name="category" required>
+				                <option value="" selected disabled>선택하세요</option>
+				                <option value="영화">영화</option>
+				                <option value="공연">공연</option>
+				                <option value="전시">전시</option>
+				                <option value="팝업스토어">팝업스토어</option>
+				            </select>
+				        </div>
+				        <div class="col-md-6">
+				            <label for="title" class="form-label fw-bold">콘텐츠 제목</label>
+				            <input type="text" class="form-control" id="title" name="title" placeholder="예: 어벤져스: 엔드게임" required>
+				        </div>
+				        <div class="col-md-3">
+				            <label for="ageLimit" class="form-label fw-bold">연령 제한</label>
+				            <select class="form-select" id="ageLimit" name="ageLimit" required>
+				                <option value="전체관람가" selected>전체연령</option>
+				                <option value="12세이상관람가">12세이상</option>
+				                <option value="15세이상관람가">15세이상</option>
+				                <option value="청소년관람불가">청소년불가</option>
+				            </select>
+				        </div>
+				    </div>
+				
+				    <div class="row mb-3">
+				        <div class="col-md-4">
+						    <label for="placeId" class="form-label fw-bold">개최 장소 (Place)</label>
+						    <select class="form-select" id="placeId" name="placeId" required>
+						        <option value="" selected disabled>장소를 선택하세요</option>
+						        
+						        <option th:each="place : ${places}" 
+						                th:value="${place.placeId}" 
+						                th:text="${place.name}">
+						            마포아트센터 (이 글자는 타임리프가 덮어씁니다)
+						        </option>
+						        
+						    </select>
+						    <div class="form-text">장소가 없다면 장소 관리를 먼저 해주세요.</div>
+						</div>
+				        <div class="col-md-4">
+				            <label for="runningTime" class="form-label fw-bold">러닝타임 (분)</label>
+				            <input type="number" class="form-control" id="runningTime" name="runningTime" placeholder="예: 120">
+				        </div>
+				    </div>
+				
+				    <div class="row mb-4">
+				        <div class="col-md-6">
+				            <label for="startDate" class="form-label fw-bold">시작일(상영일)</label>
+				            <input type="date" class="form-control" id="startDate" name="startDate" required>
+				        </div>
+				        <div class="col-md-6">
+				            <label for="endDate" class="form-label fw-bold">종료일</label>
+				            <input type="date" class="form-control" id="endDate" name="endDate" required>
+				        </div>
+				    </div>
+				
+				    <div class="mb-4">
+				        <label for="posterFile" class="form-label fw-bold">포스터 이미지</label>
+				        <input class="form-control" type="file" id="posterFile" name="posterFile" accept="image/*">
+				    </div>
+				
+				    <div class="mb-5">
+				        <label for="description" class="form-label fw-bold">줄거리 / 소개</label>
+				        <textarea class="form-control" id="description" name="description" rows="5" placeholder="콘텐츠에 대한 상세 설명을 입력하세요" required></textarea>
+				    </div>
+				
+				    <h5 class="fw-bold mb-3 border-bottom pb-2 d-flex justify-content-between align-items-center">
+				        <span>2. 회차 및 상세 상영관(Schedule)</span>
+				        <button type="button" class="btn btn-sm btn-outline-primary" id="addScheduleBtn">+ 회차 추가</button>
+				    </h5>
+				    
+				    <div id="schedule-container">
+				        <div class="card bg-light mb-3 schedule-item border-0">
+				            <div class="card-body row align-items-end">
+				                <div class="col-md-2">
+				                    <label class="form-label fw-bold text-secondary">회차</label>
+				                    <input type="number" class="form-control" name="schedules[0].sessionNum" placeholder="예: 1" required>
+				                </div>
+				                <div class="col-md-3">
+				                    <label class="form-label fw-bold text-secondary">상세 장소(몇관)</label>
+				                    <input type="text" class="form-control" name="schedules[0].roomName" placeholder="예: 1관 (IMAX)" required>
+				                </div>
+				                <div class="col-md-3">
+				                    <label class="form-label fw-bold text-secondary">시작 시간</label>
+				                    <input type="datetime-local" class="form-control" name="schedules[0].startTime" required>
+				                </div>
+				                <div class="col-md-3">
+				                    <label class="form-label fw-bold text-secondary">종료 시간</label>
+				                    <input type="datetime-local" class="form-control" name="schedules[0].endTime" required>
+				                </div>
+				                <div class="col-md-1">
+				                    <button type="button" class="btn btn-outline-danger w-100 delete-schedule-btn"><i class="fas fa-trash"></i></button>
+				                </div>
+				            </div>
+				        </div>
+				    </div>
+				
+				    <div class="d-flex justify-content-end gap-2 mt-4 border-top pt-4">
+				        <button type="button" class="btn btn-light border" onclick="history.back()">취소</button>
+				        <button type="submit" class="btn btn-primary" style="background-color: #503396; border-color: #503396;">콘텐츠 및 회차 등록하기</button>
+				    </div>
+				</form>
+				<script th:src="@{/js/admin/content-form.js}"></script>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

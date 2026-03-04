@@ -59,8 +59,9 @@
                 <span class="label">선택 좌석</span>
                 <div class="value">
                     <span th:each="bs : ${booking.bookingSeats}" 
-                          th:text="${bs.seat.seatName}" 
-                          class="seat-badge">A1</span>
+      th:text="${bs.seat.seatRow + bs.seat.seatCol}" 
+      class="seat-badge">
+</span>
                 </div>
             </div>
             <div class="info-row" style="border:none; margin-top:20px;">
@@ -69,9 +70,19 @@
                       th:text="${#numbers.formatInteger(booking.totalPrice, 3, 'COMMA')} + '원'">15,000원</span>
             </div>
 
-            <div style="margin-top:30px; display:flex; gap:10px;">
-                <a href="/" style="flex:1; text-align:center; padding:12px; background:#eee; border-radius:8px; text-decoration:none; color:#333;">홈으로</a>
-                <a href="/myPage" style="flex:1; text-align:center; padding:12px; background:#503396; border-radius:8px; text-decoration:none; color:white;">예매확인</a>
+	<div style="margin-top:30px; display:flex; justify-content:center; gap:12px;">
+
+    <a th:href="@{/home}" 
+       style="width:120px; text-align:center; padding:10px 0; background:#eee; border-radius:8px; text-decoration:none; color:#333; font-weight:500;">
+       홈으로
+    </a>
+
+    <a th:href="@{/auth/myPage(bookingNumber=${booking.bookingNumber})}"
+       style="width:120px; text-align:center; padding:10px 0; background:#503396; border-radius:8px; text-decoration:none; color:white; font-weight:500;">
+       예매확인
+    </a>
+
+</div>
             </div>
         </div>
     </div>

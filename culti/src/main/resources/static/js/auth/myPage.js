@@ -40,6 +40,19 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 	// ===== URL 파라미터로 초기 탭 결정 =====
 	const params = new URLSearchParams(window.location.search);
+	// ===== 예매 취소 후 취소/환불 탭 열기 =====
+		const reservationTab = params.get("reservationTab");
+		if (reservationTab === "cancel") {
+		    navItems.forEach(nav => nav.classList.remove('active'));
+		    const cancelNav =
+		        document.querySelector('.nav-item[data-tab="cancellations"]');
+		    if (cancelNav) cancelNav.classList.add('active');
+		    tabContents.forEach(c => c.classList.remove('active'));
+		    const cancelSection =
+		        document.getElementById('cancellations');
+		    if (cancelSection) cancelSection.classList.add('active');
+		    alert("예매가 취소되었습니다.");
+		}
 	const mateSectionParam = params.get("mateSection");
 
 	if (mateSectionParam === "mate") {
@@ -104,6 +117,26 @@ document.addEventListener('DOMContentLoaded', function() {
 		    if (!confirm(msg)) e.preventDefault();
 		  });
 		});
+	
+		// 더보기 (각 패널별)
+		document.querySelectorAll('#mate .mate-panel').forEach(panel => {
+		  const items = panel.querySelectorAll('.application-card');
+		  const btn = panel.querySelector('[data-more-btn]');
+		  if (!btn) return;
+
+		  let shown = 3; // 처음 4개만
+		  const render = () => {
+		    items.forEach((el, idx) => el.style.display = idx < shown ? '' : 'none');
+		    btn.style.display = shown >= items.length ? 'none' : '';
+		  };
+
+		  btn.addEventListener('click', () => {
+		    shown += 6; // 6개씩 더
+		    render();
+		  });
+
+		  render();
+		});
 		
 	// ===========동행매칭 끝=====
 
@@ -138,10 +171,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    function filterReservations(filter) {
-        // 실제로는 서버에서 필터링된 데이터를 가져옴
-        console.log('필터:', filter);
-    }
+	function filterReservations(filter) {
+		    const items = document.querySelectorAll(".reservation-item");
+		    items.forEach(item => {
+		        if (filter === "all") {
+		            item.style.display = "flex";
+		            return;
+		        }
+		        const category = item.dataset.category;
+		        if (category === filter) {
+		            item.style.display = "flex";
+		        } else {
+		            item.style.display = "none";
+		        }
+		    });
+		}
 
     // ========== 쿠폰/포인트 탭 ==========
     benefitTabs.forEach(tab => {
@@ -378,132 +422,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `).join('');
     }
 
-    // ========== 초기 데이터 로드 ==========
-    
-    // 데모 데이터
-    const demoReservations = [
-        {
-            id: '1',
-            category: '영화',
-            title: '오펜하이머',
-            reservationNumber: 'R20260222001',
-            date: '2026.03.01',
-            time: '14:00',
-            seat: 'A열 5번',
-            price: 15000,
-            image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=400&fit=crop',
-            status: 'upcoming'
-        },
-        {
-            id: '2',
-            category: '전시',
-            title: '모네 특별전',
-            reservationNumber: 'R20260222002',
-            date: '2026.02.28',
-            time: '10:00',
-            seat: '일반 1매',
-            price: 20000,
-            image: 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=300&h=400&fit=crop',
-            status: 'upcoming'
-        },
-        {
-            id: '3',
-            category: '공연',
-            title: '오페라의 유령',
-            reservationNumber: 'R20260215001',
-            date: '2026.02.15',
-            time: '19:00',
-            seat: 'R석 12번',
-            price: 80000,
-            image: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=300&h=400&fit=crop',
-            status: 'completed'
-        }
-    ];
 
-    const demoCancellations = [
-        {
-            id: 'c1',
-            category: '영화',
-            title: '파묘',
-            reservationNumber: 'R20260115003',
-            date: '2026.01.20',
-            time: '18:30',
-            seat: 'H열 12번',
-            price: 14000,
-            image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=400&fit=crop',
-            status: 'canceled',
-            cancelDate: '2026.01.18'
-        },
-        {
-             id: 'c2',
-             category: '공연',
-             title: '노트르담 드 파리',
-             reservationNumber: 'R20260110005',
-             date: '2026.02.05',
-             time: '19:00',
-             seat: 'VIP석 2매',
-             price: 320000,
-             image: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=300&h=400&fit=crop',
-             status: 'canceled',
-             cancelDate: '2026.01.25'
-        }
-    ];
-
-    const demoCoupons = [
-        {
-            discount: '5,000원',
-            type: '금액',
-            name: '신규가입 환영 쿠폰',
-            description: '전 상품 사용 가능',
-            expiry: '2026.03.31까지'
-        },
-        {
-            discount: '10%',
-            type: '할인',
-            name: '영화 특가 쿠폰',
-            description: '영화 예매 시 10% 할인',
-            expiry: '2026.02.28까지'
-        }
-    ];
-
-    const demoPoints = [
-        {
-            title: '오페라의 유령 예매',
-            date: '2026.02.15',
-            amount: 4000,
-            type: 'plus'
-        },
-        {
-            title: '모네 특별전 예매',
-            date: '2026.02.20',
-            amount: 1000,
-            type: 'plus'
-        }
-    ];
-
-    const demoFavorites = [
-        {
-            id: '1',
-            title: '듄: 파트 2',
-            period: '2026.03.01 - 상영중',
-            image: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=300&h=400&fit=crop'
-        },
-        {
-            id: '2',
-            title: '인상주의 미술 전시',
-            period: '2026.01.15 - 2026.04.30',
-            image: 'https://images.unsplash.com/photo-1577083165633-14ebcdb0f658?w=300&h=400&fit=crop'
-        }
-    ];
-
-    // 초기 렌더링
-    //loadUserInfo();
-    renderReservations(demoReservations.slice(0, 2), 'recentReservations');
-    renderReservations(demoReservations, 'allReservations');
-    renderCancellations(demoCancellations);
-    renderCoupons(demoCoupons);
-    renderPoints(demoPoints);
-    renderFavorites(demoFavorites);
 
     // ========== 프로필 수정 ==========
     
@@ -709,13 +628,13 @@ function viewTicket(id) {
 }
 
 // 예매 취소
-function cancelReservation(id) {
+/*function cancelReservation(id) {
     if (confirm('예매를 취소하시겠습니까?')) {
         console.log('예매 취소:', id);
         alert('예매가 취소되었습니다.');
     }
 }
-
+*/
 // 리뷰 작성
 function writeReview(id) {
     console.log('리뷰 작성:', id);
