@@ -1,107 +1,62 @@
-let currentPaymentData = null;
-
 /**
- * 결제 모달 열기
+ * 결제 실행 함수
  */
-function openPaymentModal(data) {
-    currentPaymentData = data;
-    document.getElementById('md-title').innerText = data.title;
-    document.getElementById('md-detail').innerText = data.details;
-    document.getElementById('md-amount').innerText = data.amount.toLocaleString();
-    document.getElementById('paymentModal').style.display = 'flex';
-}
-
-/**
- * 결제 모달 닫기
- */
-function closeModal() {
-    document.getElementById('paymentModal').style.display = 'none';
-}
-
-/**
- * 포트원 결제 실행 (채널 키 방식 최적화)
- */
-function executePortOne(payMethod) {
-    const IMP = window.IMP;
-    // [중요] 관리자 센터의 '내 식별코드'와 일치하는지 다시 확인하세요.
-    IMP.init("imp06217828"); 
-
-    // 관리자 센터의 채널키를 객체로 관리
-    const CHANNEL_KEYS = {
-
-    };
-
-    // 시큐리티가 적용된 HTML 폼에서 이메일 정보 추출
-    const buyerEmail = document.querySelector('input[name="userEmail"]')?.value;
-    const buyerName = "CULTI_USER"; // 필요 시 세션 유저 이름으로 연동
-
-    if (!buyerEmail) {
-        alert("로그인 세션이 만료되었거나 정보가 없습니다. 다시 로그인해 주세요.");
-        return;
-    }
-
-    // 결제 수단 대문자 변환하여 키 매칭
-    const selectedKey = CHANNEL_KEYS[payMethod.toUpperCase()];
+async function handleTossPayment() {
+    // [수정] 만약 booking_seat.js에서 선택된 좌석 배열 이름이 다르다면 그 이름을 써야 합니다.
+    // 예: selectedSeatList 가 실제 변수명이라면 그것으로 교체하세요.
     
-    if (!selectedKey) {
-        alert("해당 결제 수단의 채널 키 설정이 필요합니다.");
+    // 에러 방지를 위해 변수 존재 여부 체크 로직 추가
+    if (typeof selectedSeats === 'undefined') {
+        console.error("좌석 선택 데이터(selectedSeats)를 찾을 수 없습니다. 변수명을 확인하세요.");
+        alert("시스템 오류: 좌석 데이터를 불러올 수 없습니다.");
         return;
     }
 
-    // V2 방식: pg/pay_method 파라미터 없이 channelKey만 사용
-    let payConfig = {
-        channelKey: selectedKey,
-        merchant_uid: "CULTI_" + new Date().getTime(),
-        name: currentPaymentData.title,
-        amount: currentPaymentData.amount,
-        buyer_email: buyerEmail, 
-        buyer_name: buyerName,
-        m_redirect_url: window.location.origin + "/reservation/booking/seat"
-    };
+    const seatIds = selectedSeats.map(s => s.seatId); 
+    const totalPrice = calculateTotalPrice(); 
+    const scheduleId = document.getElementById('scheduleId').value;
+    
+    // [수정] CSRF 토큰을 가져오는 ID를 확인하세요. (HTML에 id="csrf-token"이 있어야 함)
+    const csrfToken = document.getElementById('csrf-token')?.value || 
+                      document.querySelector('input[name="_csrf"]')?.value;
 
-    console.log("결제 요청 데이터:", payConfig);
+    if (seatIds.length === 0) {
+        alert("좌석을 선택해주세요.");
+        return;
+    }
 
-    IMP.request_pay(payConfig, function (rsp) {
-        if (rsp.success) {
-            verifyAndSubmit(rsp);
-        } else {
-            // 에러 메시지 undefined 방지 처리
-            console.error("결제 실패 응답:", rsp);
-            alert("결제에 실패했습니다: " + (rsp.error_msg || "네트워크 오류 또는 설정 미비"));
-        }
-    });
-}
+    try {
+        const response = await fetch("/reservation/booking/create/json", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRF-TOKEN": csrfToken
+            },
+            body: new URLSearchParams({
+                'scheduleId': scheduleId,
+                'seatIds': seatIds.join(','),
+                'totalPrice': totalPrice
+            })
+        });
 
-/**
- * 결제 검증 및 실제 예매 폼 전송
- */
-function verifyAndSubmit(rsp) {
-    // [보안] fetch 요청 시 시큐리티 CSRF 토큰 처리가 필요할 수 있습니다.
-    fetch("/payment/verify", {
-        method: "POST",
-        headers: { 
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            imp_uid: rsp.imp_uid,
-            merchant_uid: rsp.merchant_uid,
-            total_price: rsp.paid_amount
-        })
-    }).then(res => {
-        if(res.ok) {
-            const bookingForm = document.getElementById('bookingForm');
-            if (bookingForm) {
-                // 검증된 금액을 폼에 세팅 후 전송
-                document.getElementById('input-total-price').value = rsp.paid_amount;
-                bookingForm.submit();
-            } else {
-                console.error("전송할 예약 폼(bookingForm)을 찾을 수 없습니다.");
-            }
-        } else {
-            alert("서버 검증에 실패했습니다. 결제가 취소될 수 있습니다.");
-        }
-    }).catch(err => {
-        console.error("통신 에러:", err);
-        alert("결제 처리 중 통신 오류가 발생했습니다.");
-    });
+        if (!response.ok) throw new Error("서버 예매 정보 생성 실패");
+
+        const data = await response.json(); 
+
+        const clientKey = 'test_ck_발급받은키'; // 본인 키로 교체
+        const tossPayments = TossPayments(clientKey);
+
+        // [참고] 토스 SDK 버전에 따라 amount 형식이 다를 수 있으니 확인하세요.
+        await tossPayments.requestPayment('카드', {
+            amount: data.totalPrice,
+            orderId: data.bookingNumber, // BookingResponseDTO의 필드명과 일치해야 함
+            orderName: data.movieTitle,
+            successUrl: window.location.origin + '/payment/success',
+            failUrl: window.location.origin + '/payment/fail',
+        });
+
+    } catch (error) {
+        console.error("결제 프로세스 에러:", error);
+        alert("오류 발생: " + error.message);
+    }
 }
