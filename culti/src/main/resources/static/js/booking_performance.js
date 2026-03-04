@@ -1,207 +1,391 @@
-/**
- * 공연 예매 전용 상태 관리 객체
- */
+console.log("performance js loaded");
+
 const bookingState = {
-    adult: 0,
-    youth: 0,
-    selectedSeats: [], // {id, price} 객체 저장
-    currentFloor: 1,   // 현재 선택된 층 (1F / 2F)
-    timer: 600         // 10분 제한 시간
+
+    scheduleId: null,
+
+    seats: [],
+
+    // 좌석 등급별 선택 수
+    seatType: {
+        VIP: 0,
+        R: 0,
+        S: 0,
+        A: 0
+    },
+
+    selectedSeats: [],
+
+    currentFloor: 1,
+
+    timer: 600,
+
+    // 관리자 가격
+    priceMap: {}
 };
 
-/**
- * 1. 층 전환 함수 (1층/2층 탭 클릭 시 호출)
- */
-function switchFloor(floorNum) {
-    bookingState.currentFloor = floorNum;
-    
-    // 버튼 UI 활성화 스타일 제어
-    document.querySelectorAll('.floor-btn').forEach(btn => {
-        btn.classList.remove('active', 'bg-[#503396]', 'text-white');
-        btn.classList.add('text-gray-500');
-    });
-    
-    const activeBtn = document.getElementById(`btn-${floorNum}f`);
-    activeBtn.classList.add('active', 'bg-[#503396]', 'text-white');
-    activeBtn.classList.remove('text-gray-500');
 
-    // 해당 층의 좌석도를 구역별로 다시 그리기
-    initSeatMap();
-}
+// -------------------------
+// 시작
+// -------------------------
+window.addEventListener("load", async () => {
 
-/**
- * 2. 좌석 배치도 초기화 및 렌더링
- */
-function initSeatMap() {
-    const blocks = {
-        left: document.getElementById('block-left'),
-        center: document.getElementById('block-center'),
-        right: document.getElementById('block-right')
-    };
+    const params = new URLSearchParams(window.location.search);
+    bookingState.scheduleId = params.get("scheduleId");
 
-    // 기존에 그려진 좌석들 삭제
-    Object.values(blocks).forEach(b => b.innerHTML = "");
-
-    if (bookingState.currentFloor === 1) {
-        // 1층 배치: 사진처럼 좌측(3-6번), 중앙(7-15번), 우측(16-19번)으로 분할
-        renderBlock('left', ['A','B','C','D','E','F'], 3, 6);
-        renderBlock('center', ['A','B','C','D','E','F','G','H','I','J'], 7, 15);
-        renderBlock('right', ['A','B','C','D','E','F'], 16, 19);
-    } else {
-        // 2층 배치: 중앙 위주로 넓게 구성 (K열부터 시작)
-        renderBlock('center', ['K','L','M','N','O'], 1, 15);
+    if(!bookingState.scheduleId){
+        alert("scheduleId 없음");
+        return;
     }
-}
 
-/**
- * 3. 구역(Block)별 좌석 생성 함수
- */
-function renderBlock(blockId, rows, startCol, endCol) {
-    const target = document.getElementById(`block-${blockId}`);
-    // 예약 완료된 좌석 (DB 연동 전 가짜 데이터)
-    const reservedMock = ['1F-A3', '1F-B10', '1F-H7', '1F-H8']; 
+    await loadSeats();
+    await loadPrices();
 
-    rows.forEach(row => {
-        const rowWrapper = document.createElement('div');
-        rowWrapper.className = "row-wrapper";
+    setFloorButtonActive(1);
 
-        // 중앙 블록에만 알파벳(A, B, C...) 행 레이블 표시
-        if (blockId === 'center') {
-            const label = document.createElement('div');
-            label.className = "row-label";
-            label.innerText = row;
-            rowWrapper.appendChild(label);
-        }
-
-        for (let col = startCol; col <= endCol; col++) {
-            const seatId = `${bookingState.currentFloor}F-${row}${col}`;
-            // VIP 등급 조건 (예: 1층 중앙 G-J열 특정 범위)
-            const isVip = (bookingState.currentFloor === 1 && row >= 'G' && row <= 'J') && (col >= 7 && col <= 13);
-            const isReserved = reservedMock.includes(seatId);
-            const price = isVip ? 150000 : 110000;
-
-            const seat = document.createElement('div');
-            seat.id = `seat-${seatId}`;
-            seat.className = `seat ${isReserved ? 'reserved' : (isVip ? 'vip' : 'available')}`;
-            
-            // 다른 층을 갔다가 돌아와도 내가 선택했던 좌석은 'selected' 유지
-            if (bookingState.selectedSeats.find(s => s.id === seatId)) {
-                seat.classList.add('selected');
-            }
-
-            seat.innerText = isReserved ? 'X' : col;
-
-            if (!isReserved) {
-                seat.onclick = () => toggleSeat(seatId, price, seat);
-            }
-            rowWrapper.appendChild(seat);
-        }
-        target.appendChild(rowWrapper);
-    });
-}
-
-/**
- * 4. 좌석 선택 토글 로직
- */
-function toggleSeat(id, price, element) {
-    const totalCount = bookingState.adult + bookingState.youth;
-    const index = bookingState.selectedSeats.findIndex(s => s.id === id);
-
-    if (index > -1) {
-        // 이미 선택된 좌석이면 해제
-        bookingState.selectedSeats.splice(index, 1);
-        element.classList.remove('selected');
-    } else {
-        // 인원수 미선택 체크
-        if (totalCount === 0) {
-            alert("상단에서 관람 인원을 먼저 선택해주세요.");
-            return;
-        }
-        // 최대 선택 가능 수 체크
-        if (bookingState.selectedSeats.length >= totalCount) {
-            alert(`이미 ${totalCount}석을 모두 선택하셨습니다.`);
-            return;
-        }
-        // 좌석 선택 추가
-        bookingState.selectedSeats.push({ id, price });
-        element.classList.add('selected');
-    }
-    updateSummary();
-}
-
-/**
- * 5. 인원수 변경 (성인/청소년 +/-)
- */
-function updateCount(type, delta) {
-    bookingState[type] = Math.max(0, bookingState[type] + delta);
-    document.getElementById(`${type}-count`).innerText = bookingState[type];
-    
-    // 인원수를 줄여서 현재 선택된 좌석보다 적어지면, 마지막 좌석부터 자동 해제
-    const total = bookingState.adult + bookingState.youth;
-    while(bookingState.selectedSeats.length > total) {
-        const removed = bookingState.selectedSeats.pop();
-        const el = document.getElementById(`seat-${removed.id}`);
-        if(el) el.classList.remove('selected');
-    }
-    updateSummary();
-}
-
-/**
- * 6. 하단 요약 바 업데이트 (실시간 금액 및 좌석명)
- */
-function updateSummary() {
-    const seatNames = bookingState.selectedSeats.map(s => s.id).sort().join(', ');
-    const total = bookingState.selectedSeats.reduce((sum, s) => sum + s.price, 0);
-
-    document.getElementById('display-seat-names').innerText = seatNames || '선택 안 됨';
-    document.getElementById('display-total-price').innerText = `₩${total.toLocaleString()}`;
-
-    // 결제하기 버튼 활성화 제어
-    const btn = document.getElementById('submit-booking-btn');
-    const totalNeeded = bookingState.adult + bookingState.youth;
-    
-    if (totalNeeded > 0 && bookingState.selectedSeats.length === totalNeeded) {
-        btn.disabled = false;
-        btn.classList.replace('bg-gray-300', 'bg-[#503396]');
-        btn.classList.replace('cursor-not-allowed', 'cursor-pointer');
-    } else {
-        btn.disabled = true;
-        btn.classList.replace('bg-[#503396]', 'bg-gray-300');
-        btn.classList.replace('cursor-pointer', 'cursor-not-allowed');
-    }
-}
-
-/**
- * 7. 10분 점유 타이머
- */
-function startTimer() {
-    const timerEl = document.getElementById('hold-timer');
-    const interval = setInterval(() => {
-        const min = String(Math.floor(bookingState.timer / 60)).padStart(2, '0');
-        const sec = String(bookingState.timer % 60).padStart(2, '0');
-        timerEl.innerText = `좌석 임시 점유 중 ${min}:${sec}`;
-        
-        if (bookingState.timer <= 0) {
-            clearInterval(interval);
-            alert("점유 시간이 만료되어 페이지를 새로고침합니다.");
-            location.reload();
-        }
-        bookingState.timer--;
-    }, 1000);
-}
-
-/**
- * 8. 결제하기 버튼 클릭 시 데이터 확인
- */
-function handleBookingSubmit() {
-    if(confirm("선택하신 좌석으로 예매를 진행하시겠습니까?")) {
-        console.log("예매 정보:", bookingState.selectedSeats);
-        // 여기서 결제 API 호출 또는 서버 전송 로직 수행
-    }
-}
-
-// 초기 페이지 로드 시 실행
-window.onload = () => {
     initSeatMap();
     startTimer();
-};
+    updateSummary();
+});
+
+
+// -------------------------
+// 좌석 조회
+// -------------------------
+async function loadSeats(){
+
+    const res = await fetch(`/api/performance/seats/${bookingState.scheduleId}`);
+
+    const data = await res.json();
+
+    bookingState.seats = data.map(s=>({
+
+        seatId: s.seat.seatId,
+        row: s.seat.seatRow,
+        col: Number(s.seat.seatCol),
+        grade: s.seat.grade,
+        floor: Number(s.seat.floor),
+        status: s.status
+
+    }));
+
+}
+
+
+// -------------------------
+// 관리자 가격 조회
+// -------------------------
+async function loadPrices(){
+
+    const res = await fetch(`/api/performance/price/${bookingState.scheduleId}`);
+    const data = await res.json();
+
+    bookingState.priceMap = {};
+
+    data.forEach(p => {
+        bookingState.priceMap[p.grade] = p.price;
+    });
+
+}
+
+
+
+
+// -------------------------
+// 층 전환
+// -------------------------
+function switchFloor(floor){
+
+    bookingState.currentFloor = floor;
+
+    setFloorButtonActive(floor);
+
+    initSeatMap();
+
+}
+
+
+function setFloorButtonActive(floor){
+
+    document.querySelectorAll(".floor-btn")
+        .forEach(btn=>btn.classList.remove("active"));
+
+    document.getElementById(`btn-${floor}f`)
+        .classList.add("active");
+
+}
+
+
+// -------------------------
+// 좌석 렌더링
+// -------------------------
+function initSeatMap(){
+
+    const left = document.getElementById("block-left");
+    const center = document.getElementById("block-center");
+    const right = document.getElementById("block-right");
+
+    left.innerHTML="";
+    center.innerHTML="";
+    right.innerHTML="";
+
+    const floorSeats =
+        bookingState.seats.filter(s=>s.floor===bookingState.currentFloor);
+
+    const rowMap={};
+
+    floorSeats.forEach(seat=>{
+
+        if(!rowMap[seat.row]) rowMap[seat.row]=[];
+
+        rowMap[seat.row].push(seat);
+
+    });
+
+    Object.keys(rowMap).sort().forEach(row=>{
+
+        const rowLeft=document.createElement("div");
+        const rowCenter=document.createElement("div");
+        const rowRight=document.createElement("div");
+
+        rowLeft.className="row-wrapper";
+        rowCenter.className="row-wrapper";
+        rowRight.className="row-wrapper";
+
+        const label=document.createElement("div");
+        label.className="row-label";
+        label.innerText=row;
+
+        rowCenter.appendChild(label);
+
+        rowMap[row].sort((a,b)=>a.col-b.col)
+            .forEach(seat=>{
+
+            const seatEl=document.createElement("div");
+
+            seatEl.className="seat";
+
+            if(seat.status==="OCCUPIED"){
+
+                seatEl.classList.add("reserved");
+                seatEl.innerText="X";
+
+            }else{
+
+                seatEl.classList.add(seat.grade.toLowerCase());
+
+                seatEl.innerText=seat.col;
+
+                seatEl.onclick=()=>toggleSeat(seat,seatEl);
+
+            }
+
+            if(seat.col<=5) rowLeft.appendChild(seatEl);
+            else if(seat.col<=10) rowCenter.appendChild(seatEl);
+            else rowRight.appendChild(seatEl);
+
+        });
+
+        if(rowLeft.children.length>0) left.appendChild(rowLeft);
+        if(rowCenter.children.length>1) center.appendChild(rowCenter);
+        if(rowRight.children.length>0) right.appendChild(rowRight);
+
+    });
+
+}
+
+
+// -------------------------
+// 좌석 선택
+// -------------------------
+function toggleSeat(seat, el){
+
+    const idx = bookingState.selectedSeats
+        .findIndex(s => s.seatId === seat.seatId);
+
+    // 선택 해제
+	if(idx > -1){
+
+	    bookingState.selectedSeats.splice(idx,1);
+
+
+	    el.classList.remove("selected");
+
+	    updateSummary();
+
+	    return;
+	}
+
+    // 현재 선택된 좌석 등급 확인
+    const selectedGrades = Object.entries(bookingState.seatType)
+        .filter(([k,v]) => v > 0)
+        .map(([k]) => k);
+
+    // 다른 등급 좌석 클릭했을 경우
+    if(selectedGrades.length > 0 && !selectedGrades.includes(seat.grade)){
+        alert("좌석 등급을 확인해주세요.");
+        return;
+    }
+
+    // 해당 등급 최대 선택 수
+    const gradeLimit = bookingState.seatType[seat.grade];
+
+    const selectedSameGrade =
+        bookingState.selectedSeats
+        .filter(s => s.grade === seat.grade).length;
+
+    if(selectedSameGrade >= gradeLimit){
+        alert(`${seat.grade}석 선택 수를 초과했습니다.`);
+        return;
+    }
+
+    const price =
+        bookingState.priceMap[seat.grade?.toUpperCase()] ?? 0;
+
+		bookingState.selectedSeats.push({
+		    seatId: seat.seatId,
+		    name: `${seat.floor}F-${seat.row}${seat.col}`,
+		    grade: seat.grade,
+		    price
+		});
+
+		
+
+    el.classList.add("selected");
+
+    updateSummary();
+}
+
+function getTotalSeatCount(){
+
+    return Object.values(bookingState.seatType)
+        .reduce((a,b)=>a+b,0);
+
+}
+
+
+// -------------------------
+// 좌석 등급 수 변경
+// -------------------------
+function updateSeatType(type,delta){
+
+    bookingState.seatType[type]+=delta;
+
+    if(bookingState.seatType[type]<0)
+        bookingState.seatType[type]=0;
+
+    document.getElementById(`${type.toLowerCase()}-count`)
+        .innerText=bookingState.seatType[type];
+
+    updateSummary();
+
+}
+
+
+// -------------------------
+// 요약
+// -------------------------
+function updateSummary(){
+
+    const namesEl=document.getElementById("display-seat-names");
+    const priceEl=document.getElementById("display-total-price");
+    const btn=document.getElementById("submit-booking-btn");
+
+    const names=bookingState.selectedSeats
+        .map(s=>s.name).join(", ");
+
+		const total = bookingState.selectedSeats
+		    .reduce((sum,s)=>sum+(s.price||0),0);
+
+    namesEl.innerText=names||"선택 없음";
+
+    priceEl.innerText=`₩${total.toLocaleString()}`;
+
+    const ok =
+        bookingState.selectedSeats.length===getTotalSeatCount()
+        && getTotalSeatCount()>0;
+
+    btn.disabled=!ok;
+
+}
+
+
+// -------------------------
+// 타이머
+// -------------------------
+function startTimer(){
+
+    const timerEl=document.getElementById("hold-timer");
+
+    const interval=setInterval(()=>{
+
+        const min=String(Math.floor(bookingState.timer/60))
+            .padStart(2,"0");
+
+        const sec=String(bookingState.timer%60)
+            .padStart(2,"0");
+
+        timerEl.innerText=`좌석 임시 점유 ${min}:${sec}`;
+
+        bookingState.timer--;
+
+        if(bookingState.timer<0){
+
+            clearInterval(interval);
+
+            alert("시간 만료");
+
+            location.reload();
+
+        }
+
+    },1000);
+
+}
+
+
+// -------------------------
+// 예매 요청
+// -------------------------
+async function handleBookingSubmit(){
+
+    const payload={
+
+        scheduleId:Number(bookingState.scheduleId),
+
+        seatIds:bookingState.selectedSeats
+            .map(s=>String(s.seatId)),
+
+        totalPrice:bookingState.selectedSeats
+            .reduce((a,b)=>a+(b.price||0),0)
+
+    };
+
+    const csrfToken =
+        document.querySelector('meta[name="_csrf"]').content;
+
+    const csrfHeader =
+        document.querySelector('meta[name="_csrf_header"]').content;
+
+		const res = await fetch("/api/performance/booking/create",{
+
+		    method:"POST",
+
+		    headers:{
+		        "Content-Type":"application/json",
+		        [csrfHeader]:csrfToken
+		    },
+
+		    body:JSON.stringify(payload)
+
+		});
+
+		const data = await res.json();
+
+		location.href=`/booking/success?bookingId=${data.bookingId}`;
+}
+
+// 전역 노출
+window.switchFloor=switchFloor;
+window.updateSeatType=updateSeatType;
+window.handleBookingSubmit=handleBookingSubmit;

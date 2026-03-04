@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class AdminService {
+	
 
     private final ContentRepository contentRepository;
     private final ScheduleRepository scheduleRepository;
@@ -187,6 +188,42 @@ public class AdminService {
         place.setAddress(address);
         
         placeRepository.save(place);
+    }
+    public PerformancePriceDTO getPerformancePrice(Long scheduleId){
+
+        Schedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new IllegalArgumentException("스케줄 없음"));
+
+        Content content = schedule.getContent();
+
+        List<ContentPrice> prices =
+                contentPriceRepository.findByContentId(content.getId());
+
+        PerformancePriceDTO dto = new PerformancePriceDTO();
+
+        for(ContentPrice p : prices){
+
+            switch(p.getGrade()){
+
+                case "VIP":
+                    dto.setVipPrice(p.getPrice());
+                    break;
+
+                case "R":
+                    dto.setRPrice(p.getPrice());
+                    break;
+
+                case "S":
+                    dto.setSPrice(p.getPrice());
+                    break;
+
+                case "A":
+                    dto.setAPrice(p.getPrice());
+                    break;
+            }
+        }
+
+        return dto;
     }
     
 }

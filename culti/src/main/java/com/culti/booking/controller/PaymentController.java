@@ -1,10 +1,12 @@
 package com.culti.booking.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.culti.booking.dto.BookingResponseDTO;
 import com.culti.booking.entity.Booking;
 import com.culti.booking.repository.BookingRepository;
 import com.culti.booking.service.BookingService;
@@ -20,6 +22,19 @@ public class PaymentController {
     private final PaymentService paymentService;
     private final BookingService bookingService;
     private final BookingRepository bookingRepository;
+    
+    @GetMapping("/reservation/payment")
+    public String paymentPage(
+            @RequestParam("bookingId") Long bookingId,
+            Model model) {
+
+        BookingResponseDTO booking = bookingService.getBookingResult(bookingId);
+
+        model.addAttribute("booking", booking);
+        model.addAttribute("bookingId", bookingId);
+
+        return "reservation/payment";
+    }
 
     /**
      * 토스 결제 성공 시 호출되는 콜백 URL
@@ -56,4 +71,8 @@ public class PaymentController {
         // [팁] 실패 페이지(booking_fail.html)를 reservation 폴더 안에 만드시면 됩니다.
         return "reservation/booking_fail"; 
     }
+    
+ 
+    
+  
 }

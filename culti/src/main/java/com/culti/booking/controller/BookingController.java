@@ -52,25 +52,30 @@ public class BookingController {
             Model model) {
 
         Schedule schedule = scheduleService.getScheduleById(scheduleId);
-
         if (schedule == null) {
             return "redirect:/reservation/booking?error=notfound";
         }
 
-        // 좌석 전체 조회
-        List<Seat> seats = seatRepository.findAll();
-
-        // 해당 스케줄의 좌석 상태 조회
-        List<ScheduleSeat> scheduleSeats = scheduleSeatRepository.findBySchedule_ScheduleId(scheduleId);
-
+        // 공통 모델
         model.addAttribute("schedule", schedule);
+        model.addAttribute("scheduleId", scheduleId);
+
+        // ✅ 카테고리로 좌석 페이지 분기
+        String category = schedule.getContent().getCategory(); // "영화" / "공연" / "전시"
+
+        if ("공연".equals(category)) {
+            // 공연은 JS가 /api/performance/seats/{scheduleId}로 가져가니까 서버에서 좌석리스트 굳이 안 넣어도 됨
+            return "reservation/booking_performance"; // ← 공연 좌석 HTML(지호님이 올린 그 파일)
+        }
+
+        // 영화(기존 방식) - 서버에서 좌석/상태 내려주는 템플릿 유지
+        List<Seat> seats = seatRepository.findAll();
+        List<ScheduleSeat> scheduleSeats = scheduleSeatRepository.findBySchedule_ScheduleId(scheduleId);
         model.addAttribute("seatListFromDb", seats);
         model.addAttribute("scheduleSeats", scheduleSeats);
-        model.addAttribute("scheduleId", scheduleId);
 
         return "reservation/booking_seat";
     }
-
     /**
      * 좌석 선택 후 결제 요청 (fetch JSON)
      */
@@ -129,4 +134,36 @@ public class BookingController {
 
         return "redirect:/auth/myPage?reservationTab=cancel";
     }
+    
+    @GetMapping("/booking/success")
+    public String paymentSuccess(
+            @RequestParam("bookingId") Long bookingId,
+            Model model) {
+
+        BookingResponseDTO booking =
+                bookingService.getBookingResult(bookingId);
+
+        bookingService.confirmBookingStatus(booking.getBookingNumber());
+
+        model.addAttribute("booking", booking);
+
+        return "reservation/booking_result_performance";
+    }
+    @GetMapping("/reservation/payment")
+    public String paymentPage(
+            @RequestParam("bookingId") Long bookingId,
+            Model model) {
+
+        BookingResponseDTO booking =
+                bookingService.getBookingResult(bookingId);
+
+        model.addAttribute("booking", booking);
+        model.addAttribute("bookingId", bookingId);
+
+        return "reservation/payment";
+    }
+
+  
+
+   
 }
