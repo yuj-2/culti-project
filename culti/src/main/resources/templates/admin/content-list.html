@@ -37,7 +37,12 @@
                                   th:text="${content.category}">
                             </span>
                         </td>
-                        <td class="text-start fw-bold" th:text="${content.title}"></td>
+                        <td class="text-start fw-bold">
+						    <a th:href="@{/admin/content/edit(id=${content.id})}" class="text-decoration-none text-dark" style="transition: color 0.2s;" onmouseover="this.style.color='#503396'" onmouseout="this.style.color='#212529'">
+						        <span th:text="${content.title}"></span>
+						        <i class="fas fa-external-link-alt ms-1 text-muted" style="font-size: 0.8rem;"></i>
+						    </a>
+						</td>
                         <td class="text-muted small">
                             <span th:text="${content.startDate}"></span> ~ <span th:text="${content.endDate}"></span>
                         </td>

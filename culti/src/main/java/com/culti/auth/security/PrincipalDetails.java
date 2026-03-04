@@ -16,7 +16,7 @@ import lombok.Getter;
 @Getter
 public class PrincipalDetails implements UserDetails, OAuth2User {
 
-    private final UserDTO userDto;
+    private UserDTO userDto;
     private Map<String, Object> attributes;
 
     // ✅ 일반 로그인용 생성자
@@ -28,6 +28,10 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
     public PrincipalDetails(UserDTO userDto, Map<String, Object> attributes) {
         this.userDto = userDto;
         this.attributes = attributes;
+    }
+    
+    public void setDto(UserDTO dto) {
+        this.userDto = dto;
     }
 
     /* ================= OAuth2User ================= */
@@ -58,7 +62,15 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // ✅ ROLE 반드시 있어야 403 안 남
-        return Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
+    	String role = userDto.getRole(); // "USER" or "ADMIN"
+
+        UserRole userRole = UserRole.valueOf(role); 
+        // USER → UserRole.USER
+        // ADMIN → UserRole.ADMIN
+
+        return Collections.singleton(
+                new SimpleGrantedAuthority(userRole.getValue())
+        );
     }
 
     @Override
