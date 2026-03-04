@@ -36,4 +36,7 @@ public class Booking {
     private Integer ticketCount = 0;
     private Integer discountAmount = 0;
     private String paymentMethod;
+    
+    @Column(name = "payment_status")
+    private String paymentStatus;
 }
