@@ -32,7 +32,9 @@ public interface ScheduleSeatRepository extends JpaRepository<ScheduleSeat, Long
             @Param("scheduleId") Long scheduleId,
             @Param("seatIds") List<Long> seatIds
     );
+    
     @Modifying
+    @Transactional
     @Query("""
     UPDATE ScheduleSeat s
     SET s.status = 'AVAILABLE'
@@ -40,7 +42,7 @@ public interface ScheduleSeatRepository extends JpaRepository<ScheduleSeat, Long
     AND s.seat.seatId IN :seatIds
     """)
     void updateStatusToAvailable(
-            Long scheduleId,
-            List<Long> seatIds
+            @Param("scheduleId") Long scheduleId,
+            @Param("seatIds") List<Long> seatIds
     );
 }
