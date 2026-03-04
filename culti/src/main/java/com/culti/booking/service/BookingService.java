@@ -77,7 +77,8 @@ public class BookingService {
         booking.setTicketCount(requestDTO.getSeatIds().size());
         booking.setDiscountAmount(0);
         booking.setPaymentMethod("TOSS");
-
+        booking.setPaymentStatus("READY");
+        
         Booking savedBooking = bookingRepository.save(booking);
 
         // 좌석 저장
