@@ -1,5 +1,14 @@
 // DOM이 로드된 후 실행
 document.addEventListener('DOMContentLoaded', function() {
+	
+	const p = new URLSearchParams(window.location.search);
+	  const linked = p.get("linked");
+
+	  if (linked === "success") {
+	      alert("연동되었습니다.");
+	      window.history.replaceState({}, document.title, window.location.pathname);
+	  }
+	  
     // 사이드바 네비게이션
     const navItems = document.querySelectorAll('.nav-item');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -24,7 +33,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // 프로필 폼
     const profileForm = document.getElementById('profileForm');
     const cancelEdit = document.getElementById('cancelEdit');
-	
+	const passwordUpdateForm=document.getElementById('passwordUpdateForm');
+	console.log("passwordUpdateForm:", passwordUpdateForm);
 	// ===========동행매칭
 
 		
@@ -506,11 +516,13 @@ document.addEventListener('DOMContentLoaded', function() {
             phone: document.getElementById('profilePhone').value,
             birthdate: document.getElementById('profileBirth').value,
             gender: document.querySelector('input[name="gender"]:checked')?.value,
-            currentPassword: document.getElementById('currentPassword').value,
+			email : document.getElementById('profileEmail').value
+            /*currentPassword: document.getElementById('currentPassword').value,
             newPassword: document.getElementById('newPassword').value,
-            confirmPassword: document.getElementById('confirmPassword').value
+            confirmPassword: document.getElementById('confirmPassword').value*/
         };
 
+		/*
         // 비밀번호 변경 시 유효성 검사
         if (formData.newPassword) {
             if (!formData.currentPassword) {
@@ -522,13 +534,46 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
         }
+		*/
 
+		
+		
+		
+		
+		/*
         // 데모용
         alert('회원정보가 수정되었습니다.');
         console.log('수정 데이터:', formData);
         
         // 화면 업데이트
         document.getElementById('userName').textContent = formData.name;
+		*/
+		const token = document.querySelector("meta[name='_csrf']").content;
+		const header = document.querySelector("meta[name='_csrf_header']").content;
+				
+		fetch('/api/myPage/update', {
+		        method: 'POST',
+		        headers: {
+		            'Content-Type': 'application/json',
+					[header]: token
+		        },
+		        body: JSON.stringify(formData)
+		    })
+		    .then(response => {
+		        if (!response.ok) {
+		            throw new Error('서버 오류 발생');
+		        }
+		        return response.json(); // 서버에서 JSON 리턴할 경우
+		    })
+		    .then(data => {
+		        alert('회원정보가 수정되었습니다.');
+		        location.reload(); // 새로고침
+		    })
+		    .catch(error => {
+		        console.error('에러:', error);
+		        alert('수정 중 오류가 발생했습니다.');
+		    });
+		
     });
 
     cancelEdit.addEventListener('click', function() {
@@ -537,7 +582,63 @@ document.addEventListener('DOMContentLoaded', function() {
             //loadUserInfo();
         }
     });
+	
+	
+	
+	passwordUpdateForm.addEventListener('submit', function(e) {
+	        e.preventDefault();
+			
+			alert('ddd');
+	        const formData = {
+	            currentPassword: document.getElementById('currentPassword').value,
+	            newPassword: document.getElementById('newPassword').value,
+				email : document.getElementById('profileEmail').value
+	        };
 
+			
+	        // 비밀번호 변경 시 유효성 검사
+	        if (formData.newPassword) {
+	            if (!formData.currentPassword) {
+	                alert('현재 비밀번호를 입력해주세요.');
+	                return;
+	            }
+	            if (formData.newPassword !== formData.confirmPassword) {
+	                alert('새 비밀번호가 일치하지 않습니다.');
+	                return;
+	            }
+	        }
+			
+			const token = document.querySelector("meta[name='_csrf']").content;
+			const header = document.querySelector("meta[name='_csrf_header']").content;
+					
+			fetch('/api/myPage/changePassword', {
+			        method: 'POST',
+			        headers: {
+			            'Content-Type': 'application/json',
+						[header]: token
+			        },
+			        body: JSON.stringify(formData)
+			    })
+			    .then(response => {
+			        if (!response.ok) {
+			            throw new Error('서버 오류 발생');
+			        }
+			        return response.json(); // 서버에서 JSON 리턴할 경우
+			    })
+			    .then(data => {
+			        alert('비밀번호가 변경되었습니다.');
+			        location.reload(); // 새로고침
+			    })
+			    .catch(error => {
+			        console.error('에러:', error);
+			        alert('변경 중 오류가 발생했습니다.');
+			    });
+			
+	    });
+	
+	
+	
+	
     // ========== 로그아웃 ==========
     
     logoutBtn.addEventListener('click', function() {
@@ -593,6 +694,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+
+
+
 
 // ========== 전역 함수 (HTML에서 호출) ==========
 

@@ -21,6 +21,7 @@ import com.culti.auth.dto.TermsRequestDTO;
 import com.culti.auth.dto.UserDTO;
 import com.culti.auth.entity.User;
 import com.culti.auth.security.PrincipalDetails;
+import com.culti.auth.service.SocialAuthService;
 import com.culti.auth.service.TermsService;
 import com.culti.auth.service.UserService;
 import com.culti.mate.DTO.MateApplyMypageDTO;
@@ -29,7 +30,7 @@ import com.culti.mate.DTO.MyPostMypageDTO;
 import com.culti.mate.entity.MatePost;
 import com.culti.mate.matePage.Criteria;
 import com.culti.mate.service.MateService;
-
+import com.culti.review.config.WebConfig;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -40,11 +41,12 @@ import lombok.extern.log4j.Log4j2;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
-	
+
 	private final UserService userService;
 	private final MateService mateService;
 	private final TermsService termsService;
-	
+	private final SocialAuthService socialAuthService;
+
 	
 	//로그인페이지
 	@GetMapping("/login")
@@ -158,6 +160,22 @@ public class AuthController {
 			String email=userDetails.getUsername();
 			UserDTO userDTO=userDetails.getUserDto();
 			model.addAttribute("user",userDTO);
+			
+			
+			//소셜로그인 연동 여부를 model로 넘김
+			
+			boolean kakao=this.socialAuthService
+					.existsByUser_UserIdAndProvider(userDTO.getUserId(), "kakao");
+			
+			boolean google=this.socialAuthService
+					.existsByUser_UserIdAndProvider(userDTO.getUserId(), "google");
+			
+			boolean naver=this.socialAuthService
+					.existsByUser_UserIdAndProvider(userDTO.getUserId(), "naver");
+			
+			model.addAttribute("kakao",kakao);
+			model.addAttribute("google",google);
+			model.addAttribute("naver",naver);
 			
 			// ===== 동행매칭==================
 			// 탭 상태

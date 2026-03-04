@@ -72,5 +72,11 @@ public interface UserService {
 		//[5] 유저 ID로 엔티티 반환
 		User getUserById(Long userID);
 		
+		//[6]유저 정보 저장
+		void saveUser(User user);
+		
+		//[7]비밀번호 변경
+		User changePassword(String email, String currentPassword, String newPassword);
+		
 		
 }

@@ -5,6 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}">
+<meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>마이페이지 - CULTI</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     
@@ -231,7 +233,7 @@
                                 
                                 <div class="form-group">
                                     <label for="profileName">이름</label>
-                                    <input type="text" id="profileName" th:value="${user.name}" disabled>
+                                    <input type="text" id="profileName" th:value="${user.name}" readonly>
                                     <span class="form-help">이름은 변경할 수 없습니다.</span>
                                 </div>
 
@@ -242,7 +244,7 @@
 
                                 <div class="form-group">
                                     <label for="profileEmail">이메일</label>
-                                    <input type="email" id="profileEmail" th:value="${user.email}" disabled>
+                                    <input type="email" id="profileEmail" th:value="${user.email}" readonly>
                                     <span class="form-help">이메일은 변경할 수 없습니다.</span>
                                 </div>
 
@@ -255,25 +257,34 @@
                                     <label for="profileBirth">생년월일</label>
                                     <input type="date" id="profileBirth" th:value="${user.birthDate}">
                                 </div>
-
                                 <div class="form-group">
                                     <label>성별</label>
                                     <div class="radio-group">
-                                        <label class="radio-label">
-                                            <input type="radio" name="gender" value="male" checked>
-                                            <span>남성</span>
-                                        </label>
-                                        <label class="radio-label">
-                                            <input type="radio" name="gender" value="female">
-                                            <span>여성</span>
-                                        </label>
-                                        <label class="radio-label">
-                                            <input type="radio" name="gender" value="other">
-                                            <span>선택안함</span>
-                                        </label>
-                                    </div>
+    <label class="radio-label">
+        <input type="radio" name="gender" value="M"
+               th:checked="${user.gender.toString() == 'M'}">
+        <span>남성</span>
+    </label>
+
+    <label class="radio-label">
+        <input type="radio" name="gender" value="F"
+               th:checked="${user.gender.toString() == 'F'}">
+        <span>여성</span>
+    </label>
+
+    <label class="radio-label">
+        <input type="radio" name="gender" value="O"
+               th:checked="${user.gender.toString() == 'O'}">
+        <span>선택안함</span>
+    </label>
+</div>
                                 </div>
+        <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">저장하기</button>
+         </div>
                             </div>
+                            
+                            </form>
 <div class="form-section">
     <h3 class="form-section-title">소셜 계정 연동</h3>
     <p class="form-help" style="margin-bottom: 15px;">소셜 계정을 연결하면 더 간편하게 로그인할 수 있습니다.</p>
@@ -285,10 +296,12 @@
                 <span>카카오 계정</span>
             </div>
             <div class="social-action">
-                <a th:href="@{/auth/link/kakao}"
-                   class="btn-sm btn-connect">
-                   연결하기
-                </a>
+                <a th:href="${kakao} ? '#' : @{/auth/link/kakao}"
+   th:text="${kakao} ? '연동됨' : '연결하기'"
+   th:classappend="${kakao} ? ' disabled'"
+   th:onclick="${kakao} ? 'return false;'"
+   class="btn-sm btn-connect">
+</a>
             </div>
         </div>
 
@@ -298,10 +311,12 @@
                 <span>네이버 계정</span>
             </div>
             <div class="social-action">
-                <a th:href="@{/auth/link/naver}"
-                   class="btn-sm btn-connect">
-                   연결하기
-                </a>
+                <a th:href="${naver} ? '#' : @{/auth/link/naver}"
+   th:text="${naver} ? '연동됨' : '연결하기'"
+   th:classappend="${naver} ? ' disabled'"
+   th:onclick="${naver} ? 'return false;'"
+   class="btn-sm btn-connect">
+</a>
             </div>
         </div>
 
@@ -311,14 +326,19 @@
                 <span>구글 계정</span>
             </div>
             <div class="social-action">
-                <a th:href="@{/auth/link/google}"
-                   class="btn-sm btn-connect">
-                   연결하기
-                </a>
+                <a th:href="${google} ? '#' : @{/auth/link/google}"
+   th:text="${google} ? '연동됨' : '연결하기'"
+   th:classappend="${google} ? ' disabled'"
+   th:onclick="${google} ? 'return false;'"
+   class="btn-sm btn-connect">
+</a>
+                
+                
             </div>
         </div>
     </div>
 </div>
+	<form id="passwordUpdateForm">
                             <div class="form-section">
                                 <h3 class="form-section-title">비밀번호 변경</h3>
                                 
@@ -340,7 +360,6 @@
 
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary">저장하기</button>
-                                <button type="button" class="btn btn-secondary" id="cancelEdit">취소</button>
                             </div>
                         </form>
 
@@ -638,6 +657,10 @@
             </div>
         </div>
     </div>
+<script>
+    //alert('연동되었습니다.');
+</script>
 </div>
+
 </body>
 </html>
