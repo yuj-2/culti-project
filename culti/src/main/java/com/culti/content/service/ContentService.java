@@ -3,6 +3,8 @@ package com.culti.content.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.culti.content.entity.Content;
@@ -28,6 +30,10 @@ public class ContentService {
 		} else {
 			throw new RuntimeException("content not found");
 		}
+	}
+	
+	public Page<Content> getContentList(Pageable pageable) {
+	    return contentRepository.findAll(pageable);
 	}
 	
 }

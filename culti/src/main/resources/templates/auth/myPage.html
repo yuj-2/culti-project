@@ -162,9 +162,62 @@
                             <button class="filter-tab" data-filter="performance">공연</button>
                         </div>
 
-                        <div class="reservation-list" id="allReservations">
-                            <!-- JavaScript로 동적 생성 -->
-                        </div>
+                       <div class="reservation-list" id="allReservations">
+
+   <div class="reservation-item"
+     th:each="booking : ${bookings}"
+     data-category="movie">
+
+        <div class="reservation-info">
+        
+        
+
+            <span class="reservation-category">영화</span>
+
+            <h3 class="reservation-title"
+                th:text="${booking.movieTitle}">
+                영화 제목
+            </h3>
+
+            <div class="reservation-details">
+
+                <p>
+                    예매번호 :
+                    <span th:text="${booking.bookingNumber}"></span>
+                </p>
+
+                <p>
+                    상영시간 :
+                    <span th:text="${booking.showTime}"></span>
+                </p>
+
+                <p>
+                    좌석 :
+                    <span th:each="seat : ${booking.seatNames}"
+                          th:text="${seat}"
+                          style="margin-right:5px;">
+                    </span>
+                </p>
+
+                <p>
+                    결제금액 :
+                    <span th:text="${#numbers.formatInteger(booking.totalPrice,3,'COMMA')}"></span>원
+                </p>
+
+            </div>
+
+        </div>
+
+       <div class="reservation-actions">
+
+<form th:action="@{/auth/booking/cancel}" method="post">
+    <input type="hidden" name="bookingNumber" th:value="${booking.bookingNumber}">
+    <button type="submit">예매 취소</button>
+</form>
+</div>
+    </div>
+
+</div>
                     </section>
 
                     <!-- 쿠폰/포인트 -->
@@ -214,12 +267,69 @@
                     </section>
 
                     <!-- 취소/환불 내역 -->
-                    <section class="tab-content" id="cancellations">
-                        <h1 class="content-title">취소/환불 내역</h1>
-                        <div class="reservation-list" id="cancellationList">
-                            <!-- JavaScript로 동적 생성 -->
-                        </div>
-                    </section>
+                    <!-- 취소/환불 내역 -->
+<section class="tab-content" id="cancellations">
+
+<h1 class="content-title">취소/환불 내역</h1>
+
+<div class="reservation-list">
+
+<div class="reservation-item canceled"
+     th:each="booking : ${cancelledBookings}">
+
+    <div class="reservation-info">
+
+        <span class="reservation-category">영화</span>
+
+        <h3 class="reservation-title"
+            th:text="${booking.movieTitle}">
+        </h3>
+
+        <div class="reservation-details">
+
+            <p>
+                예매번호 :
+                <span th:text="${booking.bookingNumber}"></span>
+            </p>
+
+            <p>
+                상영시간 :
+                <span th:text="${booking.showTime}"></span>
+            </p>
+
+            <p>
+                좌석 :
+                <span th:each="seat : ${booking.seatNames}"
+                      th:text="${seat}"
+                      style="margin-right:5px;">
+                </span>
+            </p>
+
+            <p>
+                환불금액 :
+                <span th:text="${#numbers.formatInteger(booking.totalPrice,3,'COMMA')}"></span>원
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="reservation-actions">
+        <button disabled>환불 완료</button>
+    </div>
+
+</div>
+
+<div th:if="${#lists.isEmpty(cancelledBookings)}"
+     style="text-align:center;padding:40px;color:#999;">
+
+취소/환불 내역이 없습니다.
+
+</div>
+
+</div>
+
+</section>
 
                     <!-- 회원정보 수정 -->
                     <section class="tab-content" id="profile">

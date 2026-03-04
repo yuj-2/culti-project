@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+<head>
+    <title>단일 티켓 가격 등록</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold m-0"><i class="fas fa-ticket-alt me-2 text-muted"></i> 단일 티켓 가격 등록 (전시/팝업스토어)</h4>
+        </div>
+
+        <div class="card shadow-sm border-0 mx-auto" style="max-width: 600px;">
+            <div class="card-body p-5">
+                <form th:action="@{/admin/price/single}" method="post">
+                    <input type="hidden" name="contentId" th:value="${priceDTO.contentId}">
+                    
+                    <div class="alert alert-light border border-success border-start-0 border-end-0 border-bottom-0 border-top-4 mb-4" role="alert">
+                        <i class="fas fa-info-circle text-success me-2"></i> <strong>안내:</strong> 해당 전시/팝업스토어의 기본 티켓 가격(원)을 숫자만 입력해 주세요.
+                    </div>
+
+                    <h5 class="fw-bold mb-4 border-bottom pb-2">가격 정보 입력</h5>
+
+                    <div class="row mb-5 align-items-center">
+                        <div class="col-md-3 text-end fw-bold text-dark">일반 티켓 가격</div>
+                        <div class="col-md-9">
+                            <div class="input-group shadow-sm">
+                                <input type="number" class="form-control" name="price" 
+                                       th:value="${priceDTO.price}" placeholder="예: 20000" required>
+                                <span class="input-group-text bg-white">원</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-2 border-top pt-4">
+                        <button type="button" class="btn btn-light border px-4" onclick="history.back()">취소</button>
+                        <button type="submit" class="btn btn-success px-5"><i class="fas fa-check me-2"></i>가격 등록 완료</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

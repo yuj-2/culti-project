@@ -18,6 +18,7 @@ public class Seat {
 
     private String seatRow;
     private Integer seatCol;
+    
     private String grade;
-    private Integer basePrice;
+    
 }
