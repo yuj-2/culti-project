@@ -8,7 +8,7 @@
     <script th:src="@{/js/common.js}"></script>
     <script th:src="@{/js/calendar.js}"></script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50/30 font-sans">
+<body class="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50/30 ">
     
 
     <div  layout:fragment="content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -17,13 +17,13 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-2 tracking-tight">문화 일정 캘린더</h2>
             <p class="text-gray-500 text-base mb-6">이번 달 진행되는 영화, 공연, 전시 일정을 CULTI에서 한눈에 확인하세요.</p>
         
-            <div class="flex flex-wrap gap-2">
-                <button class="px-5 py-2.5 rounded-full bg-[#503396] text-white text-sm font-semibold shadow-md shadow-purple-900/20 transition-all">전체 일정</button>
-                <button class="px-5 py-2.5 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-purple-50 hover:text-[#503396] hover:border-purple-200 text-sm font-medium transition-all">영화</button>
-                <button class="px-5 py-2.5 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-purple-50 hover:text-[#503396] hover:border-purple-200 text-sm font-medium transition-all">공연</button>
-                <button class="px-5 py-2.5 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-purple-50 hover:text-[#503396] hover:border-purple-200 text-sm font-medium transition-all">전시</button>
-                <button class="px-5 py-2.5 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-purple-50 hover:text-[#503396] hover:border-purple-200 text-sm font-medium transition-all">팝업스토어</button>
-                </div>
+			<div class="flex flex-wrap gap-2" id="calendar-filters">
+			  <button data-category="전체" class="px-5 py-2.5 rounded-full bg-[#503396] text-white text-sm font-semibold shadow-md shadow-purple-900/20 transition-all">전체 일정</button>
+			  <button data-category="영화" class="px-5 py-2.5 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-purple-50 hover:text-[#503396] hover:border-purple-200 text-sm font-medium transition-all">영화</button>
+			  <button data-category="공연" class="px-5 py-2.5 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-purple-50 hover:text-[#503396] hover:border-purple-200 text-sm font-medium transition-all">공연</button>
+			  <button data-category="전시" class="px-5 py-2.5 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-purple-50 hover:text-[#503396] hover:border-purple-200 text-sm font-medium transition-all">전시</button>
+			  <button data-category="팝업스토어" class="px-5 py-2.5 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-purple-50 hover:text-[#503396] hover:border-purple-200 text-sm font-medium transition-all">팝업스토어</button>
+			</div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

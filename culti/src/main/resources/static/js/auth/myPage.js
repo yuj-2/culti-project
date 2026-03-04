@@ -94,6 +94,26 @@ document.addEventListener('DOMContentLoaded', function() {
 		    if (!confirm(msg)) e.preventDefault();
 		  });
 		});
+	
+		// 더보기 (각 패널별)
+		document.querySelectorAll('#mate .mate-panel').forEach(panel => {
+		  const items = panel.querySelectorAll('.application-card');
+		  const btn = panel.querySelector('[data-more-btn]');
+		  if (!btn) return;
+
+		  let shown = 3; // 처음 4개만
+		  const render = () => {
+		    items.forEach((el, idx) => el.style.display = idx < shown ? '' : 'none');
+		    btn.style.display = shown >= items.length ? 'none' : '';
+		  };
+
+		  btn.addEventListener('click', () => {
+		    shown += 6; // 6개씩 더
+		    render();
+		  });
+
+		  render();
+		});
 		
 	// ===========동행매칭 끝=====
 

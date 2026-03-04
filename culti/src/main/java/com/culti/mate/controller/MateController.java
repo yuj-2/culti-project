@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,11 +16,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.culti.auth.dto.UserDTO;
 import com.culti.auth.service.UserService;
+import com.culti.mate.DTO.MateCommentDTO;
 import com.culti.mate.DTO.MatePostDTO;
 import com.culti.mate.entity.MatePost;
 import com.culti.mate.enums.MateApplyStatus;
@@ -27,7 +31,6 @@ import com.culti.mate.matePage.Criteria;
 import com.culti.mate.matePage.PageDTO;
 import com.culti.mate.repository.MateRepository;
 import com.culti.mate.service.MateService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -134,16 +137,16 @@ public class MateController {
 		mateService.apply(postId, email, message);
 		return "redirect:/mate/mate";
 	}
-	
-	@PreAuthorize("isAuthenticated()")
-	@PostMapping("/addComment")
-	public String addComment(@RequestParam("postId") Long postId,
-	                         @RequestParam("comment") String comment,
-	                         @AuthenticationPrincipal UserDetails userDetails) {
-	    String email = userDetails.getUsername();
-	    mateService.addComment(postId, email, comment);
-	    return "redirect:/mate/mate";
-	}
+//	
+//	@PreAuthorize("isAuthenticated()")
+//	@PostMapping("/addComment")
+//	public String addComment(@RequestParam("postId") Long postId,
+//	                         @RequestParam("comment") String comment,
+//	                         @AuthenticationPrincipal UserDetails userDetails) {
+//	    String email = userDetails.getUsername();
+//	    mateService.addComment(postId, email, comment);
+//	    return "redirect:/mate/mate";
+//	}
 
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/updateComment")
@@ -177,6 +180,23 @@ public class MateController {
 	    return "redirect:/mate/mate?category=all&page=" + pageAll + "&size=" + size + "&openPostId=" + postId;
 	}
 	
+	@PreAuthorize("isAuthenticated()")
+	@PostMapping("/addComment")
+	@ResponseBody
+	public ResponseEntity<MateCommentDTO> addComment(@RequestBody Map<String, Object> data,
+	                                     @AuthenticationPrincipal UserDetails user) {
+	    Long postId = Long.valueOf(data.get("postId").toString());
+	    String content = data.get("content").toString();
 
+	    MateCommentDTO dto = mateService.addComment(postId, user.getUsername(), content);
+	    return ResponseEntity.ok(dto);
+	}
+	
+
+	@GetMapping("/comments")
+	@ResponseBody
+	public List<MateCommentDTO> getComments(@RequestParam("postId") Long postId) {
+	    return mateService.getComments(postId);
+	}
 	
 }

@@ -36,9 +36,5 @@ public class HomeController {
 		model.addAttribute("posts", dtoList);
 	}
 	
-	@GetMapping("/calendar")
-	public String calendar() {
-	    return "calendar/calendar";
-	}
-	
+
 }
