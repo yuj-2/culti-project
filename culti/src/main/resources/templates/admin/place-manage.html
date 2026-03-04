@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+<head>
+    <title>장소 관리</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold m-0"><i class="fas fa-map-marker-alt me-2 text-muted"></i> 개최 장소 관리</h4>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-4">
+			    <div class="card shadow-sm border-0">
+			        <div class="card-header bg-white fw-bold py-3">
+			            <i class="fas fa-search-location me-1 text-primary"></i> 장소 검색 및 등록
+			        </div>
+			        <div class="card-body">
+			            
+			            <div class="mb-3">
+			                <label class="form-label fw-bold text-muted small">카카오맵 키워드 검색</label>
+			                <div class="input-group">
+			                    <input type="text" id="keyword" class="form-control" placeholder="예: 세종문화회관" onkeyup="if(window.event.keyCode==13){searchPlaces()}">
+			                    <button class="btn btn-outline-secondary" type="button" onclick="searchPlaces()"><i class="fas fa-search"></i></button>
+			                </div>
+			            </div>
+			
+			            <div id="mapContainer" style="display:none; margin-bottom: 20px;">
+			                <div id="map" style="width:100%; height:200px; border-radius: 8px; border: 1px solid #dee2e6;"></div>
+			                <ul id="placesList" class="list-group list-group-flush mt-2 border rounded" style="max-height: 200px; overflow-y: auto;">
+			                    </ul>
+			            </div>
+			
+			            <hr class="my-4">
+			
+			            <form th:action="@{/admin/place/new}" method="post">
+			                <div class="mb-3">
+			                    <label class="form-label fw-bold">선택된 장소명</label>
+			                    <input type="text" class="form-control bg-light" id="placeName" name="name" placeholder="위에서 장소를 검색하고 선택하세요" required readonly>
+			                </div>
+			                <div class="mb-4">
+			                    <label class="form-label fw-bold">선택된 도로명 주소</label>
+			                    <input type="text" class="form-control bg-light" id="placeAddress" name="address" placeholder="자동으로 입력됩니다" required readonly>
+			                </div>
+			                <button type="submit" class="btn btn-culti w-100"><i class="fas fa-plus me-2"></i>이 장소 등록하기</button>
+			            </form>
+			
+			        </div>
+			    </div>
+			</div>
+
+            <div class="col-md-8">
+                <div class="table-container shadow-sm border-0">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="15%">장소 ID</th>
+                                <th width="35%">장소명</th>
+                                <th width="50%">주소</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="place : ${placeList}">
+                                <td class="fw-bold text-muted" th:text="${place.placeId}">1</td>
+                                <td class="fw-bold" th:text="${place.name}">마포아트센터</td>
+                                <td class="text-muted" th:text="${place.address}">서울시 마포구...</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(placeList)}">
+                                <td colspan="3" class="text-center py-5 text-muted">등록된 장소가 없습니다. 왼쪽 폼에서 장소를 등록해 주세요.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+<script type="text/javascript" th:src="'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${kakaoJsKey} + '&libraries=services'"></script>
+
+<script>
+    var markers = [];
+    var mapContainer = document.getElementById('map'), 
+        mapOption = {
+            center: new kakao.maps.LatLng(37.566826, 126.9786567), 
+            level: 3 
+        };  
+    var map = new kakao.maps.Map(mapContainer, mapOption); 
+    var ps = new kakao.maps.services.Places();  
+
+    // 현재 선택된 마커를 기억할 변수
+    var currentMarker = null;
+
+    function searchPlaces() {
+        var keyword = document.getElementById('keyword').value;
+        if (!keyword.replace(/^\s+|\s+$/g, '')) {
+            alert('검색할 장소명을 입력해주세요!');
+            return false;
+        }
+        document.getElementById('mapContainer').style.display = 'block';
+        map.relayout();
+        ps.keywordSearch(keyword, placesSearchCB); 
+    }
+
+    function placesSearchCB(data, status, pagination) {
+        if (status === kakao.maps.services.Status.OK) {
+            displayPlaces(data);
+        } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+            alert('검색 결과가 존재하지 않습니다.');
+            return;
+        } else if (status === kakao.maps.services.Status.ERROR) {
+            alert('검색 결과 중 오류가 발생했습니다.');
+            return;
+        }
+    }
+
+    function displayPlaces(places) {
+        var listEl = document.getElementById('placesList'), 
+            bounds = new kakao.maps.LatLngBounds();
+        listEl.innerHTML = '';
+        
+        for (var i = 0; i < places.length; i++) {
+            var placePosition = new kakao.maps.LatLng(places[i].y, places[i].x);
+            bounds.extend(placePosition);
+
+            var li = document.createElement('li');
+            li.className = 'list-group-item list-group-item-action cursor-pointer';
+            var addressText = places[i].road_address_name ? places[i].road_address_name : places[i].address_name;
+            
+            li.innerHTML = '<div class="fw-bold text-primary">' + places[i].place_name + '</div>' +
+                           '<div class="text-muted small"><i class="fas fa-map-marker-alt me-1"></i>' + addressText + '</div>';
+
+            (function(placeName, address, latlng) {
+                li.onclick = function() {
+                    document.getElementById('placeName').value = placeName;
+                    document.getElementById('placeAddress').value = address;
+                    
+                    // 1. 지도 중심 이동
+                    map.setCenter(latlng);
+                    map.setLevel(3);
+                    
+                    // 2. 기존 마커가 있으면 지우기
+                    if (currentMarker) {
+                        currentMarker.setMap(null);
+                    }
+                    
+                    // 3. 새로운 위치에 마커 생성하고 지도에 띄우기
+                    currentMarker = new kakao.maps.Marker({
+                        position: latlng,
+                        map: map
+                    });
+                };
+            })(places[i].place_name, addressText, placePosition);
+
+            listEl.appendChild(li);
+        }
+        map.setBounds(bounds);
+    }
+</script>
+    </div>
+    
+    
+</body>
+</html>

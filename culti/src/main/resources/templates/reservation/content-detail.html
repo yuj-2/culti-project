@@ -56,35 +56,45 @@
 
                     <div class="space-y-4 text-gray-700">
                         <div class="flex items-start gap-3">
-                            <i data-lucide="calendar" class="w-5 h-5 text-[#503396] mt-0.5 flex-shrink-0"></i>
-                            <div>
-                                <p class="font-medium text-gray-900">공연 기간</p>
-                                <p class="text-gray-600 mt-1" 
-                           th:text="${#temporals.format(content.startDate, 'yyyy.MM.dd')} + ' ~ ' + ${#temporals.format(content.endDate, 'yyyy.MM.dd')}">
-                        </p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-start gap-3">
-                            <i data-lucide="clock" class="w-5 h-5 text-[#503396] mt-0.5 flex-shrink-0"></i>
-                            <div>
-                                <p class="font-medium text-gray-900">공연 시간</p>
-                                
-                                <p class="text-gray-600 mt-1" th:if="${#lists.isEmpty(content.schedules)}">
-                                    상세 시간 미정
-                                </p>
-
-                                <div class="text-gray-600 mt-1 space-y-1" th:unless="${#lists.isEmpty(content.schedules)}">
-                                    <p th:each="schedule : ${content.schedules}">
-                                        <span class="font-semibold text-[#503396]" 
-                                              th:text="${#temporals.format(schedule.showTime, 'MM.dd')} + ' [' + ${schedule.sessionNum} + '회차] '">
-                                        </span>
-                                        <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')} + ' ~ ' + ${#temporals.format(schedule.endTime, 'HH:mm')}">
-                                        </span>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+						    <i data-lucide="calendar" class="w-5 h-5 text-[#503396] mt-0.5 flex-shrink-0"></i>
+						    <div>
+						        <p class="font-medium text-gray-900">
+						            <span th:if="${content.category == '영화'}">상영 기간</span>
+						            <span th:if="${content.category == '공연'}">공연 기간</span>
+						            <span th:if="${content.category == '전시'}">전시 기간</span>
+						            <span th:if="${content.category == '팝업스토어'}">운영 기간</span>
+						        </p>
+						        <p class="text-gray-600 mt-1" 
+						           th:text="${#temporals.format(content.startDate, 'yyyy.MM.dd')} + ' ~ ' + ${#temporals.format(content.endDate, 'yyyy.MM.dd')}">
+						        </p>
+						    </div>
+						</div>
+						
+						<div class="flex items-start gap-3">
+						    <i data-lucide="clock" class="w-5 h-5 text-[#503396] mt-0.5 flex-shrink-0"></i>
+						    <div>
+						        <p class="font-medium text-gray-900">
+						            <span th:if="${content.category == '영화'}">상영 시간</span>
+						            <span th:if="${content.category == '공연'}">공연 시간</span>
+						            <span th:if="${content.category == '전시'}">전시 시간</span>
+						            <span th:if="${content.category == '팝업스토어'}">운영 시간</span>
+						        </p>
+						        
+						        <p class="text-gray-600 mt-1" th:if="${#lists.isEmpty(content.schedules)}">
+						            상세 시간 미정
+						        </p>
+						
+						        <div class="text-gray-600 mt-1 space-y-1" th:unless="${#lists.isEmpty(content.schedules)}">
+						            <p th:each="schedule : ${content.schedules}">
+						                <span class="font-semibold text-[#503396]" 
+						                      th:text="${#temporals.format(schedule.showTime, 'MM.dd')} + ' [' + ${schedule.sessionNum} + '회차] '">
+						                </span>
+						                <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')} + ' ~ ' + ${#temporals.format(schedule.endTime, 'HH:mm')}">
+						                </span>
+						            </p>
+						        </div>
+						    </div>
+						</div>
                         
                         <div class="flex items-start gap-3">
                             <i data-lucide="map-pin" class="w-5 h-5 text-[#503396] mt-0.5 flex-shrink-0"></i>
@@ -331,33 +341,38 @@
                </button>
                
                <div id="scheduleModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
-                 <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden transform transition-all">
-                     <div class="p-5 flex justify-between items-center border-b border-gray-100 bg-[#252451] text-white">
-                         <h3 class="text-xl font-bold">관람하실 회차를 선택해주세요</h3>
-                         <button onclick="closeScheduleModal()" class="text-white hover:text-gray-300 transition-colors">
-                             <i data-lucide="x" class="w-6 h-6"></i>
-                         </button>
-                     </div>
-                     
-                     <div class="p-6 max-h-[60vh] overflow-y-auto">
-                         <div class="space-y-3">
-                             <a th:each="schedule : ${content.schedules}"
-                                th:href="@{/reservation/booking/seat(scheduleId=${schedule.scheduleId})}"
-                                class="block w-full p-4 border border-gray-200 rounded-xl hover:border-[#503396] hover:bg-[#503396] hover:bg-opacity-5 transition-all flex justify-between items-center group cursor-pointer">
-                                 <div>
-                                     <div class="text-[#503396] font-bold text-sm mb-1" th:text="${schedule.sessionNum} + '회차'"></div>
-                                     <div class="text-gray-900 font-medium text-lg" 
-                                          th:text="${#temporals.format(schedule.showTime, 'yyyy.MM.dd')} + ' ' + ${#temporals.format(schedule.startTime, 'HH:mm')}">
-                                     </div>
-                                 </div>
-                                 <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-[#503396] transition-colors">
-                                     <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500 group-hover:text-white"></i>
-                                 </div>
-                             </a>
-                         </div>
-                     </div>
-                 </div>
-             </div>
+			       <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden transform transition-all">
+			           <div class="p-5 flex justify-between items-center border-b border-gray-100 bg-[#252451] text-white">
+			               <h3 class="text-xl font-bold">관람하실 회차를 선택해주세요</h3>
+			               <button onclick="closeScheduleModal()" class="text-white hover:text-gray-300 transition-colors">
+			                   <i data-lucide="x" class="w-6 h-6"></i>
+			               </button>
+			           </div>
+			           
+			           <div class="p-6 max-h-[60vh] overflow-y-auto">
+			               <div class="space-y-3">
+			                   <a th:each="schedule : ${content.schedules}"
+			                      th:href="@{/reservation/booking/seat(scheduleId=${schedule.scheduleId})}"
+			                      class="block w-full p-4 border border-gray-200 rounded-xl hover:border-[#503396] hover:bg-[#503396] hover:bg-opacity-5 transition-all flex justify-between items-center group cursor-pointer">
+			                       <div>
+			                           <div class="flex items-center gap-2 mb-1">
+			                               <span class="text-[#503396] font-bold text-sm" th:text="${schedule.sessionNum} + '회차'"></span>
+			                               <span class="text-xs text-gray-400">|</span>
+			                               <span class="text-gray-600 font-semibold text-sm" th:text="${schedule.roomName}"></span>
+			                           </div>
+			                           
+			                           <div class="text-gray-900 font-medium text-lg" 
+			                                th:text="${#temporals.format(schedule.showTime, 'yyyy.MM.dd')} + ' ' + ${#temporals.format(schedule.startTime, 'HH:mm')}">
+			                           </div>
+			                       </div>
+			                       <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-[#503396] transition-colors">
+			                           <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500 group-hover:text-white"></i>
+			                       </div>
+			                   </a>
+			               </div>
+			           </div>
+			       </div>
+				</div>
              
            </div>
        </div>
