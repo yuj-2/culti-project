@@ -127,34 +127,36 @@ public class BookingService {
      * 예매 결과 조회
      */
     @Transactional(readOnly = true)
-    public BookingResponseDTO getBookingResult(Long id) {
+    public List<BookingResponseDTO> getMyBookings(Long userId) {
 
-        Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("예매 없음"));
+        List<Booking> bookings =
+                bookingRepository.findByUserIdAndStatus(userId, "PAID");
 
-        Schedule schedule = scheduleRepository
-                .findById(booking.getScheduleId())
-                .orElseThrow(() -> new IllegalArgumentException("상영 정보 없음"));
+        return bookings.stream().map(booking -> {
 
-        List<BookingSeat> bookingSeats =
-                bookingSeatRepository.findByBookingBookingId(booking.getBookingId());
+            Schedule schedule = scheduleRepository
+                    .findById(booking.getScheduleId())
+                    .orElseThrow();
 
-        List<String> seatNames = bookingSeats.stream()
-                .map(bs -> bs.getSeat().getSeatRow() + bs.getSeat().getSeatCol())
-                .collect(Collectors.toList());
+            List<BookingSeat> bookingSeats =
+                    bookingSeatRepository.findByBookingBookingId(booking.getBookingId());
 
-        return BookingResponseDTO.builder()
-                .bookingNumber(booking.getBookingNumber())
-                .movieTitle(schedule.getContent().getTitle())
-                .showTime(schedule.getShowTime().toString())
-                .totalPrice(booking.getTotalPrice())
-                .seatNames(seatNames)
-                .bookingSeats(bookingSeats)
-                .build();
-    
+            List<String> seatNames = bookingSeats.stream()
+                    .map(bs -> bs.getSeat().getSeatRow() + bs.getSeat().getSeatCol())
+                    .toList();
 
+            return BookingResponseDTO.builder()
+                    .bookingNumber(booking.getBookingNumber())
+                    .movieTitle(schedule.getContent().getTitle())
+                    .showTime(schedule.getShowTime().toString())
+                    .seatNames(seatNames)
+                    .totalPrice(booking.getTotalPrice())
+                    .build();
 
+        }).toList();
     }
+
+    
     @Transactional(readOnly = true)
     public List<BookingResponseDTO> getCancelledBookings(Long userId) {
 
@@ -208,32 +210,5 @@ public class BookingService {
         );   
 
     }
-    @Transactional(readOnly = true)
-    public List<BookingResponseDTO> getMyBookings(Long userId) {
 
-        List<Booking> bookings = bookingRepository.findByUserIdAndStatus(userId, "PAID");
-
-        return bookings.stream().map(booking -> {
-
-            Schedule schedule = scheduleRepository
-                    .findById(booking.getScheduleId())
-                    .orElseThrow(() -> new IllegalArgumentException("상영 정보 없음"));
-
-            List<BookingSeat> bookingSeats =
-                    bookingSeatRepository.findByBookingBookingId(booking.getBookingId());
-
-            List<String> seatNames = bookingSeats.stream()
-                    .map(bs -> bs.getSeat().getSeatRow() + bs.getSeat().getSeatCol())
-                    .collect(Collectors.toList());
-
-            return BookingResponseDTO.builder()
-                    .bookingNumber(booking.getBookingNumber())
-                    .movieTitle(schedule.getContent().getTitle())
-                    .showTime(schedule.getShowTime().toString())
-                    .seatNames(seatNames)
-                    .totalPrice(booking.getTotalPrice())
-                    .build();
-
-        }).collect(Collectors.toList());
-    }
 }

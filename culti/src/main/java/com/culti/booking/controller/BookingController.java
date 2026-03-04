@@ -134,35 +134,6 @@ public class BookingController {
 
         return "redirect:/auth/myPage?reservationTab=cancel";
     }
-    
-    @GetMapping("/booking/success")
-    public String paymentSuccess(
-            @RequestParam("bookingId") Long bookingId,
-            Model model) {
-
-        BookingResponseDTO booking =
-                bookingService.getBookingResult(bookingId);
-
-        bookingService.confirmBookingStatus(booking.getBookingNumber());
-
-        model.addAttribute("booking", booking);
-
-        return "reservation/booking_result_performance";
-    }
-    @GetMapping("/reservation/payment")
-    public String paymentPage(
-            @RequestParam("bookingId") Long bookingId,
-            Model model) {
-
-        BookingResponseDTO booking =
-                bookingService.getBookingResult(bookingId);
-
-        model.addAttribute("booking", booking);
-        model.addAttribute("bookingId", bookingId);
-
-        return "reservation/payment";
-    }
-
   
 
    
