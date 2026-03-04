@@ -1,69 +1,48 @@
 document.addEventListener('DOMContentLoaded', function() {
-    
+
     // =========================================================
-    // 1. 정렬 드롭다운 메뉴
+    // DOM 요소들 가져오기
     // =========================================================
     const sortBtn = document.getElementById('sort-button');
     const sortDropdown = document.getElementById('sort-dropdown');
     const sortChevron = document.getElementById('sort-chevron');
     const sortText = document.getElementById('sort-text');
     const sortOptions = document.querySelectorAll('.sort-option');
-
-    if (sortBtn && sortDropdown) {
-        sortBtn.addEventListener('click', function(e) {
-            e.stopPropagation(); 
-            sortDropdown.classList.toggle('hidden');
-            sortChevron.style.transform = sortDropdown.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
-        });
-
-      sortOptions.forEach(option => {
-           option.addEventListener('click', function() {
-               sortText.textContent = this.textContent;
-               sortDropdown.classList.add('hidden');
-               sortChevron.style.transform = 'rotate(0deg)';
-
-               const currentCategory = sessionStorage.getItem('savedCategory') || '영화';
-               const currentKeyword = searchInput ? searchInput.value.trim() : '';
-               fetchAndRenderCards(currentCategory, currentKeyword);
-           });
-       });
-
-        document.addEventListener('click', function(e) {
-            if (!sortBtn.contains(e.target) && !sortDropdown.contains(e.target)) {
-                sortDropdown.classList.add('hidden');
-                sortChevron.style.transform = 'rotate(0deg)';
-            }
-        });
-    }
-
-   // =========================================================
-    // 2. 백엔드(API) 호출 및 데이터 렌더링 로직
-    // =========================================================
+    const searchInput = document.getElementById('search-input');
+    const tabButtons = document.querySelectorAll('.flex-wrap button');
     const contentGrid = document.getElementById('content-grid');
-    if (!contentGrid) return;
-    
-    const tabButtons = document.querySelectorAll('.flex-wrap button'); 
-    const searchInput = document.getElementById('search-input'); 
 
-    function fetchAndRenderCards(category, keyword = '') {
+    // =========================================================
+    // 1. 핵심! 렌더링 함수 (무조건 호출될 때마다 현재 상태를 금고에 박제!)
+    // =========================================================
+    window.fetchAndRenderCards = function(category, keyword = '', page = 0) {
         if(!contentGrid) return;
-        
-      const sortTextElement = document.getElementById('sort-text');
-      const currentSort = sortTextElement ? sortTextElement.textContent.trim() : '인기순';
-        
-      fetch(`/content/api/list?category=${encodeURIComponent(category)}&keyword=${encodeURIComponent(keyword)}&sort=${encodeURIComponent(currentSort)}`)
-               .then(response => response.json())
-               .then(data => {
+
+        // 화면에 떠있는 현재 정렬 기준 읽어오기
+        const currentSort = sortText ? sortText.textContent.trim() : '인기순';
+
+        // 🔥 제일 중요한 부분: 데이터를 요청할 때마다 '현재 상태'를 모조리 금고에 덮어씁니다!
+        sessionStorage.setItem('savedCategory', category);
+        sessionStorage.setItem('savedKeyword', keyword);
+        sessionStorage.setItem('savedPage', page);
+        sessionStorage.setItem('savedSort', currentSort);
+
+        fetch(`/content/api/list?category=${encodeURIComponent(category)}&keyword=${encodeURIComponent(keyword)}&sort=${encodeURIComponent(currentSort)}&page=${page}`)
+            .then(response => response.json())
+            .then(pageData => {
                 contentGrid.innerHTML = '';
+                const data = pageData.content;
 
                 if(data.length === 0) {
                     contentGrid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500 font-medium">검색 결과가 없습니다.</div>`;
+                    document.getElementById('pagination-container').innerHTML = '';
                     return;
                 }
 
+                // 카드 그리기 (여기에 keepState 티켓 남기는 코드 들어있음!)
                 data.forEach(item => {
                     const cardHTML = `
-                        <div onclick="location.href='/reservation/detail/${item.id}'" class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 cursor-pointer">
+                        <div onclick="sessionStorage.setItem('keepState', 'true'); location.href='/reservation/detail/${item.id}'" class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 cursor-pointer">
                             <div class="relative overflow-hidden aspect-[3/4] bg-gray-100">
                                 <img src="${item.posterUrl}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -81,58 +60,97 @@ document.addEventListener('DOMContentLoaded', function() {
                     `;
                     contentGrid.insertAdjacentHTML('beforeend', cardHTML);
                 });
+
+                // 페이징 버튼 그리기 실행
+                renderPagination(pageData, category, keyword);
             })
             .catch(error => console.error('Error:', error));
-    }
+    };
 
-    // ---------------------------------------------------------
-    // 금고에서 카테고리 꺼내오기 & 뒤로가기 감지 (유지)
-    // ---------------------------------------------------------
-    let savedCategory = sessionStorage.getItem('savedCategory');
-   const keepCategory = sessionStorage.getItem('keepCategory');
-   
-    const referrer = document.referrer; 
-    const navEntries = performance.getEntriesByType("navigation");
-    const navType = navEntries.length > 0 ? navEntries[0].type : "";
+    // 페이징 버튼 생성
+    function renderPagination(pageData, category, keyword) {
+        const paginationContainer = document.getElementById('pagination-container');
+        if (!paginationContainer) return;
 
-    const isReload = navType === "reload";
-    const isBackForward = navType === "back_forward";
-    const isFromDetail = referrer.includes('/reservation/detail');
-    
-   if (!isReload && !isBackForward && !isFromDetail && !keepCategory) {
-        savedCategory = '영화';
-        sessionStorage.removeItem('savedCategory');
-    } else if (!savedCategory) {
-        savedCategory = '영화';
-    }
-    
-   sessionStorage.removeItem('keepCategory');
-   
-   tabButtons.forEach(btn => {
-        if (btn.textContent.trim() === savedCategory) {
-            btn.className = "px-6 py-3 rounded-xl transition-all duration-200 bg-[#503396] text-white shadow-lg shadow-purple-900/25 res-tab-active";
-        } else {
-            btn.className = "px-6 py-3 rounded-xl transition-all duration-200 bg-gray-50 text-gray-700 hover:bg-gray-100 res-tab-default";
+        if (pageData.totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
         }
-    });
-   
-    // ---------------------------------------------------------
-    // 이벤트 리스너들 
-    // ---------------------------------------------------------
-    
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const currentKeyword = this.value.trim(); 
-            const currentCategory = sessionStorage.getItem('savedCategory') || '영화'; 
-            fetchAndRenderCards(currentCategory, currentKeyword);
+
+        let html = `<nav aria-label="Page navigation"><ul class="inline-flex items-center -space-x-px gap-1">`;
+
+        html += `<li class="${pageData.first ? 'opacity-50 pointer-events-none' : ''}">
+            <button onclick="window.fetchAndRenderCards('${category}', '${keyword}', ${pageData.number - 1})"
+               class="block px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700">
+                <span class="font-bold">&lt; 이전</span>
+            </button>
+        </li>`;
+
+        for (let i = 0; i < pageData.totalPages; i++) {
+            const isActive = (i === pageData.number);
+            const activeClass = isActive ? 'bg-[#503396] text-white border-[#503396] font-bold' : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700';
+            
+            html += `<li>
+                <button onclick="window.fetchAndRenderCards('${category}', '${keyword}', ${i})"
+                   class="px-4 py-2 leading-tight border rounded-md ${activeClass}">${i + 1}</button>
+            </li>`;
+        }
+
+        html += `<li class="${pageData.last ? 'opacity-50 pointer-events-none' : ''}">
+            <button onclick="window.fetchAndRenderCards('${category}', '${keyword}', ${pageData.number + 1})"
+               class="block px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700">
+                <span class="font-bold">다음 &gt;</span>
+            </button>
+        </li>`;
+
+        html += `</ul></nav>`;
+        paginationContainer.innerHTML = html;
+    }
+
+
+    // =========================================================
+    // 2. 이벤트 리스너 등록 (정렬 드롭다운, 검색, 탭 변경)
+    // =========================================================
+    if (sortBtn && sortDropdown) {
+        sortBtn.addEventListener('click', function(e) {
+            e.stopPropagation(); 
+            sortDropdown.classList.toggle('hidden');
+            sortChevron.style.transform = sortDropdown.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        });
+
+        sortOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                sortText.textContent = this.textContent;
+                sortDropdown.classList.add('hidden');
+                sortChevron.style.transform = 'rotate(0deg)';
+
+                const currentCategory = sessionStorage.getItem('savedCategory') || '영화';
+                const currentKeyword = searchInput ? searchInput.value.trim() : '';
+                // 정렬을 바꿨으니 0페이지로 새로 통신!
+                window.fetchAndRenderCards(currentCategory, currentKeyword, 0);
+            });
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!sortBtn.contains(e.target) && !sortDropdown.contains(e.target)) {
+                sortDropdown.classList.add('hidden');
+                sortChevron.style.transform = 'rotate(0deg)';
+            }
         });
     }
 
-    // 2. 탭 버튼을 클릭했을 때
+    if (searchInput) {
+        // 🔥 브라우저 자동완성 오지랖 차단! (input -> keyup으로 변경됨)
+        searchInput.addEventListener('keyup', function(e) {
+            const currentKeyword = this.value.trim(); 
+            const currentCategory = sessionStorage.getItem('savedCategory') || '영화'; 
+            window.fetchAndRenderCards(currentCategory, currentKeyword, 0);
+        });
+    }
+
     tabButtons.forEach(button => {
         button.addEventListener('click', function() {
             const clickedCategory = this.textContent.trim();
-            sessionStorage.setItem('savedCategory', clickedCategory);
             
             tabButtons.forEach(btn => {
                 btn.className = "px-6 py-3 rounded-xl transition-all duration-200 bg-gray-50 text-gray-700 hover:bg-gray-100 res-tab-default";
@@ -140,15 +158,65 @@ document.addEventListener('DOMContentLoaded', function() {
             this.className = "px-6 py-3 rounded-xl transition-all duration-200 bg-[#503396] text-white shadow-lg shadow-purple-900/25 res-tab-active";
 
             const currentKeyword = searchInput ? searchInput.value.trim() : '';
-            fetchAndRenderCards(clickedCategory, currentKeyword);
+            window.fetchAndRenderCards(clickedCategory, currentKeyword, 0); 
         });
     });
 
+
     // =========================================================
-    // 3. 최초 페이지 로드 시 백엔드 호출
+    // 3. 페이지 최초 진입 시 상태 복원 및 초기 호출!
     // =========================================================
-    const currentKeyword = searchInput ? searchInput.value.trim() : '';
-    fetchAndRenderCards(savedCategory, currentKeyword);
+    const referrer = document.referrer; 
+    const navEntries = performance.getEntriesByType("navigation");
+    const navType = navEntries.length > 0 ? navEntries[0].type : "";
+
+    const isReload = navType === "reload";
+    const isBackForward = navType === "back_forward";
+    const isFromDetail = referrer.includes('/reservation/detail');
+    const keepCategory = sessionStorage.getItem('keepCategory');
+    
+    // 🔥 카드를 눌렀다는 증명서(티켓) 꺼내기!
+    const keepState = sessionStorage.getItem('keepState'); 
+
+    let initCategory = '영화';
+    let initKeyword = '';
+    let initPage = 0;
+    let initSort = '인기순';
+
+    // 🔥 조건문에 keepState === 'true' 추가됨!
+    if (isReload || isBackForward || isFromDetail || keepCategory || keepState === 'true') {
+        initCategory = sessionStorage.getItem('savedCategory') || '영화';
+        initKeyword = sessionStorage.getItem('savedKeyword') || '';
+        initPage = parseInt(sessionStorage.getItem('savedPage')) || 0;
+        initSort = sessionStorage.getItem('savedSort') || '인기순';
+        
+        // 화면의 검색어와 정렬 글자도 복구
+        if (searchInput) searchInput.value = initKeyword;
+        if (sortText) sortText.textContent = initSort;
+
+        // 화면 탭 활성화 복구
+        tabButtons.forEach(btn => {
+            if (btn.textContent.trim() === initCategory) {
+                btn.className = "px-6 py-3 rounded-xl transition-all duration-200 bg-[#503396] text-white shadow-lg shadow-purple-900/25 res-tab-active";
+            } else {
+                btn.className = "px-6 py-3 rounded-xl transition-all duration-200 bg-gray-50 text-gray-700 hover:bg-gray-100 res-tab-default";
+            }
+        });
+
+    } else {
+        // 완전 첫 진입이면 싹 지우기
+        sessionStorage.removeItem('savedCategory');
+        sessionStorage.removeItem('savedKeyword');
+        sessionStorage.removeItem('savedPage');
+        sessionStorage.removeItem('savedSort');
+        sessionStorage.removeItem('keepCategory');
+    }
+
+    // 🔥 티켓은 한 번 썼으니 찢어버리기!
+    sessionStorage.removeItem('keepState');
+
+    // 모든 준비가 끝났으면 최초 1회 통신 실행!
+    window.fetchAndRenderCards(initCategory, initKeyword, initPage);
 
 });
 
@@ -215,12 +283,10 @@ window.onload = function() {
 			            infowindow.open(map, marker);
 			        });
 
-			        // [선택 사항] 지도의 다른 부분을 클릭하면 인포윈도우를 닫고 싶다면 아래 코드를 추가하세요.
-			        /*
+					// 다른데 클릭하면 인포윈도우 닫음
 			        kakao.maps.event.addListener(map, 'click', function() {
 			            infowindow.close();
 			        });
-			        */
 
 			        map.setCenter(coords);
 			    } 

@@ -26,73 +26,53 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelEdit = document.getElementById('cancelEdit');
 	
 	// ===========동행매칭
-	
+
+		
 	// ===== URL 파라미터로 초기 탭 결정 =====
 	const params = new URLSearchParams(window.location.search);
-	// ===== 예매 취소 후 취소/환불 탭 열기 =====
-	const reservationTab = params.get("reservationTab");
-
-	if (reservationTab === "cancel") {
-
-	    navItems.forEach(nav => nav.classList.remove('active'));
-
-	    const cancelNav =
-	        document.querySelector('.nav-item[data-tab="cancellations"]');
-
-	    if (cancelNav) cancelNav.classList.add('active');
-
-	    tabContents.forEach(c => c.classList.remove('active'));
-
-	    const cancelSection =
-	        document.getElementById('cancellations');
-
-	    if (cancelSection) cancelSection.classList.add('active');
-
-	    alert("예매가 취소되었습니다.");
-	}
 	const mateSectionParam = params.get("mateSection");
 
 	if (mateSectionParam === "mate") {
 
-	  // 사이드바 active 변경
-	  navItems.forEach(nav => nav.classList.remove('active'));
-	  const mateNav = document.querySelector('.nav-item[data-tab="mate"]');
-	  if (mateNav) mateNav.classList.add('active');
+		  // 사이드바 active 변경
+		  navItems.forEach(nav => nav.classList.remove('active'));
+		  const mateNav = document.querySelector('.nav-item[data-tab="mate"]');
+		  if (mateNav) mateNav.classList.add('active');
 
-	  // 컨텐츠 active 변경
-	  tabContents.forEach(c => c.classList.remove('active'));
-	  const mateSectionEl = document.getElementById('mate');
-	  if (mateSectionEl) mateSectionEl.classList.add('active');
-	}
+		  // 컨텐츠 active 변경
+		  tabContents.forEach(c => c.classList.remove('active'));
+		  const mateSectionEl = document.getElementById('mate');
+		  if (mateSectionEl) mateSectionEl.classList.add('active');
+		}
 	
-	const mateTabParam = params.get("mateTab");
+		const mateTabParam = params.get("mateTab");
 
-	if (mateTabParam) {
+			if (mateTabParam) {
 
-	  const mateTabs = document.querySelectorAll('#mate .tabs .tab[data-mate-tab]');
-	  const matePanels = document.querySelectorAll('#mate .mate-panel[data-mate-tab]');
+			  const mateTabs = document.querySelectorAll('#mate .tabs .tab[data-mate-tab]');
+			  const matePanels = document.querySelectorAll('#mate .mate-panel[data-mate-tab]');
 
-	  mateTabs.forEach(t => t.classList.remove('active'));
-	  matePanels.forEach(p => p.classList.remove('active'));
+			  mateTabs.forEach(t => t.classList.remove('active'));
+			  matePanels.forEach(p => p.classList.remove('active'));
 
-	  const targetTab = document.querySelector(
-	    `#mate .tabs .tab[data-mate-tab="${mateTabParam}"]`
-	  );
-	  const targetPanel = document.querySelector(
-	    `#mate .mate-panel[data-mate-tab="${mateTabParam}"]`
-	  );
+			  const targetTab = document.querySelector(
+			    `#mate .tabs .tab[data-mate-tab="${mateTabParam}"]`
+			  );
+			  const targetPanel = document.querySelector(
+			    `#mate .mate-panel[data-mate-tab="${mateTabParam}"]`
+			  );
 
-	  if (targetTab) targetTab.classList.add('active');
-	  if (targetPanel) targetPanel.classList.add('active');
-	}
-	
+			  if (targetTab) targetTab.classList.add('active');
+			  if (targetPanel) targetPanel.classList.add('active');
+			}
+			
 	// 동행매칭 내부 탭(받은/내가신청) : 리로드 없이 토글 
 	const mateTabs = document.querySelectorAll('#mate .tabs .tab[data-mate-tab]');
 	const matePanels = document.querySelectorAll('#mate .mate-panel[data-mate-tab]');
 
 	mateTabs.forEach(tab => {
 	  tab.addEventListener('click', function(e) {
-	    e.preventDefault(); // href 이동(리로드) 막기
+	    e.preventDefault(); // ✅ href 이동(리로드) 막기
 
 	    const target = this.dataset.mateTab;
 
@@ -108,13 +88,33 @@ document.addEventListener('DOMContentLoaded', function() {
 	});
 	
 	// confirm
-	document.querySelectorAll('.js-confirm').forEach(btn => {
-	  btn.addEventListener('click', (e) => {
-	    const msg = btn.dataset.msg || '진행할까요?';
-	    if (!confirm(msg)) e.preventDefault();
-	  });
-	});
+		document.querySelectorAll('.js-confirm').forEach(btn => {
+		  btn.addEventListener('click', (e) => {
+		    const msg = btn.dataset.msg || '진행할까요?';
+		    if (!confirm(msg)) e.preventDefault();
+		  });
+		});
 	
+		// 더보기 (각 패널별)
+		document.querySelectorAll('#mate .mate-panel').forEach(panel => {
+		  const items = panel.querySelectorAll('.application-card');
+		  const btn = panel.querySelector('[data-more-btn]');
+		  if (!btn) return;
+
+		  let shown = 3; // 처음 4개만
+		  const render = () => {
+		    items.forEach((el, idx) => el.style.display = idx < shown ? '' : 'none');
+		    btn.style.display = shown >= items.length ? 'none' : '';
+		  };
+
+		  btn.addEventListener('click', () => {
+		    shown += 6; // 6개씩 더
+		    render();
+		  });
+
+		  render();
+		});
+		
 	// ===========동행매칭 끝=====
 
     // ========== 네비게이션 ==========
@@ -148,28 +148,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-	function filterReservations(filter) {
-
-	    const items = document.querySelectorAll(".reservation-item");
-
-	    items.forEach(item => {
-
-	        if (filter === "all") {
-	            item.style.display = "flex";
-	            return;
-	        }
-
-	        const category = item.dataset.category;
-
-	        if (category === filter) {
-	            item.style.display = "flex";
-	        } else {
-	            item.style.display = "none";
-	        }
-
-	    });
-
-	}
+    function filterReservations(filter) {
+        // 실제로는 서버에서 필터링된 데이터를 가져옴
+        console.log('필터:', filter);
+    }
 
     // ========== 쿠폰/포인트 탭 ==========
     benefitTabs.forEach(tab => {
@@ -525,7 +507,7 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
     // 초기 렌더링
-    loadUserInfo();
+    //loadUserInfo();
     renderReservations(demoReservations.slice(0, 2), 'recentReservations');
     renderReservations(demoReservations, 'allReservations');
     renderCancellations(demoCancellations);
@@ -572,7 +554,7 @@ document.addEventListener('DOMContentLoaded', function() {
     cancelEdit.addEventListener('click', function() {
         if (confirm('수정을 취소하시겠습니까?')) {
             profileForm.reset();
-            loadUserInfo();
+            //loadUserInfo();
         }
     });
 
@@ -640,14 +622,13 @@ function viewTicket(id) {
     alert('티켓 상세 페이지로 이동합니다.');
 }
 
-/*// 예매 취소
+// 예매 취소
 function cancelReservation(id) {
     if (confirm('예매를 취소하시겠습니까?')) {
         console.log('예매 취소:', id);
         alert('예매가 취소되었습니다.');
-		}
-    }*/
-
+    }
+}
 
 // 리뷰 작성
 function writeReview(id) {

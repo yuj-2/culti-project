@@ -39,6 +39,7 @@ async function handleTossPayment() {
             })
         });
 
+
         if (!response.ok) throw new Error("서버 예매 정보 생성 실패");
 
         const data = await response.json(); 
@@ -59,4 +60,38 @@ async function handleTossPayment() {
         console.error("결제 프로세스 에러:", error);
         alert("오류 발생: " + error.message);
     }
+
+/**
+ * 결제 검증 및 실제 예매 폼 전송
+ */
+function verifyAndSubmit(rsp) {
+    // [보안] fetch 요청 시 시큐리티 CSRF 토큰 처리가 필요할 수 있습니다.
+    fetch("/payment/verify", {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            imp_uid: rsp.imp_uid,
+            merchant_uid: rsp.merchant_uid,
+            total_price: rsp.paid_amount
+        })
+    }).then(res => {
+        if(res.ok) {
+            const bookingForm = document.getElementById('bookingForm');
+            if (bookingForm) {
+                // 검증된 금액을 폼에 세팅 후 전송
+                document.getElementById('input-total-price').value = rsp.paid_amount;
+                bookingForm.submit();
+            } else {
+                console.error("전송할 예약 폼(bookingForm)을 찾을 수 없습니다.");
+            }
+        } else {
+            alert("서버 검증에 실패했습니다. 결제가 취소될 수 있습니다.");
+        }
+    }).catch(err => {
+        console.error("통신 에러:", err);
+        alert("결제 처리 중 통신 오류가 발생했습니다.");
+    });
+}
 }

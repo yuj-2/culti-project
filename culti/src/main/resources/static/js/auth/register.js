@@ -26,13 +26,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const verificationSuccess = document.getElementById('verificationSuccess');
     const termsError = document.getElementById('termsError');
 
-    // 약관 동의 요소들
-    const agreeAll = document.getElementById('agreeAll');
-    const requiredTerms = document.querySelectorAll('.required-term');
-    const agreeTerms = document.getElementById('agreeTerms');
-    const agreePrivacy = document.getElementById('agreePrivacy');
-    const agreeMarketing = document.getElementById('agreeMarketing');
-    const agreeAge = document.getElementById('agreeAge');
+	// ========== 약관 동의 요소들 수정 ==========
+	const agreeAll = document.getElementById('agreeAll');
+	// 동적으로 생성된 모든 약관 체크박스 (name으로 타겟팅)
+	const termCheckboxes = document.querySelectorAll('input[name="agreedTerms"]');
+	// 필수 약관들 (class로 타겟팅)
+	const requiredTerms = document.querySelectorAll('.required-term');
+	const agreeAge = document.getElementById('agreeAge');
 
     // 비밀번호 강도 표시
     const passwordStrength = document.getElementById('passwordStrength');
@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalContent = document.getElementById('modalContent');
     const closeModal = document.getElementById('closeModal');
     const modalConfirm = document.getElementById('modalConfirm');
-    const termsLinks = document.querySelectorAll('.terms-link');
 
     // 상태 변수
     let verificationTimer = null;
@@ -280,45 +279,20 @@ document.addEventListener('DOMContentLoaded', function() {
 		    'Content-Type': 'application/json', // 서버의 @RequestBody가 인식할 수 있게 설정 
 			[header]: token 
 			},
-		  body: JSON.stringify(emailData) // 데이터를 JSON 문자열로 변환
+			body: JSON.stringify({ 
+			        email: emailData // key값을 'email'로 지정
+			    })
 		})
 		.then(response => response.text()) // 서버 응답을 텍스트로 받기
 		.then(data => {
 		  console.log("서버 응답:", data);
-		  alert("인증번호가 발송되었습니다!");
 		})
 		.catch(error => console.error('에러 발생:', error));
 		
 		
-        // 실제 서버 통신 코드
-        /*
-        fetch('/api/send-verification', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email: email })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                verificationCode = data.code; // 개발용, 실제로는 서버에서만 보관
-                showVerificationInput();
-            } else {
-                showError(emailInput, emailError, data.message || '인증번호 발송에 실패했습니다.');
-                sendVerifyBtn.disabled = false;
-                sendVerifyBtn.textContent = '인증번호 발송';
-            }
-        })
-        .catch(error => {
-            console.error('인증번호 발송 오류:', error);
-            showError(emailInput, emailError, '서버 오류가 발생했습니다.');
-            sendVerifyBtn.disabled = false;
-            sendVerifyBtn.textContent = '인증번호 발송';
-        });
-        */
 
         // 데모용 코드
+		
         setTimeout(function() {
             verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
             console.log('인증번호 (데모):', verificationCode);
@@ -358,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (timeLeft <= 0) {
                 clearVerificationTimer();
-                showError(null, verificationError, '인증 시간이 만료���었습니다. 다시 시도해주세요.');
+                showError(null, verificationError, '인증 시간이 만료되었습니다. 다시 시도해주세요.');
             }
         }, 1000);
     }
@@ -449,23 +423,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // 인증번호 확인
     function checkVerificationCode() {
         const enteredCode = Array.from(codeInputs).map(input => input.value).join('');
-        
+		const token = document.querySelector("meta[name='_csrf']").content;
+		const header = document.querySelector("meta[name='_csrf_header']").content;
         if (enteredCode.length === 6) {
             // 서버로 인증번호 확인 요청
-            /*
-            fetch('/api/verify-code', {
+            
+            fetch('/api/auth/verify', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+					[header]: token
                 },
                 body: JSON.stringify({ 
                     email: emailInput.value,
-                    code: enteredCode 
+                    inputAuthCode: enteredCode 
                 })
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
+                if (data==true) {
                     handleVerificationSuccess();
                 } else {
                     handleVerificationError();
@@ -475,9 +451,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('인증 확인 오류:', error);
                 handleVerificationError();
             });
-            */
+            
             
             // 데모용 코드
+			/*
             setTimeout(function() {
                 if (enteredCode === verificationCode) {
                     handleVerificationSuccess();
@@ -485,6 +462,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     handleVerificationError();
                 }
             }, 500);
+			*/
         }
     }
 
@@ -516,189 +494,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ========== 약관 모달 ==========
 
-    // 약관 모달 열기
-    termsLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const modalType = link.getAttribute('data-modal');
-            openTermsModal(modalType);
-        });
-    });
+	// 약관 모달 열기 이벤트 바인딩
+	const termsLinks = document.querySelectorAll('.terms-link');
+	termsLinks.forEach(link => {
+	    link.addEventListener('click', function(e) {
+	        e.preventDefault();
+	        const termId = this.getAttribute('data-term-id');
+	        const title = this.parentElement.querySelector('span').textContent;
+	        // 숨겨둔 hidden div에서 본문 가져오기
+	        const content = document.getElementById('term-content-' + termId).textContent;
+	        
+	        openTermsModal(title, content);
+	    });
+	});
 
-    // 약관 모달 열기 함수
-    function openTermsModal(type) {
-        let title = '';
-        let content = '';
-
-        // 실제 프로젝트에서는 서버에서 약관 내용을 가져옵니다
-        /*
-        fetch(`/api/terms/${type}`)
-            .then(response => response.json())
-            .then(data => {
-                modalTitle.textContent = data.title;
-                modalContent.textContent = data.content;
-                termsModal.classList.add('active');
-            })
-            .catch(error => {
-                console.error('약관 로드 오류:', error);
-                alert('약관을 불러오는데 실패했습니다.');
-            });
-        */
-
-        // 데모용 약관 내용 (DB에서 불러온다고 가정)
-        switch(type) {
-            case 'terms':
-                title = '이용약관';
-                content = `제1조 (목적)
-이 약관은 CULTI(이하 "회사")가 제공하는 모든 서비스(이하 "서비스")의 이용조건 및 절차, 회사와 회원 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
-
-제2조 (정의)
-1. "서비스"란 회사가 제공하는 영화, 전시, 공연 예매 및 관련된 제반 서비스를 의미합니다.
-2. "회원"이란 회사의 서비스에 접속하여 이 약관에 따라 회사와 이용계약을 체결하고 회사가 제공하는 서비스를 이용하는 고객을 말합니다.
-3. "아이디(ID)"란 회원의 식별과 서비스 이용을 위하여 회원이 정하고 회사가 승인하는 문자와 숫자의 조합을 의미합니다.
-4. "비밀번호"란 회원이 부여받은 아이디와 일치되는 회원임을 확인하고 비밀보호를 위해 회원 자신이 정한 문자 또는 숫자의 조합을 의미합니다.
-
-제3조 (약관의 게시와 개정)
-1. 회사는 이 약관의 내용을 회원이 쉽게 알 수 있도록 서비스 초기 화면에 게시합니다.
-2. 회사는 관련 법령을 위배하지 않는 범위에서 이 약관을 개정할 수 있습니다.
-3. 회사가 약관을 개정할 경우에는 적용일자 및 개정사유를 명시하여 현행약관과 함께 제1항의 방식에 따라 그 개정약관의 적용일자 7일 전부터 적용일자 전일까지 공지합니다.
-
-제4조 (회원가입)
-1. 회원가입은 신청자가 온라인으로 회사에서 제공하는 소정의 가입신청 양식에서 요구하는 사항을 기록하여 가입을 완료하는 것으로 성립됩니다.
-2. 회사는 다음 각 호에 해당하는 경우에 대해서는 그 신청에 대한 승낙을 제한할 수 있고, 그 사유가 해소될 때까지 승낙을 유보할 수 있습니다.
-   가. 실명이 아니거나 타인의 명의를 이용하여 신청한 경우
-   나. 허위의 정보를 기재하거나, 회사가 요구하는 내용을 기재하지 않은 경우
-   다. 만 14세 미만이 신청한 경우
-
-제5조 (서비스의 제공 및 변경)
-1. 회사는 다음과 같은 서비스를 제공합니다.
-   가. 영화, 전시, 공연 예매 서비스
-   나. 문화 콘텐츠 정보 제공 서비스
-   다. 기타 회사가 추가 개발하거나 다른 회사와의 제휴계약 등을 통해 회원에게 제공하는 일체의 서비스
-2. 회사는 서비스의 내용을 변경할 수 있으며, 변경된 서비스 내용을 사전에 공지합니다.
-
-제6조 (서비스의 중단)
-1. 회사는 컴퓨터 등 정보통신설비의 보수점검, 교체 및 고장, 통신의 두절 등의 사유가 발생한 경우에는 서비스의 제공을 일시적으로 중단할 수 있습니다.
-2. 회사는 제1항의 ��유로 서비스의 제공이 일시적으로 중단됨으로 인하여 이용자 또는 제3자가 입은 손해에 대하여 배상합니다. 단, 회사가 고의 또는 과실이 없음을 입증하는 경우에는 그러하지 아니합니다.
-
-제7조 (회원탈퇴 및 자격 상실)
-1. 회원은 회사에 언제든지 탈퇴를 요청할 수 있으며 회사는 즉시 회원탈퇴를 처리합니다.
-2. 회원이 다음 각 호의 사유에 해당하는 경우, 회사는 회원자격을 제한 및 정지시킬 수 있습니다.
-   가. 가입 신청 시에 허위 내용을 등록한 경우
-   나. 다른 사람의 서비스 이용을 방해하거나 그 정보를 도용하는 등 전자상거래 질서를 위협하는 경우
-   다. 서비스를 이용하여 법령 또는 이 약관이 금지하거나 공서양속에 반하는 행위를 하는 경우
-
-부칙
-이 약관은 2026년 2월 21일부터 적용됩니다.`;
-                break;
-            case 'privacy':
-                title = '개인정보 수집 및 이용 동의';
-                content = `CULTI(이하 "회사")는 개인정보 보호법에 따라 이용자의 개인정보 보호 및 권익을 보호하고 개인정보와 관련한 이용자의 고충을 원활하게 처리할 수 있도록 다음과 같은 처리방침을 두고 있습니다.
-
-1. 개인정보의 수집 및 이용 목적
-회사는 수집한 개인정보를 다음의 목적을 위해 활용합니다.
-가. 서비스 제공에 관한 계약 이행 및 서비스 제공에 따른 요금정산
-   - 콘텐츠 제공, 예매 서비스 제공, 구매 및 요금 결제, 물품배송 또는 청구서 등 발송
-나. 회원 관리
-   - 회원제 서비스 이용에 따른 본인확인, 개인식별, 불량회원의 부정 이용 방지와 비인가 사용 방지, 가입 의사 확인, 연령확인, 불만처리 등 민원처리, 고지사항 전달
-다. 마케팅 및 광고에 활용
-   - 이벤트 등 광고성 정보 전달, 접속 빈도 파악, 회원의 서비스 이용에 대한 통계
-
-2. 수집하는 개인정보의 항목
-회사는 회원가입, 서비스 이용 등을 위해 아래와 같은 개인정보를 수집하고 있습니다.
-가. 필수항목: 이름, 이메일 주소, 비밀번호, 전화번호
-나. 선택항목: 생년월일, 성별
-다. 자동 수집 항목: IP주소, 쿠키, 서비스 이용 기록, 방문 기록
-
-3. 개인정보의 보유 및 이용기간
-회사는 개인정보 수집 및 이용목적이 달성된 후에는 예외 없이 해당 정보를 지체 없이 파기합니다.
-가. 회원가입정보: 회원 탈퇴 시까지
-나. 예매 정보: 예매 완료 후 5년간 보관
-다. 부정이용 기록: 부정 이용 방지를 위해 수집일로부터 1년간 보관
-
-4. 개인정보의 파기절차 및 방법
-회사는 원칙적으로 개인정보 수집 및 이용목적이 달성된 후에는 해당 정보를 지체없이 파기합니다.
-가. 파기절차
-   - 회원님이 회원가입 등을 위해 입력하신 정보는 목적이 달성된 후 별도의 DB로 옮겨져(종이의 경우 별도의 서류함) 내부 방침 및 기타 관련 법령에 의한 정보보호 사유에 따라 일정 기간 저장된 후 파기됩니다.
-나. 파기방법
-   - 종이에 출력된 개인정보는 분쇄기로 분쇄하거나 소각을 통하여 파기합니다.
-   - 전자적 파일 형태로 저장된 개인정보는 기록을 재생할 수 없는 기술적 방법을 사용하여 삭제합니다.
-
-5. 개인정보 제공
-회사는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다. 다만, 아래의 경우에는 예외로 합니다.
-가. 이용자들이 사전에 동의한 경우
-나. 법령의 규정에 의거하거나, 수사 목적으로 법령에 정해진 절차와 방법에 따라 수사기관의 요구가 있는 경우
-
-6. 개인정보의 안전성 확보조치
-회사는 개인정보의 안전성 확보를 위해 다음과 같은 조치를 취하고 있습니다.
-가. 관리적 조치: 내부관리계획 수립 및 시행, 정기적 직원 교육
-나. 기술적 조치: 개인정보처리시스템 등의 접근권한 관리, 접근통제시스템 설치, 고유식별정보 등의 암호화, 보안프로그램 설치
-다. 물리적 조치: 전산실, 자료보관실 등의 접근통제
-
-7. 개인정보 보호책임자
-회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 정보주체의 불만처리 및 피해구제 등을 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다.
-- 개인정보 보호책임자: 홍길동
-- 이메일: privacy@culti.com
-- 전화번호: 02-1234-5678
-
-시행일자: 2026년 2월 21일`;
-                break;
-            case 'marketing':
-                title = '마케팅 정보 수신 동의';
-                content = `CULTI(이하 "회사")는 회원님께 다양한 혜택과 이벤트 정보를 제공하기 위하여 아래와 같이 마케팅 활용에 대한 동의를 받고 있습니다.
-
-1. 마케팅 활용 목적
-회사는 수집한 개인정보를 다음과 같은 목적으로 활용합니다.
-가. 신규 서비스 및 이벤트 정보 안내
-나. 맞춤형 서비스 및 상품 추천
-다. 할인 쿠폰 및 프로모션 정보 제공
-라. 참여 이벤트 및 경품 행사 안내
-
-2. 수신 정보의 종류
-가. 이메일: 이벤트, 프로모션, 신규 서비스 안내
-나. SMS/MMS: 예매 정보, 할인 쿠폰, 긴급 공지사항
-다. 앱 푸시 알림: 실시간 이벤트, 관심 콘텐츠 추천
-
-3. 정보 발송 주체
-가. 발송 주체: CULTI
-나. 발송 빈도: 주 1~2회 (이벤트 및 프로모션에 따라 변동 가능)
-
-4. 개인정보의 보유 및 이용기간
-마케팅 활용 동의일로부터 회원 탈퇴 시 또는 동의 철회 시까지
-
-5. 동의 거부권 및 불이익
-귀하는 위와 같은 마케팅 정보 수신에 대한 동의를 거부할 수 있습니다.
-다만, 동의를 거부하시는 경우 각종 이벤트 및 프로모션 안내를 받으실 수 없습니다.
-동의하지 않으셔도 CULTI의 기본 서비스 이용에는 제한이 없습니다.
-
-6. 수신 동의 변경
-회원님은 언제든지 마이페이지에서 마케팅 정보 수신 동의를 변경하실 수 있습니다.
-가. 웹사이트: 마이페이지 > 설정 > 알림설정
-나. 이메일: 수신 거부 링크 클릭
-다. 고객센터: 1234-5678 (평일 09:00~18:00)
-
-7. 개인정보 보호책임자
-- 이름: 홍길동
-- 이메일: privacy@culti.com
-- 전화번호: 02-1234-5678
-
-본 동의는 선택사항이며, 동의하지 않으셔도 서비스 이용이 가능합니다.
-
-시행일자: 2026년 2월 21일`;
-                break;
-            default:
-                title = '약관';
-                content = '약관 내용을 불러오는 중 오류가 발생했습니다.';
-        }
-
-        // 모달에 내용 표시
-        modalTitle.textContent = title;
-        modalContent.textContent = content;
-        termsModal.classList.add('active');
-        
-        // body 스크롤 방지
-        document.body.style.overflow = 'hidden';
-    }
+	// 모달 열기 함수 (내용을 직접 받도록 수정)
+	function openTermsModal(title, content) {
+	    modalTitle.textContent = title;
+	    modalContent.textContent = content;
+	    termsModal.classList.add('active');
+	    document.body.style.overflow = 'hidden';
+	}
 
     // 약관 모달 닫기
     function closeTermsModal() {
@@ -725,25 +541,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ========== 약관 동의 ==========
 
-    // 전체 동의 체크박스
-    agreeAll.addEventListener('change', function() {
-        const isChecked = agreeAll.checked;
-        agreeTerms.checked = isChecked;
-        agreePrivacy.checked = isChecked;
-        agreeMarketing.checked = isChecked;
-        agreeAge.checked = isChecked;
-        hideError(null, termsError);
-    });
+	// 전체 동의 체크박스
+	agreeAll.addEventListener('change', function() {
+	    const isChecked = agreeAll.checked;
+	    // 모든 약관 체크박스 + 만 14세 이상 체크박스 조절
+		
+		// 이벤트 발생 시점에 다시 한 번 체크박스들을 찾습니다 (동적 생성 대응)
+		const currentTerms = document.querySelectorAll('input[name="agreedTermIds"]');
+	    currentTerms.forEach(cb => cb.checked = isChecked);
+	    if(agreeAge) agreeAge.checked = isChecked;
+	    hideError(null, termsError);
+	});
 
-    // 개별 체크박스
-    [agreeTerms, agreePrivacy, agreeMarketing, agreeAge].forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const allChecked = agreeTerms.checked && agreePrivacy.checked && 
-                             agreeMarketing.checked && agreeAge.checked;
-            agreeAll.checked = allChecked;
-            hideError(null, termsError);
-        });
-    });
+	const termsGroup = document.querySelector('.terms-group');
+
+	if (termsGroup) {
+	    termsGroup.addEventListener('change', function(e) {
+	        // 클릭된 애가 약관 체크박스이거나 '만 14세' 체크박스인 경우만 실행
+	        if (e.target.name === 'agreedTermIds' || e.target.id === 'agreeAge') {
+	            
+	            // 현재 화면에 존재하는 모든 체크박스를 실시간으로 수집
+	            const currentTerms = document.querySelectorAll('input[name="agreedTermIds"]');
+	            const termList = Array.from(currentTerms);
+	            if(agreeAge) termList.push(agreeAge);
+
+	            // 모든 체크박스가 체크되어 있는지 검사 (하나라도 풀리면 false)
+	            const isAllChecked = termList.every(cb => cb.checked);
+	            
+	            // 전체 동의 체크박스 상태 업데이트
+	            agreeAll.checked = isAllChecked;
+	            hideError(null, termsError);
+	        }
+	    });
+	}
 
     // ========== 폼 제출 ==========
 /*

@@ -1,5 +1,7 @@
 package com.culti.auth.controller;
 
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +22,9 @@ public class EmailAuthController {
 	
 	
 	@PostMapping("/send")
-    public String sendEmail(@RequestBody String email) {
+    public String sendEmail(@RequestBody Map<String, String> payload) {
+		String email = payload.get("email");
+		
         // 1. 이메일 발송 로직
 		String authCode=this.emailService.sendSimpleEmail(email);
 		
@@ -31,11 +35,19 @@ public class EmailAuthController {
         return "인증번호가 발송되었습니다.";
     }
 
-	/*
+	
     @PostMapping("/verify")
-    public ResponseEntity<Boolean> verifyCode(@RequestBody VerifyRequest request) {
-        // 1. 저장된 번호와 비교
-        // 2. 일치 여부 반환
-        return ResponseEntity.ok(true);
-    }*/
+    public boolean verifyCode(@RequestBody Map<String, String> payload) {
+    	String email = payload.get("email");
+        String inputAuthCode = payload.get("inputAuthCode");
+        
+    	String authCode=this.emailService.returnAuthCode(email);
+    	
+    	if (authCode.equals(inputAuthCode)) {
+			return true;
+		}
+    	
+        
+        return false;
+    }
 }

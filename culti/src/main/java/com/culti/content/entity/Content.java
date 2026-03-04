@@ -62,5 +62,9 @@ public class Content {
 	
 	@Column(nullable = false)
     private int bookingCount = 0;
+    
+    @JsonIgnore
+    @OneToMany(mappedBy = "content", cascade = CascadeType.ALL)
+    private java.util.List<ContentPrice> contentPrices;
 	
 }
