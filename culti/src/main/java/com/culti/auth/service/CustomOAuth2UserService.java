@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -45,7 +46,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String providerId;
         
         Long linkUserId = (Long) session.getAttribute("LINK_USER_ID");
-        
+        String mode = (String) session.getAttribute("OAUTH2_MODE");
         if ("kakao".equals(provider)) {
             providerId = attributes.get("id").toString();
 
@@ -66,19 +67,27 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User user=null;
         if (socialAuthOpt.isEmpty()) {
            
-        	Optional<User> result=this.userRepository.findByUserId(linkUserId);
+        	if("link".equals(mode)) {
+        		Optional<User> result=this.userRepository.findByUserId(linkUserId);
+            	
+            	if (result.isPresent()) {
+    				user=result.get();
+    			}
+        	}else {
+        		throw new UsernameNotFoundException("마이페이지에 연동이 안된 계정입니다.");
+        	}
         	
-        	if (result.isPresent()) {
-				user=result.get();
-			}
+        	
         	
         }else {
         	 user = socialAuthOpt.get().getUser(); // 이미 fetch join → 안전
 
-             // ✅ Entity → DTO 변환
-             // 이미 있는코드지만... 임시방편으로
+             
              
         }
+        
+     // ✅ Entity → DTO 변환
+        // 이미 있는코드지만... 임시방편으로
         UserDTO dto = UserDTO.builder()
  				.userId(user.getUserId())
  				.password(user.getPassword())
