@@ -258,21 +258,33 @@
 
 /* 버튼 그룹: 폼들이 줄 맞춰지고 간격 일정하게 */
 .mate-manage .action-buttons {
-  display: inline-flex;
+  display: flex;
   gap: 8px;
-  align-items: center;
+  align-items: center;      /* 수평 기준 맞춤 */
+  justify-content: flex-end; /* 오른쪽 정렬 */
 }
 
 /* 폼이 기본 block이라 줄바꿈 생기는 거 방지 */
 .mate-manage .action-buttons form {
-  display: inline-flex;
   margin: 0;
+  display: flex;
 }
 
 /* 버튼 아이콘 정리 */
 .mate-manage .button i {
   font-size: 14px;
   margin-right: 6px;
+}
+
+/* a 버튼도 버튼처럼 */
+.mate-manage .action-buttons .button{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;       /* 높이 통일 */
+  padding: 0 12px;    /* 좌우만 */
+  line-height: 1;
+  white-space: nowrap;
 }
 
 /* 거절/취소 버튼은 '강한 빨강 덩어리' 대신 ghost 스타일로 */
@@ -458,4 +470,42 @@
 /* 버튼 숨김 처리 (JS에서 display none 쓰는 경우 대비) */
 .mate-manage .btn-more[style*="display: none"] {
   margin-top: 0;
+}
+
+/* ✅ 버튼 줄 정렬 강제 */
+.mate-manage .action-buttons{
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px;
+}
+
+/* form이 줄바꿈 안 하게 */
+.mate-manage .action-buttons form{
+  display: flex;
+  margin: 0;
+}
+
+/* a / button 모두 같은 크기로 통일 */
+.mate-manage a.button,
+.mate-manage button.button{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 40px;          /* ✅ 높이 고정 */
+  padding: 0 14px;       /* ✅ 좌우만 */
+  line-height: 1;        /* ✅ 글자 높이 영향 제거 */
+  margin: 0 !important;  /* ✅ 마진 제거 */
+  box-sizing: border-box;
+}
+
+/* success에 넣어둔 margin-bottom 제거 */
+.mate-manage .button-success{
+  margin-bottom: 0 !important;
+}
+
+/* ghost(테두리)도 같은 높이 유지 */
+.mate-manage .button-ghost{
+  border-width: 1px;
 }
