@@ -30,6 +30,19 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 	// ===== URL 파라미터로 초기 탭 결정 =====
 	const params = new URLSearchParams(window.location.search);
+	// ===== 예매 취소 후 취소/환불 탭 열기 =====
+		const reservationTab = params.get("reservationTab");
+		if (reservationTab === "cancel") {
+		    navItems.forEach(nav => nav.classList.remove('active'));
+		    const cancelNav =
+		        document.querySelector('.nav-item[data-tab="cancellations"]');
+		    if (cancelNav) cancelNav.classList.add('active');
+		    tabContents.forEach(c => c.classList.remove('active'));
+		    const cancelSection =
+		        document.getElementById('cancellations');
+		    if (cancelSection) cancelSection.classList.add('active');
+		    alert("예매가 취소되었습니다.");
+		}
 	const mateSectionParam = params.get("mateSection");
 
 	if (mateSectionParam === "mate") {
@@ -148,10 +161,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    function filterReservations(filter) {
-        // 실제로는 서버에서 필터링된 데이터를 가져옴
-        console.log('필터:', filter);
-    }
+	function filterReservations(filter) {
+		    const items = document.querySelectorAll(".reservation-item");
+		    items.forEach(item => {
+		        if (filter === "all") {
+		            item.style.display = "flex";
+		            return;
+		        }
+		        const category = item.dataset.category;
+		        if (category === filter) {
+		            item.style.display = "flex";
+		        } else {
+		            item.style.display = "none";
+		        }
+		    });
+		}
 
     // ========== 쿠폰/포인트 탭 ==========
     benefitTabs.forEach(tab => {
@@ -623,13 +647,13 @@ function viewTicket(id) {
 }
 
 // 예매 취소
-function cancelReservation(id) {
+/*function cancelReservation(id) {
     if (confirm('예매를 취소하시겠습니까?')) {
         console.log('예매 취소:', id);
         alert('예매가 취소되었습니다.');
     }
 }
-
+*/
 // 리뷰 작성
 function writeReview(id) {
     console.log('리뷰 작성:', id);
