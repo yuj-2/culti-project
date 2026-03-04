@@ -53,6 +53,11 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             <a th:href="@{/mate/mate}" class="px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 header-nav-link">동행 찾기</a>
             <a th:href="@{/support}" class="px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 header-nav-link">고객센터</a>
 <!--             <button class="px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 header-nav-link">고객센터</button> -->
+<a sec:authorize="hasRole('ADMIN')" 
+   th:href="@{/admin/main}"
+   class="px-4 py-2 text-yellow-300 hover:text-white hover:bg-red-600/30 rounded-lg transition-all duration-200 header-nav-link">
+   관리자페이지
+</a>
           </div>
 
           <div class="flex items-center space-x-4">

@@ -1,6 +1,7 @@
 package com.culti.auth.service;
 
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -8,7 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.culti.auth.dto.UserDTO;
+import com.culti.auth.entity.LoginLog;
 import com.culti.auth.entity.User;
+import com.culti.auth.repository.LoginLogRepository;
 import com.culti.auth.repository.UserRepository;
 import com.culti.booking.controller.BookingController;
 
@@ -22,13 +25,13 @@ public class UserServiceImpl implements UserService{
 	
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
-
+	private final LoginLogRepository loginLogRepository;
 	
 	@Override
 	public Long register(UserDTO userDTO) {
 		log.info("😝 UserServiceImpl.register()..." + userDTO);
 		userDTO.setRole("USER");
-		userDTO.setStatus("정상");
+		userDTO.setStatus("ACTIVE");
 		// BoardDTO -> Board 엔티티로 변환
 		User entity = this.dtoToEntity(userDTO);
 		
@@ -128,6 +131,19 @@ public class UserServiceImpl implements UserService{
         
         return user;
 		
+	}
+
+	@Override
+	public void saveLoginLog(User user,String ipAddress) {
+		// TODO Auto-generated method stub
+		LoginLog log=LoginLog.builder()
+				.user(user)
+				.ipAddress(ipAddress)
+				.loginTime(LocalDateTime.now())
+				.loginResult("SUCCESS")
+				.build();
+		
+		this.loginLogRepository.save(log);
 	}
 
 }
