@@ -1,52 +1,99 @@
 package com.culti.auth.service;
 
-import lombok.extern.slf4j.Slf4j; // 로그 사용을 위한 어노테이션 (Lombok 사용 시)
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.culti.auth.dto.UserDTO;
+import com.culti.auth.entity.SocialAuth;
+import com.culti.auth.entity.User;
+import com.culti.auth.repository.SocialAuthRepository;
+import com.culti.auth.repository.UserRepository;
+import com.culti.auth.security.PrincipalDetails;
+
+import jakarta.servlet.http.HttpSession;
 
 import java.util.Map;
+import java.util.Optional;
 
-@Slf4j // 로그 기능을 활성화합니다.
+@Slf4j
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
+    private final SocialAuthRepository socialAuthRepository;
+    private final UserRepository userRepository;
+    private final HttpSession session;
+
     @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        // 부모 클래스의 loadUser를 호출하여 사용자 정보를 가져옵니다.
+    public OAuth2User loadUser(OAuth2UserRequest userRequest)
+            throws OAuth2AuthenticationException {
+
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        // 1. 서비스 구분 (예: kakao)
-        String registrationId = userRequest.getClientRegistration().getRegistrationId();
-
-        // 2. 전체 데이터 가져오기 (Map 형태)
+        String provider = userRequest.getClientRegistration().getRegistrationId();
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
-        // 3. 카카오 데이터 파싱
-        // 카카오는 id, kakao_account(email 등), profile(nickname 등) 구조로 데이터를 줍니다.
-        String providerId = attributes.get("id").toString();
-        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
-        Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
-        String nickname = (String) profile.get("nickname");
-
-        // --- 콘솔 출력 구간 ---
-        System.out.println("========================================");
-        System.out.println("[OAuth2 로그인 발생]");
-        System.out.println("서비스 이름 (Registration ID): " + registrationId);
-        System.out.println("카카오 고유 ID (Provider ID): " + providerId);
-        System.out.println("사용자 닉네임: " + nickname);
+        String providerId;
         
-        // 이메일은 카카오 설정에서 '필수'로 되어 있어야 가져올 수 있습니다.
-        if (kakaoAccount.get("email") != null) {
-            System.out.println("사용자 이메일: " + kakaoAccount.get("email"));
+        Long linkUserId = (Long) session.getAttribute("LINK_USER_ID");
+        
+        if ("kakao".equals(provider)) {
+            providerId = attributes.get("id").toString();
+
+        } else if ("google".equals(provider)) {
+            providerId = attributes.get("sub").toString();
+
+        } else if ("naver".equals(provider)) {
+            Map<String, Object> response = (Map<String, Object>) attributes.get("response");
+            providerId = response.get("id").toString();
+            attributes = response;
+
+        } else {
+            throw new OAuth2AuthenticationException("Unsupported provider");
         }
 
-        // 전체 데이터를 보고 싶을 때 (디버깅용)
-        System.out.println("전체 Attributes: " + attributes);
-        System.out.println("========================================");
+        Optional<SocialAuth> socialAuthOpt =
+            socialAuthRepository.findWithUserByProviderAndProviderId(provider, providerId);
+        User user=null;
+        if (socialAuthOpt.isEmpty()) {
+           
+        	Optional<User> result=this.userRepository.findByUserId(linkUserId);
+        	
+        	if (result.isPresent()) {
+				user=result.get();
+			}
+        	
+        }else {
+        	 user = socialAuthOpt.get().getUser(); // 이미 fetch join → 안전
 
-        return oAuth2User;
+             // ✅ Entity → DTO 변환
+             // 이미 있는코드지만... 임시방편으로
+             
+        }
+        UserDTO dto = UserDTO.builder()
+ 				.userId(user.getUserId())
+ 				.password(user.getPassword())
+ 				.phone(user.getPhone())
+ 				.name(user.getName())
+ 				.status(user.getStatus())
+ 				.role(user.getRole())
+ 				.birthDate(user.getBirthDate())
+ 				.gender(user.getGender())
+ 				.createdAt(user.getCreatedAt())
+ 				.nickname(user.getNickname())
+ 				.email(user.getEmail())
+ 				.build();
+
+         return new PrincipalDetails(dto, attributes);
+       
     }
 }

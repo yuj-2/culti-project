@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.culti.auth.entity.User;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,4 +32,22 @@ public class UserDTO {
 	
 	private Character gender;
 	private String nickname;
+	
+	public static UserDTO fromEntity(User user) {
+        if (user == null) return null;
+
+        return UserDTO.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .password(user.getPassword()) // 시큐리티 인증용
+                .phone(user.getPhone())
+                .name(user.getName())
+                .status(user.getStatus())
+                .createdAt(user.getCreatedAt())
+                .role(user.getRole())
+                .birthDate(user.getBirthDate())
+                .gender(user.getGender())
+                .nickname(user.getNickname())
+                .build();
+    }
 }

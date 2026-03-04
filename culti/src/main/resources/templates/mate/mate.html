@@ -481,6 +481,46 @@ function closeApplyModal() {
 function closeDeleteConfirmModal() {
   document.getElementById('deleteConfirmModal')?.classList.remove('show');
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+	  // 카드 클릭 바인딩
+	  bindPostCardClicks();
+
+	  // 새글쓰기 버튼 클릭 -> 작성 모달 열기
+	  const createBtn = document.getElementById('createButton');
+	  createBtn?.addEventListener('click', (e) => {
+	    e.preventDefault();
+	    document.getElementById('createModal')?.classList.add('show');
+	  });
+	});
+
+	// 오버레이 클릭 시 닫기(선택)
+	document.addEventListener('click', (e) => {
+	  if (e.target?.id === 'createModal') closeCreateModal();
+	  if (e.target?.id === 'detailModal') closeDetailModal();
+	  if (e.target?.id === 'applyModal') closeApplyModal();
+	  if (e.target?.id === 'deleteConfirmModal') closeDeleteConfirmModal();
+	});
+	
+	function openApplyModal() {
+		  // 로그인 안 했으면 로그인 페이지로
+		  if (!isAuthenticated) {
+		    location.href = '/auth/login';
+		    return;
+		  }
+		  document.getElementById('applyModal')?.classList.add('show');
+		}
+	
+	function submitApply() {
+		  const msg = document.getElementById('applyMessage')?.value.trim();
+		  if (!selectedPostId) return alert("게시글을 먼저 선택해주세요.");
+		  if (!msg) return alert("메시지를 입력해주세요.");
+
+		  document.getElementById('applyPostId').value = selectedPostId;
+		  document.getElementById('applyMessageField').value = msg;
+
+		  document.getElementById('applyForm').submit();
+		}
 </script>
 
 </div>
