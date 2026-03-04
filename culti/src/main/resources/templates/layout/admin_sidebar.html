@@ -9,7 +9,7 @@
 		</div>
 
     <nav class="nav flex-column mt-4">
-        <a class="nav-link active" th:href="@{/admin/main}"><i class="fas fa-chart-line me-2"></i> 대시보드</a>
+        <a class="nav-link" th:href="@{/admin/main}"><i class="fas fa-chart-line me-2"></i> 대시보드</a>
         <a class="nav-link" th:href="@{/admin/content/new}"><i class="fas fa-plus-square me-2"></i> 콘텐츠 등록</a>
         <a class="nav-link" th:href="@{/admin/content/list}"><i class="fas fa-film me-2"></i> 영화/전시 관리</a>
         <a class="nav-link" th:href="@{/admin/place/manage}"><i class="fas fa-map-marker-alt me-2"></i> 장소 관리</a>
@@ -18,4 +18,27 @@
         <a class="nav-link" href="/support/admin/inquiry"><i class="fas fa-headset me-2"></i> 고객센터 관리</a>
         <a class="nav-link" href="#"><i class="fas fa-cog me-2"></i> 사이트 설정</a>
     </nav>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentPath = window.location.pathname; // 현재 접속한 URL 경로 가져오기
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+            
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                
+                // href가 있고 '#'이 아니면서, 현재 URL이 href 경로로 시작하면 active 추가!
+                if (href && href !== '#' && currentPath.startsWith(href)) {
+                    link.classList.add('active');
+                }
+            });
+
+            // 🎯 센스있는 예외 처리: '수정'이나 '가격 등록' 페이지에 들어가 있을 때는 '영화/전시 관리' 메뉴에 불이 들어오게 유지!
+            if (currentPath.includes('/admin/content/edit') || currentPath.includes('/admin/price')) {
+                const listMenu = document.querySelector('a[href="/admin/content/list"]');
+                if (listMenu) listMenu.classList.add('active');
+            }
+        });
+    </script>
+    
 </div>
