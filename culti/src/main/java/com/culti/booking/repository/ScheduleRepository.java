@@ -1,5 +1,6 @@
 package com.culti.booking.repository;
 
+import com.culti.content.entity.Content;
 import com.culti.content.entity.Schedule;
 
 import java.time.LocalDateTime;
@@ -11,4 +12,9 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
 	List<Schedule> findByShowTimeGreaterThanEqualAndShowTimeLessThan(LocalDateTime start, LocalDateTime end);
 	
+
+	// 추가
+	void deleteAllByContent(Content content);
+	
+
 }

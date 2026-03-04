@@ -16,6 +16,7 @@ import com.culti.auth.entity.SocialAuth;
 import com.culti.auth.entity.User;
 import com.culti.auth.repository.SocialAuthRepository;
 import com.culti.auth.repository.UserRepository;
+import com.culti.auth.util.IpUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,6 +38,10 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             throws IOException, ServletException {
     	
     	System.out.println("소셜로그인성공메서드진입");
+    	
+        
+        
+        
     	
         OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
         OAuth2User oAuth2User = authToken.getPrincipal();
@@ -89,7 +94,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         else {
             setDefaultTargetUrl("/auth/login?error=not_linked");
         }
-
+        
         super.onAuthenticationSuccess(request, response, authentication);
     }
 

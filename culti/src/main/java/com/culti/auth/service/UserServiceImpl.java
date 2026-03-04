@@ -1,13 +1,17 @@
 package com.culti.auth.service;
 
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.culti.auth.dto.UserDTO;
+import com.culti.auth.entity.LoginLog;
 import com.culti.auth.entity.User;
+import com.culti.auth.repository.LoginLogRepository;
 import com.culti.auth.repository.UserRepository;
 import com.culti.booking.controller.BookingController;
 
@@ -21,13 +25,13 @@ public class UserServiceImpl implements UserService{
 	
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
-
+	private final LoginLogRepository loginLogRepository;
 	
 	@Override
 	public Long register(UserDTO userDTO) {
 		log.info("😝 UserServiceImpl.register()..." + userDTO);
 		userDTO.setRole("USER");
-		userDTO.setStatus("정상");
+		userDTO.setStatus("ACTIVE");
 		// BoardDTO -> Board 엔티티로 변환
 		User entity = this.dtoToEntity(userDTO);
 		
@@ -86,7 +90,7 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	public User getUserById(Long userID) {
-		Optional<User> result = userRepository.findByUserId(userID);
+		Optional<User> result = this.userRepository.findByUserId(userID);
 
 	    if (result.isPresent()) {
 	        User user = result.get();
@@ -95,6 +99,51 @@ public class UserServiceImpl implements UserService{
 	    }
 	    
 	    return null;
+	}
+
+	@Override
+	public void saveUser(User user) {
+		this.userRepository.save(user);
+		
+	}
+
+	@Transactional
+	@Override
+	public User changePassword(String email, String currentPassword, String newPassword) {
+		Optional<User> result = userRepository.findByEmail(email);
+        User user=null;  
+        if (result.isEmpty()) {
+			throw new RuntimeException("사용자 없음");
+		}else {
+			user=result.get();
+		}  
+
+        // 1. 현재 비밀번호 검증
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new RuntimeException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 2. 새 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(newPassword);
+
+        // 3. 저장
+        user.setPassword(encodedPassword);
+        
+        return user;
+		
+	}
+
+	@Override
+	public void saveLoginLog(User user,String ipAddress) {
+		// TODO Auto-generated method stub
+		LoginLog log=LoginLog.builder()
+				.user(user)
+				.ipAddress(ipAddress)
+				.loginTime(LocalDateTime.now())
+				.loginResult("SUCCESS")
+				.build();
+		
+		this.loginLogRepository.save(log);
 	}
 
 }

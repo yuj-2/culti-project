@@ -1,6 +1,7 @@
 // DOM이 로드된 후 실행
 document.addEventListener('DOMContentLoaded', function() {
     // 폼 요소들
+	
     const signupForm = document.getElementById('signupForm');
     const nameInput = document.getElementById('name');
     const emailInput = document.getElementById('email');

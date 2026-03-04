@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+
+<head>
+    <title>로그인 로그 관리</title>
+</head>
+
+<body>
+<div layout:fragment="content" class="container mt-4">
+
+    <h3 class="mb-4">🔐 로그인 로그 관리</h3>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <!-- 테이블 스크롤 영역 -->
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+
+                <table class="table table-bordered table-hover text-center align-middle">
+                    <thead class="table-dark sticky-top">
+                        <tr>
+                            <th>No</th>
+                            <th>User ID</th>
+                            <th>IP Address</th>
+                            <th>Login Time</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr th:each="log, stat : ${loginLogs}">
+                            <td th:text="${stat.count}">1</td>
+
+                            <!-- User 연관관계 -->
+                            <td th:text="${log.user.userId}">1</td>
+
+                            <td th:text="${log.ipAddress}">127.0.0.1</td>
+
+                            <td th:text="${#temporals.format(log.loginTime, 'yyyy-MM-dd HH:mm:ss')}">
+                                2026-03-05 12:00:00
+                            </td>
+
+                            <td>
+                                <span th:if="${log.loginResult == 'SUCCESS'}" class="badge bg-success">
+                                    SUCCESS
+                                </span>
+                                <span th:if="${log.loginResult == 'FAIL'}" class="badge bg-danger">
+                                    FAIL
+                                </span>
+                            </td>
+                        </tr>
+
+                        <!-- 로그 없을 때 -->
+                        <tr th:if="${#lists.isEmpty(loginLogs)}">
+                            <td colspan="5">로그인 기록이 없습니다.</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
