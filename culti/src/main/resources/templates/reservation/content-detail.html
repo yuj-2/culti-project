@@ -365,7 +365,7 @@
     
     <div th:replace="~{layout/footer::footer}"></div>
 
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=b32f0cea9b46043cd332b797ceefc593&libraries=services"></script>
+<script type="text/javascript" th:src="'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${kakaoJsKey} + '&libraries=services'"></script>
 <script src="/js/reservation.js"></script>
 
 </body>
