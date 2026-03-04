@@ -576,19 +576,20 @@ document.addEventListener('DOMContentLoaded', function() {
 		
     });
 
+	/*
     cancelEdit.addEventListener('click', function() {
         if (confirm('수정을 취소하시겠습니까?')) {
             profileForm.reset();
             //loadUserInfo();
         }
     });
+	*/
 	
 	
 	
 	passwordUpdateForm.addEventListener('submit', function(e) {
 	        e.preventDefault();
 			
-			alert('ddd');
 	        const formData = {
 	            currentPassword: document.getElementById('currentPassword').value,
 	            newPassword: document.getElementById('newPassword').value,
@@ -602,7 +603,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	                alert('현재 비밀번호를 입력해주세요.');
 	                return;
 	            }
-	            if (formData.newPassword !== formData.confirmPassword) {
+	            if (formData.newPassword !== document.getElementById('confirmPassword').value) {
 	                alert('새 비밀번호가 일치하지 않습니다.');
 	                return;
 	            }
@@ -640,12 +641,12 @@ document.addEventListener('DOMContentLoaded', function() {
 	
 	
     // ========== 로그아웃 ==========
-    
+    /*
     logoutBtn.addEventListener('click', function() {
         if (confirm('로그아웃 하시겠습니까?')) {
             window.location.href = '/login.html';
         }
-    });
+    });*/
 
     // ========== 회원 탈퇴 ==========
     
