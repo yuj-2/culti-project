@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -14,6 +15,11 @@ import com.culti.admin.dto.ContentFormDTO;
 import com.culti.admin.dto.PerformancePriceDTO;
 import com.culti.admin.dto.ScheduleFormDTO;
 import com.culti.admin.dto.SinglePriceDTO;
+import com.culti.auth.dto.UserDTO;
+import com.culti.auth.entity.LoginLog;
+import com.culti.auth.entity.User;
+import com.culti.auth.repository.LoginLogRepository;
+import com.culti.auth.repository.UserRepository;
 import com.culti.booking.entity.Place;
 import com.culti.booking.repository.PlaceRepository;
 import com.culti.booking.repository.ScheduleRepository;
@@ -37,7 +43,8 @@ public class AdminService {
     private final ScheduleRepository scheduleRepository;
     private final PlaceRepository placeRepository;
     private final ContentPriceRepository contentPriceRepository;
-
+    private final UserRepository userRepository;
+    private final LoginLogRepository loginLogRepository;
     @Transactional
     public void registerContent(ContentFormDTO formDTO) throws IOException {
         
@@ -259,4 +266,36 @@ public class AdminService {
         }
     }
     
+    //User 목록 반환
+    public List<UserDTO> getUserDTOs(String keyword) {
+        List<User> users = userRepository.searchUsers(keyword);
+        
+        // 엔티티 → DTO 변환
+        List<UserDTO> dtos = users.stream()
+        	    .map(UserDTO::fromEntity)
+        	    .toList();
+        
+        return dtos;
+    }
+    //사용자의 권한 바꾸는 기능
+    public void toggleUserRole(Long id) {
+        Optional<User> result = this.userRepository.findById(id);
+        User user=null;
+        
+        if (result.isPresent()) {
+			user=result.get();
+		}
+        
+        if (user.getRole().equals("USER")) {
+            user.setRole("ADMIN");
+        } else {
+            user.setRole("USER");
+        }
+        
+        this.userRepository.save(user);
+    }
+    
+    public List<LoginLog> findAllLog() {
+        return this.loginLogRepository.findAllOrderByLoginTimeDesc();
+    }
 }

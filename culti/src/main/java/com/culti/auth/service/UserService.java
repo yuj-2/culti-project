@@ -78,5 +78,6 @@ public interface UserService {
 		//[7]비밀번호 변경
 		User changePassword(String email, String currentPassword, String newPassword);
 		
-		
+		//[8]회원 로그인 로그 저장
+		void saveLoginLog(User user,String ipAddress);
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +18,9 @@ import com.culti.admin.dto.ContentFormDTO;
 import com.culti.admin.dto.PerformancePriceDTO;
 import com.culti.admin.dto.SinglePriceDTO;
 import com.culti.admin.service.AdminService;
+import com.culti.auth.dto.UserDTO;
+import com.culti.auth.entity.LoginLog;
+import com.culti.auth.entity.User;
 import com.culti.booking.entity.Place;
 import com.culti.content.entity.Content;
 import com.culti.content.entity.ContentPrice;
@@ -182,5 +186,35 @@ public class AdminController {
 	    return "redirect:/admin/place/manage";
 	}
 	
+	
+	@GetMapping("/auth/user")
+	public String userList(
+	        Model model,
+	        @RequestParam(name = "keyword", required = false) String keyword) {
+
+	    // 검색어가 null 또는 빈 문자열이면 null 처리
+	    if (keyword != null && keyword.isBlank()) {
+	        keyword = null;
+	    }
+
+	    List<UserDTO> userList = this.adminService.getUserDTOs(keyword);
+	    model.addAttribute("userList", userList);
+	    model.addAttribute("keyword", keyword); // 뷰에서 검색어 유지용
+	    return "admin/auth-user";
+	}
+	
+	@PostMapping("/user/role/{id}")
+	public String changeRole(@PathVariable("id") Long id) {
+		System.out.println(id);
+	    this.adminService.toggleUserRole(id);
+	    return "redirect:/admin/auth/user";
+	}
+	
+	@GetMapping("/auth/loginLog")
+	public String loginLogPage(Model model) {
+	    List<LoginLog> loginLogs = this.adminService.findAllLog();
+	    model.addAttribute("loginLogs", loginLogs);
+	    return "admin/auth-logInLog";
+	}
 	
 }

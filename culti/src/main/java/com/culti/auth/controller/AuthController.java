@@ -29,6 +29,7 @@ import com.culti.mate.DTO.MyPostMypageDTO;
 import com.culti.mate.matePage.Criteria;
 import com.culti.mate.service.MateService;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -98,6 +99,48 @@ public class AuthController {
             return "redirect:/auth/login";
         }
     }*/
+    
+  //마이페이지에서 소셜로그인 연동
+  	@GetMapping("/link/kakao")
+  	public String linkKakao(HttpSession session, @AuthenticationPrincipal PrincipalDetails userDetails) {
+  		
+  		
+
+  		 if (userDetails == null) {
+  		        return "redirect:/auth/login?error=login_required";
+  		    }
+  		 	System.out.println("컨트롤러진입");
+  		    session.setAttribute("OAUTH2_MODE", "link");
+  		    session.setAttribute("LINK_USER_ID", userDetails.getUserDto().getUserId());
+
+  		    return "redirect:/oauth2/authorization/kakao";
+  	}
+
+  	@GetMapping("/link/google")
+  	public String linkGoogle(HttpSession session, @AuthenticationPrincipal PrincipalDetails userDetails) {
+  		
+
+  		if (userDetails == null) {
+  	        return "redirect:/auth/login?error=login_required";
+  	    }
+
+  	    session.setAttribute("OAUTH2_MODE", "link");
+  	    session.setAttribute("LINK_USER_ID", userDetails.getUserDto().getUserId());
+  	    return "redirect:/oauth2/authorization/google";
+  	}
+
+  	@GetMapping("/link/naver")
+  	public String linkNaver(HttpSession session,@AuthenticationPrincipal PrincipalDetails userDetails) {
+  		
+
+  		if (userDetails == null) {
+  	        return "redirect:/auth/login?error=login_required";
+  	    }
+
+  	    session.setAttribute("OAUTH2_MODE", "link");
+  	    session.setAttribute("LINK_USER_ID", userDetails.getUserDto().getUserId());
+  	    return "redirect:/oauth2/authorization/naver";
+  	}
         
     //마이페이지
     @PreAuthorize("isAuthenticated()")

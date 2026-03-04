@@ -1,5 +1,6 @@
 package com.culti.auth.service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.culti.auth.dto.UserDTO;
+import com.culti.auth.entity.LoginLog;
 import com.culti.auth.entity.User;
 import com.culti.auth.repository.UserRepository;
 import com.culti.auth.security.PrincipalDetails;
@@ -46,6 +48,8 @@ public class UserSecurityService implements UserDetailsService{
         
         // 레거시 프로젝트 수업 때 CustomUser 클래스 + 추가 정보 저장..
         //return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);
+        
+        
         
         return new PrincipalDetails(userDto);
 	}
