@@ -45,14 +45,19 @@
 				
 				    <div class="row mb-3">
 				        <div class="col-md-4">
-				            <label for="placeId" class="form-label fw-bold">개최 장소 (Place)</label>
-				            <select class="form-select" id="placeId" name="placeId" required>
-				                <option value="" selected disabled>장소를 선택하세요</option>
-				                <option value="1">마포아트센터</option>
-				                <option value="2">CGV 신촌아트레온</option>
-				            </select>
-				            <div class="form-text">장소가 없다면 장소 관리를 먼저 해주세요.</div>
-				        </div>
+						    <label for="placeId" class="form-label fw-bold">개최 장소 (Place)</label>
+						    <select class="form-select" id="placeId" name="placeId" required>
+						        <option value="" selected disabled>장소를 선택하세요</option>
+						        
+						        <option th:each="place : ${places}" 
+						                th:value="${place.placeId}" 
+						                th:text="${place.name}">
+						            마포아트센터 (이 글자는 타임리프가 덮어씁니다)
+						        </option>
+						        
+						    </select>
+						    <div class="form-text">장소가 없다면 장소 관리를 먼저 해주세요.</div>
+						</div>
 				        <div class="col-md-4">
 				            <label for="runningTime" class="form-label fw-bold">러닝타임 (분)</label>
 				            <input type="number" class="form-control" id="runningTime" name="runningTime" placeholder="예: 120" required>

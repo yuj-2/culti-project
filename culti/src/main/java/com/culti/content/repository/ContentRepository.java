@@ -12,5 +12,7 @@ import com.culti.content.entity.Content;
 public interface ContentRepository extends JpaRepository<Content, Long> {
 
 	Page<Content> findByCategoryAndTitleContainingIgnoreCase(String category, String keyword, Pageable pageable);
+
+	List<Content> findByCategory(String category);
 	
 }

@@ -1,7 +1,6 @@
 package com.culti.content.controller;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -17,13 +16,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.culti.booking.entity.Seat;
 import com.culti.content.entity.Content;
+import com.culti.content.entity.ContentPrice;
 import com.culti.content.repository.ContentRepository;
 import com.culti.content.service.ContentService;
 
+import lombok.extern.log4j.Log4j2;
 import lombok.RequiredArgsConstructor;
 
+@Log4j2
 @Controller
 @RequiredArgsConstructor
 public class ContentController {
@@ -79,21 +80,23 @@ public class ContentController {
    
    @GetMapping("/reservation/detail/{id}")
    public String detailPage(Model model, @PathVariable("id") Long id) {
-      Content content = this.contentService.getContent(id);
-      model.addAttribute("content", content);
-      
-      Map<String, Integer> priceInfo = new LinkedHashMap<>();
-      
-      if (!content.getSchedules().isEmpty() && content.getSchedules().get(0).getPlace() != null) {
-          for (Seat seat : content.getSchedules().get(0).getPlace().getSeats()) {
-              priceInfo.put(seat.getGrade(), seat.getBasePrice());
-          }
-      }
-      
-      model.addAttribute("priceInfo", priceInfo);
-      model.addAttribute("kakaoJsKey", kakaoJsKey);
-      
-      return "reservation/content-detail";
+       Content content = this.contentService.getContent(id);
+       model.addAttribute("content", content);
+       
+       Map<String, Integer> priceInfo = new LinkedHashMap<>();
+       
+       if (content.getContentPrices() != null && !content.getContentPrices().isEmpty()) {
+           for (ContentPrice cp : content.getContentPrices()) {
+               priceInfo.put(cp.getGrade(), cp.getPrice());
+           }
+       } else {
+           log.warn("{}번 콘텐츠의 가격 정보가 등록되지 않았습니다.", id);
+       }
+       
+       model.addAttribute("priceInfo", priceInfo);
+       model.addAttribute("kakaoJsKey", kakaoJsKey);
+       
+       return "reservation/content-detail";
    }
    
    @GetMapping("/reservation")

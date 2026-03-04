@@ -341,33 +341,38 @@
                </button>
                
                <div id="scheduleModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
-                 <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden transform transition-all">
-                     <div class="p-5 flex justify-between items-center border-b border-gray-100 bg-[#252451] text-white">
-                         <h3 class="text-xl font-bold">관람하실 회차를 선택해주세요</h3>
-                         <button onclick="closeScheduleModal()" class="text-white hover:text-gray-300 transition-colors">
-                             <i data-lucide="x" class="w-6 h-6"></i>
-                         </button>
-                     </div>
-                     
-                     <div class="p-6 max-h-[60vh] overflow-y-auto">
-                         <div class="space-y-3">
-                             <a th:each="schedule : ${content.schedules}"
-                                th:href="@{/reservation/booking/seat(scheduleId=${schedule.scheduleId})}"
-                                class="block w-full p-4 border border-gray-200 rounded-xl hover:border-[#503396] hover:bg-[#503396] hover:bg-opacity-5 transition-all flex justify-between items-center group cursor-pointer">
-                                 <div>
-                                     <div class="text-[#503396] font-bold text-sm mb-1" th:text="${schedule.sessionNum} + '회차'"></div>
-                                     <div class="text-gray-900 font-medium text-lg" 
-                                          th:text="${#temporals.format(schedule.showTime, 'yyyy.MM.dd')} + ' ' + ${#temporals.format(schedule.startTime, 'HH:mm')}">
-                                     </div>
-                                 </div>
-                                 <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-[#503396] transition-colors">
-                                     <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500 group-hover:text-white"></i>
-                                 </div>
-                             </a>
-                         </div>
-                     </div>
-                 </div>
-             </div>
+			       <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden transform transition-all">
+			           <div class="p-5 flex justify-between items-center border-b border-gray-100 bg-[#252451] text-white">
+			               <h3 class="text-xl font-bold">관람하실 회차를 선택해주세요</h3>
+			               <button onclick="closeScheduleModal()" class="text-white hover:text-gray-300 transition-colors">
+			                   <i data-lucide="x" class="w-6 h-6"></i>
+			               </button>
+			           </div>
+			           
+			           <div class="p-6 max-h-[60vh] overflow-y-auto">
+			               <div class="space-y-3">
+			                   <a th:each="schedule : ${content.schedules}"
+			                      th:href="@{/reservation/booking/seat(scheduleId=${schedule.scheduleId})}"
+			                      class="block w-full p-4 border border-gray-200 rounded-xl hover:border-[#503396] hover:bg-[#503396] hover:bg-opacity-5 transition-all flex justify-between items-center group cursor-pointer">
+			                       <div>
+			                           <div class="flex items-center gap-2 mb-1">
+			                               <span class="text-[#503396] font-bold text-sm" th:text="${schedule.sessionNum} + '회차'"></span>
+			                               <span class="text-xs text-gray-400">|</span>
+			                               <span class="text-gray-600 font-semibold text-sm" th:text="${schedule.roomName}"></span>
+			                           </div>
+			                           
+			                           <div class="text-gray-900 font-medium text-lg" 
+			                                th:text="${#temporals.format(schedule.showTime, 'yyyy.MM.dd')} + ' ' + ${#temporals.format(schedule.startTime, 'HH:mm')}">
+			                           </div>
+			                       </div>
+			                       <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-[#503396] transition-colors">
+			                           <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500 group-hover:text-white"></i>
+			                       </div>
+			                   </a>
+			               </div>
+			           </div>
+			       </div>
+				</div>
              
            </div>
        </div>
@@ -375,7 +380,7 @@
     
     <div th:replace="~{layout/footer::footer}"></div>
 
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=b32f0cea9b46043cd332b797ceefc593&libraries=services"></script>
+<script type="text/javascript" th:src="'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${kakaoJsKey} + '&libraries=services'"></script>
 <script src="/js/reservation.js"></script>
 
 </body>
