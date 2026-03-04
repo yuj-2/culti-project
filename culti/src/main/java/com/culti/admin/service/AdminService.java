@@ -17,6 +17,8 @@ import com.culti.admin.dto.SinglePriceDTO;
 import com.culti.booking.entity.Place;
 import com.culti.booking.repository.PlaceRepository;
 import com.culti.booking.repository.ScheduleRepository;
+import com.culti.content.dto.ContentDTO;
+import com.culti.content.dto.ScheduleDTO;
 import com.culti.content.entity.Content;
 import com.culti.content.entity.ContentPrice;
 import com.culti.content.entity.Schedule;
@@ -187,6 +189,74 @@ public class AdminService {
         place.setAddress(address);
         
         placeRepository.save(place);
+    }
+    
+    @Transactional
+    public void updateContent(Long id, ContentDTO dto, MultipartFile posterFile) {
+        // 1. 기존 콘텐츠 꺼내오기
+        Content content = contentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 콘텐츠가 없습니다. id=" + id));
+        
+        // 2. 기본 정보 덮어쓰기
+        content.setTitle(dto.getTitle());
+        content.setCategory(dto.getCategory());
+        content.setAgeLimit(dto.getAgeLimit());
+        content.setRunningTime(dto.getRunningTime());
+        content.setStartDate(dto.getStartDate());
+        content.setEndDate(dto.getEndDate());
+        content.setDescription(dto.getDescription());
+        
+        // 3. 포스터 이미지가 새로 올라왔다면 기존거 지우고 새걸로 교체
+        if (posterFile != null && !posterFile.isEmpty()) {
+            try { 
+                String uploadDir = "C:/culti_upload/poster/";
+                
+                File dir = new File(uploadDir);
+                if (!dir.exists()) {
+                    dir.mkdirs(); 
+                }
+
+                String originalFilename = posterFile.getOriginalFilename();
+                String uuid = UUID.randomUUID().toString();
+                String savedFilename = uuid + "_" + originalFilename;
+
+                File destFile = new File(uploadDir + savedFilename);
+                posterFile.transferTo(destFile);
+
+                String dbPath = "/poster/" + savedFilename;
+                content.setPosterUrl(dbPath);
+
+            } catch (IOException e) {
+                throw new RuntimeException("포스터 이미지 저장 중 오류가 발생했습니다.", e);
+            }
+        }
+        
+        // 4. 회차(Schedule) 정보 통째로 갈아끼우기
+        scheduleRepository.deleteAllByContent(content); 
+        
+        if (dto.getSchedules() != null) {
+            for (ScheduleDTO sDto : dto.getSchedules()) {
+                Schedule schedule = new Schedule();
+                schedule.setContent(content);
+                schedule.setSessionNum(sDto.getSessionNum());
+                schedule.setRoomName(sDto.getRoomName());
+                
+                schedule.setShowTime(sDto.getStartTime());
+                
+                if (sDto.getStartTime() != null) {
+                    schedule.setStartTime(sDto.getStartTime().toLocalTime());
+                }
+                if (sDto.getEndTime() != null) {
+                    schedule.setEndTime(sDto.getEndTime().toLocalTime());
+                }
+                
+                // 장소(Place) 세팅
+                Place place = placeRepository.findById(dto.getPlaceId()).orElse(null);
+                schedule.setPlace(place);
+                
+                scheduleRepository.save(schedule);
+            }
+        }
     }
     
 }

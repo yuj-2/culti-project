@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.culti.admin.dto.ContentFormDTO;
 import com.culti.admin.dto.PerformancePriceDTO;
@@ -75,6 +76,30 @@ public class AdminController {
         model.addAttribute("contentList", contents);
         return "admin/content-list";
     }
+	
+	@PostMapping("/content/edit") 
+	public String editContent(@ModelAttribute com.culti.content.dto.ContentDTO contentDTO,
+	                          @RequestParam(value = "posterFile", required = false) MultipartFile posterFile) {
+	                          
+	    adminService.updateContent(contentDTO.getId(), contentDTO, posterFile);
+	    
+	    return "redirect:/admin/content/list"; 
+	}
+	
+	@GetMapping("/content/edit")
+	public String contentEditForm(@RequestParam("id") Long id, Model model) {
+	    // 1. 기존에 등록된 콘텐츠 정보 싹 다 가져오기
+	    Content content = adminService.getContentById(id);
+	    
+	    // 2. 장소 수정할 때 써먹을 전체 장소 리스트 가져오기
+	    List<Place> places = adminService.getAllPlaces();
+	    
+	    // 3. 모델에 담아서 수정 화면으로 쏘기
+	    model.addAttribute("content", content);
+	    model.addAttribute("places", places);
+	    
+	    return "admin/content-edit"; 
+	}
 	
 	// 1. 가격 등록 폼 화면 보여주기
 	@GetMapping("/price/performance")
