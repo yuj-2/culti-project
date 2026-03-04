@@ -1,12 +1,224 @@
 @charset "UTF-8";
-.cal-title {
-    font-size: 24px;
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap');
+/* ===== Theme tokens ===== */
+
+*{
+	font-family: Google Sans Flex', sans-serif;
+}
+:root{
+  --c-primary:#503396;
+  --c-ink:#111827;
+  --c-muted:#6B7280;
+  --c-border:#EDEFF5;
+  --c-bg:#FFFFFF;
+  --shadow-sm: 0 6px 16px rgba(17, 24, 39, .06);
+  --shadow-md: 0 14px 34px rgba(17, 24, 39, .10);
 }
 
-.cal-side-title {
-    font-size: 20px;
+/* ===== Titles ===== */
+.cal-title{
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:-.02em;
+  line-height:1.1;
+}
+.cal-side-title{
+  font-size:20px;
+  font-weight:900;
+  letter-spacing:-.02em;
+  line-height:1.2;
+}
+.cal-day-header{
+  font-size:12.5px;
+  font-weight:800;
+  letter-spacing:-.01em;
 }
 
-.cal-day-header {
-    font-size: 14px;
+/* ===== Calendar grid ===== */
+#calendar-days{
+  gap:12px; /* 조금 더 시원하게 */
+}
+
+/* 빈칸(앞쪽 패딩 셀)도 높이 통일 */
+.cal-empty{
+  min-height:92px;
+  border-radius:16px;
+}
+
+/* ===== Day cell ===== */
+.cal-day{
+  position:relative;
+  min-height:92px;
+  padding:10px 10px 12px;
+  border-radius:18px;
+  border:1px solid var(--c-border);
+  background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,1));
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease, background .14s ease;
+  cursor:pointer;
+  overflow:hidden;
+}
+
+/* 살짝 글로우 */
+.cal-day::before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  background: radial-gradient(600px 220px at 50% 0%, rgba(80,51,150,.10), transparent 55%);
+  opacity:0;
+  transition:opacity .14s ease;
+  pointer-events:none;
+}
+
+.cal-day:hover{
+  transform:translateY(-2px);
+  border-color: rgba(80,51,150,.22);
+  box-shadow: var(--shadow-md);
+  background: linear-gradient(180deg, rgba(80,51,150,.03), #fff);
+}
+.cal-day:hover::before{ opacity:1; }
+
+.cal-date{
+  font-size:14px;
+  font-weight:900;
+  color:var(--c-ink);
+}
+
+/* 토/일 색감 */
+.cal-day.is-sun .cal-date{ color:#EF4444; }
+.cal-day.is-sat .cal-date{ color:#3B82F6; }
+
+/* 오늘 */
+.cal-day.is-today{
+  border-color: rgba(80,51,150,.45);
+  box-shadow: 0 0 0 3px rgba(80,51,150,.12) inset;
+}
+
+/* 선택 */
+.cal-day.is-selected{
+  border-color: rgba(80,51,150,.75);
+  background: linear-gradient(180deg, rgba(80,51,150,.10), rgba(255,255,255,1));
+  box-shadow: 0 0 0 3px rgba(80,51,150,.18) inset, var(--shadow-sm);
+}
+
+/* 이벤트 dot */
+.cal-dot{
+  width:6px;
+  height:6px;
+  border-radius:999px;
+  margin-top:7px;
+  background: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(80,51,150,.10);
+}
+.cal-day.is-selected .cal-dot{
+  background:#fff;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.22);
+}
+
+/* 이벤트 개수 뱃지 (예: 2) */
+.cal-count{
+  position:absolute;
+  top:10px;
+  right:10px;
+  min-width:20px;
+  height:20px;
+  padding:0 6px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  color:#fff;
+  background: var(--c-primary);
+  box-shadow: 0 8px 18px rgba(80,51,150,.22);
+}
+
+/* ===== Right list ===== */
+#event-list:empty::before{
+  content:"선택한 날짜에 일정이 없어요 🙂";
+  display:block;
+  color:var(--c-muted);
+  font-size:14px;
+  line-height:1.7;
+  padding:10px 0;
+}
+
+.cal-event{
+  border:1px solid var(--c-border);
+  border-radius:18px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+}
+.cal-event:hover{
+  transform: translateY(-2px);
+  border-color: rgba(80,51,150,.22);
+  box-shadow: var(--shadow-md);
+}
+
+.cal-event .thumb{
+  position:relative;
+  height:150px;
+  background:#F3F4F6;
+  overflow:hidden;
+}
+.cal-event .thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform: scale(1);
+  transition: transform .25s ease;
+}
+.cal-event:hover .thumb img{ transform: scale(1.06); }
+
+.cal-chip{
+  position:absolute;
+  top:10px;
+  right:10px;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  color:#fff;
+  background: rgba(17,24,39,.82);
+  backdrop-filter: blur(6px);
+}
+
+.cal-event .body{
+  padding:14px 14px 16px;
+}
+.cal-event .title{
+  font-weight:900;
+  font-size:15px;
+  color:var(--c-ink);
+  line-height:1.25;
+}
+.cal-event .meta{
+  margin-top:8px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.cal-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+  background: rgba(80,51,150,.10);
+  color: var(--c-primary);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 640px){
+  .cal-title{ font-size:20px; }
+  .cal-side-title{ font-size:18px; }
+  #calendar-days{ gap:10px; }
+  .cal-day{ min-height:78px; padding:8px; border-radius:16px; }
+  .cal-empty{ min-height:78px; }
+  .cal-event .thumb{ height:130px; }
 }

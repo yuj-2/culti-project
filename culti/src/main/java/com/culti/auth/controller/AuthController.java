@@ -1,9 +1,11 @@
 package com.culti.auth.controller;
 
-import java.util.Map;
 
 import org.springframework.data.domain.Page;
+import java.util.List;
+
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -14,7 +16,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.culti.auth.dto.TermsDTO;
+import com.culti.auth.dto.TermsRequestDTO;
 import com.culti.auth.dto.UserDTO;
+import com.culti.auth.entity.User;
+import com.culti.auth.security.PrincipalDetails;
+import com.culti.auth.service.TermsService;
 import com.culti.auth.service.UserService;
 import com.culti.mate.DTO.MateApplyMypageDTO;
 import com.culti.mate.DTO.MatePostDTO;
@@ -23,6 +30,7 @@ import com.culti.mate.entity.MatePost;
 import com.culti.mate.matePage.Criteria;
 import com.culti.mate.service.MateService;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -35,6 +43,8 @@ public class AuthController {
 	
 	private final UserService userService;
 	private final MateService mateService;
+	private final TermsService termsService;
+	
 	
 	//로그인페이지
 	@GetMapping("/login")
@@ -44,16 +54,24 @@ public class AuthController {
 	
 	//회원가입 페이지
 	@GetMapping("/register")
-	public void signUp() {
-		
+	public void signUp(Model model) {
+		List<TermsDTO> termsList = this.termsService.getActiveTerms();
+        model.addAttribute("termsList", termsList);
 	}
 	
 	//회원가입 하기 (post방식)
 	@PostMapping("/register")
-	public String register(UserDTO userDTO) {
+	public String register(UserDTO userDTO,TermsRequestDTO termsRequestDTO) {
 		log.info("👌 AuthController.register()... POST" );
-		Long userId = this.userService.register(userDTO);
-		//rttr.addFlashAttribute("msg", bno);
+		// 1. 유저를 등록하고 PK(ID)를 받음
+	    Long userId = this.userService.register(userDTO);
+	    
+	    // 2. 중요! DB에 저장된 실제 User '엔티티'를 다시 찾아옵니다.
+	    // (서비스에 ID로 User를 찾는 findById 같은 메서드가 있다고 가정합니다)
+	    User savedUser = this.userService.getUserById(userId); 
+	    
+	    // 3. DB에서 가져온 진짜 유저 객체를 넘겨줍니다.
+	    this.termsService.saveUserAgreements(savedUser, termsRequestDTO.getAgreedTermIds());
 		
 		return "redirect:/auth/register-complete";
 	}
@@ -63,6 +81,49 @@ public class AuthController {
 	public void signupComplete() {
 		
 	}
+	
+	//마이페이지에서 소셜로그인 연동
+	@GetMapping("/link/kakao")
+	public String linkKakao(HttpSession session, @AuthenticationPrincipal PrincipalDetails userDetails) {
+		
+		
+
+		 if (userDetails == null) {
+		        return "redirect:/auth/login?error=login_required";
+		    }
+		 	System.out.println("컨트롤러진입");
+		    session.setAttribute("OAUTH2_MODE", "link");
+		    session.setAttribute("LINK_USER_ID", userDetails.getUserDto().getUserId());
+
+		    return "redirect:/oauth2/authorization/kakao";
+	}
+
+	@GetMapping("/link/google")
+	public String linkGoogle(HttpSession session, @AuthenticationPrincipal PrincipalDetails userDetails) {
+		
+
+		if (userDetails == null) {
+	        return "redirect:/auth/login?error=login_required";
+	    }
+
+	    session.setAttribute("OAUTH2_MODE", "link");
+	    session.setAttribute("LINK_USER_ID", userDetails.getUserDto().getUserId());
+	    return "redirect:/oauth2/authorization/google";
+	}
+
+	@GetMapping("/link/naver")
+	public String linkNaver(HttpSession session,@AuthenticationPrincipal PrincipalDetails userDetails) {
+		
+
+		if (userDetails == null) {
+	        return "redirect:/auth/login?error=login_required";
+	    }
+
+	    session.setAttribute("OAUTH2_MODE", "link");
+	    session.setAttribute("LINK_USER_ID", userDetails.getUserDto().getUserId());
+	    return "redirect:/oauth2/authorization/naver";
+	}
+	
 	
 	/*
 	@PostMapping("/login")
@@ -84,7 +145,7 @@ public class AuthController {
 		//마이페이지
 		@PreAuthorize("isAuthenticated()")
 		@GetMapping("/myPage")
-		public void myPage(@AuthenticationPrincipal UserDetails userDetails, Model model
+		public void myPage(@AuthenticationPrincipal PrincipalDetails userDetails, Model model
 									, @RequestParam(name="mateTab", defaultValue="received") String mateTab,
 								    @RequestParam(name="mateSection", defaultValue="mate") String mateSection,
 								    @RequestParam(name="pageMyPosts", defaultValue="1") int pageMyPosts,
@@ -93,8 +154,9 @@ public class AuthController {
 								    @RequestParam(name="size", defaultValue="9") int size,
 								    Criteria criteria){
 			
+			
 			String email=userDetails.getUsername();
-			UserDTO userDTO=this.userService.findByEmail(email);
+			UserDTO userDTO=userDetails.getUserDto();
 			model.addAttribute("user",userDTO);
 			
 			// ===== 동행매칭==================

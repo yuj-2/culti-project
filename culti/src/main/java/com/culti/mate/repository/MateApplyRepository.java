@@ -60,5 +60,6 @@ public interface MateApplyRepository extends JpaRepository<MateApply, Long>{
 		      @Param("status") MateApplyStatus status
 		  );
 
+		  boolean existsByPostAndApplicant_EmailAndStatus(MatePost post, String email, MateApplyStatus status);
 		
 }

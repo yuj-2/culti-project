@@ -8,11 +8,11 @@
     <title>마이페이지 - CULTI</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     
-    <link rel="stylesheet" th:href="@{/css/myPage.css}">
+    <link rel="stylesheet" th:href="@{/css/auth/myPage.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/mate/mateMypage.css}">
     
-    <script th:src="@{/js/myPage.js}"></script>
+    <script th:src="@{/js/auth/myPage.js}"></script>
 </head>
 <body>
     <div layout:fragment="content">
@@ -274,7 +274,51 @@
                                     </div>
                                 </div>
                             </div>
+<div class="form-section">
+    <h3 class="form-section-title">소셜 계정 연동</h3>
+    <p class="form-help" style="margin-bottom: 15px;">소셜 계정을 연결하면 더 간편하게 로그인할 수 있습니다.</p>
+    
+    <div class="social-connect-list">
+        <div class="social-item">
+            <div class="social-info">
+                <i class="fa-solid fa-comment" style="color: #FEE500; font-size: 1.5rem; margin-right: 10px;"></i>
+                <span>카카오 계정</span>
+            </div>
+            <div class="social-action">
+                <a th:href="@{/auth/link/kakao}"
+                   class="btn-sm btn-connect">
+                   연결하기
+                </a>
+            </div>
+        </div>
 
+        <div class="social-item">
+            <div class="social-info">
+                <i class="fa-solid fa-n" style="color: #03C75A; font-size: 1.2rem; margin-right: 10px;"></i>
+                <span>네이버 계정</span>
+            </div>
+            <div class="social-action">
+                <a th:href="@{/auth/link/naver}"
+                   class="btn-sm btn-connect">
+                   연결하기
+                </a>
+            </div>
+        </div>
+
+        <div class="social-item">
+            <div class="social-info">
+                <i class="fa-brands fa-google" style="color: #EA4335; font-size: 1.3rem; margin-right: 10px;"></i>
+                <span>구글 계정</span>
+            </div>
+            <div class="social-action">
+                <a th:href="@{/auth/link/google}"
+                   class="btn-sm btn-connect">
+                   연결하기
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
                             <div class="form-section">
                                 <h3 class="form-section-title">비밀번호 변경</h3>
                                 
@@ -415,6 +459,12 @@
 								</div>
 					          </div>
 					        </div>
+					        <button type="button"
+							        class="btn-more"
+							        data-more-btn
+							        th:if="${receivedPaging != null and receivedPaging.totalElements > 4}">
+							  더보기<i class="fa-solid fa-chevron-down"></i>
+							</button>
 					      </div>
 					
 					      <!-- 내가 신청한 것 (항상 렌더링 + active로 보여주기) -->
@@ -482,6 +532,12 @@
 								</div>
 					          </div>
 					        </div>
+					        <button type="button"
+							        class="btn-more"
+							        data-more-btn
+							       th:if="${appliedPaging != null and appliedPaging.totalElements > 3}">
+							  더보기
+							</button>
 					      </div>
 					      
 					      
@@ -550,6 +606,12 @@
 						      </div>
 						    </div>
 						  </div>
+						  <button type="button"
+						        class="btn-more"
+						        data-more-btn
+						        th:if="${myPostsPaging != null and myPostsPaging.totalElements > 4}">
+						  더보기
+						</button>
 						</div>
 					      
 					

@@ -880,3 +880,124 @@
   background: #fee2e2;
   color: #991b1b;
 }
+
+.comment-section{
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid rgba(148,163,184,.35);
+  border-radius: 14px;
+  background: rgba(248,250,252,.75);
+}
+
+.comment-section h3{
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.comment-section h3::before{
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: #6366f1;
+}
+
+/* list */
+#commentList{
+  display: grid;
+  gap: 10px;
+  max-height: 240px;          /* 댓글 많으면 스크롤 */
+  overflow: auto;
+  padding-right: 6px;         /* 스크롤바 공간 */
+}
+#commentList::-webkit-scrollbar{ width: 8px; }
+#commentList::-webkit-scrollbar-thumb{
+  background: rgba(148,163,184,.6);
+  border-radius: 999px;
+}
+#commentList::-webkit-scrollbar-track{
+  background: rgba(148,163,184,.15);
+  border-radius: 999px;
+}
+/* item */
+.comment-item{
+  background: #fff;
+  border: 1px solid rgba(148,163,184,.25);
+  border-radius: 14px;
+  padding: 12px 12px 10px;
+  box-shadow: 0 6px 18px rgba(15,23,42,.05);
+  position: relative;
+}
+
+.comment-item strong{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+}
+.comment-item strong::before{
+  content: "";
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(99,102,241,.25), rgba(59,130,246,.18));
+  border: 1px solid rgba(99,102,241,.25);
+}
+
+.comment-date{
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.comment-item p{
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #1f2937;
+  white-space: pre-wrap;      /* 줄바꿈 유지 */
+  word-break: break-word;     /* 긴 단어 처리 */
+}
+
+/* write box */
+.comment-write{
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: end;
+}
+
+#commentInput{
+  min-height: 44px;
+  max-height: 140px;
+  resize: vertical;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(148,163,184,.35);
+  background: #fff;
+  font-size: 13px;
+  line-height: 1.45;
+  outline: none;
+  box-shadow: 0 6px 18px rgba(15,23,42,.04);
+}
+#commentInput:focus{
+  border-color: rgba(99,102,241,.55);
+  box-shadow: 0 0 0 4px rgba(99,102,241,.14), 0 10px 22px rgba(15,23,42,.06);
+}
+
+.comment-write .button{
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+}
