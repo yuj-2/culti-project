@@ -15,38 +15,31 @@ import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import com.culti.auth.service.CustomOAuth2UserService;
-
-import lombok.RequiredArgsConstructor;
-
-
 @Configuration	   // 스프링 환경 설정 파일  == security-context.xml 동일
 @EnableWebSecurity 	// 모든 요청 URL이 스프링 시큐리티 제어
 @EnableMethodSecurity(prePostEnabled = true) // @PreAuthorize 애너테이션이 동작할 수 있도록 스프링 시큐리티의 설정
-@RequiredArgsConstructor
 public class SecurityConfig {
-	private final CustomOAuth2UserService customOAuth2UserService;
-	private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+	
 	@Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
         .authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
-                .requestMatchers(new AntPathRequestMatcher("/reservation/booking/**")).authenticated() // 경로 확인
+                .requestMatchers(new AntPathRequestMatcher("/reservation/booking/**")).authenticated()
+                
+                // [수정] 결제 성공(/success)과 실패(/fail) 경로에 대한 권한을 명시적으로 추가했습니다.
                 .requestMatchers(new AntPathRequestMatcher("/payment/**")).authenticated()
+                .requestMatchers(new AntPathRequestMatcher("/success/**")).authenticated() 
+                .requestMatchers(new AntPathRequestMatcher("/fail/**")).permitAll()
+                
                 .requestMatchers(new AntPathRequestMatcher("/**")).permitAll())
         
-     // --- CSRF 설정 (기존 로직 유지하며 세션 저장소만 명시) ---
+        // --- CSRF 설정 ---
         .csrf((csrf) -> csrf
-            .ignoringRequestMatchers(new AntPathRequestMatcher("/payment/verify/**"))
-            .csrfTokenRepository(new HttpSessionCsrfTokenRepository())) // CSRF 토큰 관리 개선
-        .oauth2Login(oauth2 -> oauth2
-        	    .loginPage("/auth/login")
-        	    .successHandler(oAuth2LoginSuccessHandler)
-        	    //.defaultSuccessUrl("/home", true) // 성공 시 루트(/)로 이동, true는 무조건 이 경로로 가라는 뜻
-        	    .userInfoEndpoint(userInfo -> userInfo
-        	        .userService(customOAuth2UserService)
-        	    )
-        	)
+            // [수정] 외부(토스 서버)에서 우리 서버로 결제 승인 요청(POST)을 보낼 때 
+            // CSRF 토큰이 없어도 거부되지 않도록 '/payment/confirm/**' 경로를 예외 처리했습니다.
+            .ignoringRequestMatchers(new AntPathRequestMatcher("/payment/confirm/**"))
+            .csrfTokenRepository(new HttpSessionCsrfTokenRepository()))
+        
         // --- 세션 정책 추가 (응답 커밋 전 세션 생성 보장) ---
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
@@ -79,7 +72,3 @@ public class SecurityConfig {
     }
 
 }
-
-
-
-
