@@ -123,6 +123,7 @@
         <button class="close-button" onclick="closeCreateModal()">&times;</button>
       </div>
 
+	<div sec:authorize="isAuthenticated()">
       <form id="createForm" method="post" action="/mate/addPost">
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <div class="form-group">
@@ -183,6 +184,7 @@
         </div>
       </form>
     </div>
+    </div>
   </div>
 
   <!-- Detail Modal -->
@@ -217,14 +219,14 @@
     </div>
   </div>
   
-  <form id="applyForm" method="post" action="/mate/applyPost" style="display:none;">
+  <form id="applyForm" method="post" action="/mate/applyPost" style="display:none;" sec:authorize="isAuthenticated()">
   <input type="hidden" name="postId" id="applyPostId">
   <input type="hidden" name="message" id="applyMessageField">
   <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 </form>
   
   <!-- Delete Confirm Modal -->
-<div class="modal-overlay" id="deleteConfirmModal">
+<div class="modal-overlay" id="deleteConfirmModal" sec:authorize="isAuthenticated()">
   <div class="modal">
     <div class="modal-header">
       <h2 class="modal-title">게시글 삭제</h2>
@@ -278,12 +280,21 @@
   </nav>
 </div>
 
+
 <script th:inline="javascript">
   const isAuthenticated = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
   const loginUserEmail = /*[[${user != null ? user.email : ''}]]*/ '';
-  const csrfToken = /*[[${_csrf.token}]]*/ '';
-  const csrfHeader = /*[[${_csrf.headerName}]]*/ 'X-CSRF-TOKEN';
   const appliedStatusMap = JSON.parse(/*[[${appliedStatusMapJson}]]*/ "{}");
+
+  // 기본값(익명용)
+  let csrfToken = '';
+  let csrfHeader = 'X-CSRF-TOKEN';
+</script>
+
+<script th:inline="javascript" sec:authorize="isAuthenticated()">
+  // 로그인일 때만 덮어쓰기 (재선언 X)
+  csrfToken = /*[[${_csrf.token}]]*/ '';
+  csrfHeader = /*[[${_csrf.headerName}]]*/ 'X-CSRF-TOKEN';
 </script>
 
 <script>
@@ -521,6 +532,25 @@ window.addEventListener('DOMContentLoaded', () => {
 
 		  document.getElementById('applyForm').submit();
 		}
+</script>
+
+<script>
+function getParam(name){
+  return new URLSearchParams(location.search).get(name);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  bindPostCardClicks();
+
+  // openPostId가 있으면 해당 카드 클릭 -> 모달 자동 오픈
+  const openPostId = getParam('openPostId');
+  if(openPostId){
+    const target = document.querySelector(`.post-card[data-id="${openPostId}"]`);
+    if(target){
+      target.click();
+    }
+  }
+});
 </script>
 
 </div>

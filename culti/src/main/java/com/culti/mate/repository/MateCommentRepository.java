@@ -10,4 +10,5 @@ import com.culti.mate.entity.MatePost;
 public interface MateCommentRepository extends JpaRepository<MateComment, Long> {
 
     List<MateComment> findByPostOrderByCreatedAtAsc(MatePost post);
+    void deleteByPost_PostId(Long postId);  
 }

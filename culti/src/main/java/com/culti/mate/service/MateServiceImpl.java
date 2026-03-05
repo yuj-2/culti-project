@@ -81,6 +81,7 @@ public class MateServiceImpl implements MateService {
 	    return mateRepository.findByCategory(enumCategory, pageable);
 	}
 
+	@Transactional
 	@Override
 	public void delete(Long postId, String email) {
 		MatePost post = mateRepository.findById(postId)
@@ -91,7 +92,7 @@ public class MateServiceImpl implements MateService {
 		    }
 
 		    // 자식 먼저 삭제
-		    mateApplyRepository.deleteByPost_PostId(postId);
+		    mateCommentRepository.deleteByPost_PostId(postId);
 
 		    // 부모 삭제
 		    mateRepository.deleteById(postId);
@@ -101,10 +102,8 @@ public class MateServiceImpl implements MateService {
 	@Override
 	@Transactional
 	public void apply(Long postId, String email, String message) {
-//		글 작성자가 신청하면 예외
-//		이미 신청했으면 예외
-//		모집 마감이면 예외
-		 // 1) 게시글 조회
+		 
+		// 1) 게시글 조회
 	    MatePost post = mateRepository.findById(postId)
 	            .orElseThrow(() -> new IllegalArgumentException("게시글 없음: " + postId));
 
@@ -193,7 +192,7 @@ public class MateServiceImpl implements MateService {
 
 	    // 이번 수락으로 정원 꽉 차면 마감
 	    if (acceptedCount + 1 >= post.getMaxPeople()) {
-	        post.close(); // setStatus 말고 close()
+	        post.close(); // 
 	    }
 	}
 
