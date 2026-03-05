@@ -38,7 +38,7 @@ public class BookingController {
     /**
      * 예매 페이지
      */
-    @GetMapping({"/reservation/booking", "/reservation/booking/performance"})
+    @GetMapping("/reservation/booking")
     public String bookingPage(Model model) {
         return "reservation/booking";
     }
@@ -111,6 +111,8 @@ public class BookingController {
     public String showBookingResult(@PathVariable("id") Long id, Model model) {
 
         BookingResponseDTO response = bookingService.getBookingResult(id);
+        
+        bookingService.confirmBookingStatus(response.getBookingNumber());
 
         model.addAttribute("booking", response);
         model.addAttribute("suggestStore", true);
