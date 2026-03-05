@@ -21,4 +21,8 @@ public class Seat {
     
     private String grade;
     
+    @Column(name = "floor")
+    private Integer floor;
+
+    
 }

@@ -31,6 +31,12 @@ function getTotalNeeded(){
 /**
  * 좌석 초기화
  */
+const seatStatusMap = {};
+
+scheduleSeats.forEach(ss=>{
+    seatStatusMap[ss.seat.seatId] = ss.status;
+});
+
 function initSeatMap(){
 
     const grid = document.getElementById("seat-map-grid");
@@ -68,9 +74,9 @@ function initSeatMap(){
         .sort((a,b)=>a.seatCol-b.seatCol)
         .forEach(seat=>{
 
-            const displayId = `${seat.seatRow}${seat.seatCol}`;
+          const displayId = `${seat.seatRow}${seat.seatCol}`;
 
-            const isReserved = seat.status === "OCCUPIED";
+     const isReserved = seatStatusMap[seat.seatId] === "OCCUPIED";
 
             renderSeat(
                 seat.seatId,
@@ -319,3 +325,8 @@ function startTimer(){
 
 
 document.addEventListener("DOMContentLoaded",initSeatMap);
+document.addEventListener("DOMContentLoaded", function () {
+
+    startTimer();
+
+});
