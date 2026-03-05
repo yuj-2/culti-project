@@ -81,6 +81,7 @@ public class MateServiceImpl implements MateService {
 	    return mateRepository.findByCategory(enumCategory, pageable);
 	}
 
+	@Transactional
 	@Override
 	public void delete(Long postId, String email) {
 		MatePost post = mateRepository.findById(postId)
@@ -91,7 +92,7 @@ public class MateServiceImpl implements MateService {
 		    }
 
 		    // 자식 먼저 삭제
-		    mateApplyRepository.deleteByPost_PostId(postId);
+		    mateCommentRepository.deleteByPost_PostId(postId);
 
 		    // 부모 삭제
 		    mateRepository.deleteById(postId);
