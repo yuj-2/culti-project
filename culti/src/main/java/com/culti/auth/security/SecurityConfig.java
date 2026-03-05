@@ -48,7 +48,6 @@ public class SecurityConfig {
         .oauth2Login(oauth2 -> oauth2
         	    .loginPage("/auth/login")
         	    .successHandler(oAuth2LoginSuccessHandler)
-        	    //.defaultSuccessUrl("/home", true) // 성공 시 루트(/)로 이동, true는 무조건 이 경로로 가라는 뜻
         	    .userInfoEndpoint(userInfo -> userInfo
         	        .userService(customOAuth2UserService)
         	    )

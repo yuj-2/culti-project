@@ -4,6 +4,7 @@ package com.culti.admin.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,9 +38,10 @@ public class AdminController {
 
 	private final AdminService adminService;
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/main")
-	public void main() {
-		
+	public void main(Model model) {
+		model.addAttribute("titleName", "통계 대시보드");
 	}
 	
 	// 콘텐츠 목록 등록 경로
@@ -48,7 +50,7 @@ public class AdminController {
 		List<Place> places = adminService.getAllPlaces();
 		
 		model.addAttribute("places", places);
-		
+		model.addAttribute("titleName", "콘텐츠 등록");
         return "admin/content-form";
     }
 	
@@ -76,7 +78,7 @@ public class AdminController {
         } else {
             contents = adminService.getContentsByCategory(category);
         }
-        
+        model.addAttribute("titleName", "영화/전시 관리");
         model.addAttribute("contentList", contents);
         return "admin/content-list";
     }
@@ -174,7 +176,7 @@ public class AdminController {
 	public String placeManagePage(Model model) {
 	    model.addAttribute("placeList", adminService.getAllPlaces());
 	    model.addAttribute("kakaoJsKey", kakaoJsKey);
-	    
+	    model.addAttribute("titleName", "장소 관리");
 	    return "admin/place-manage";
 	}
 
@@ -200,6 +202,7 @@ public class AdminController {
 	    List<UserDTO> userList = this.adminService.getUserDTOs(keyword);
 	    model.addAttribute("userList", userList);
 	    model.addAttribute("keyword", keyword); // 뷰에서 검색어 유지용
+	    model.addAttribute("titleName", "회원 관리");
 	    return "admin/auth-user";
 	}
 	
