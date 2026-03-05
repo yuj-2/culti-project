@@ -45,12 +45,4 @@ public interface ScheduleSeatRepository extends JpaRepository<ScheduleSeat, Long
             @Param("scheduleId") Long scheduleId,
             @Param("seatIds") List<Long> seatIds
     );
-    
-    @Query("""
-    	    SELECT ss
-    	    FROM ScheduleSeat ss
-    	    JOIN FETCH ss.seat s
-    	    WHERE ss.schedule.scheduleId = :scheduleId
-    	""")
-    	List<ScheduleSeat> findAllWithSeatByScheduleId(@Param("scheduleId") Long scheduleId);
 }

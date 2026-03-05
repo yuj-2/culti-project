@@ -12,9 +12,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
 	List<Schedule> findByShowTimeGreaterThanEqualAndShowTimeLessThan(LocalDateTime start, LocalDateTime end);
 	
-
 	// 추가
 	void deleteAllByContent(Content content);
 	
-
 }

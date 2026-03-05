@@ -38,7 +38,7 @@ public class BookingController {
     /**
      * 예매 페이지
      */
-    @GetMapping({"/reservation/booking", "/reservation/booking/performance"})
+    @GetMapping("/reservation/booking")
     public String bookingPage(Model model) {
         return "reservation/booking";
     }
@@ -52,30 +52,25 @@ public class BookingController {
             Model model) {
 
         Schedule schedule = scheduleService.getScheduleById(scheduleId);
+
         if (schedule == null) {
             return "redirect:/reservation/booking?error=notfound";
         }
 
-        // 공통 모델
-        model.addAttribute("schedule", schedule);
-        model.addAttribute("scheduleId", scheduleId);
-
-        // ✅ 카테고리로 좌석 페이지 분기
-        String category = schedule.getContent().getCategory(); // "영화" / "공연" / "전시"
-
-        if ("공연".equals(category)) {
-            // 공연은 JS가 /api/performance/seats/{scheduleId}로 가져가니까 서버에서 좌석리스트 굳이 안 넣어도 됨
-            return "reservation/booking_performance"; // ← 공연 좌석 HTML(지호님이 올린 그 파일)
-        }
-
-        // 영화(기존 방식) - 서버에서 좌석/상태 내려주는 템플릿 유지
+        // 좌석 전체 조회
         List<Seat> seats = seatRepository.findAll();
+
+        // 해당 스케줄의 좌석 상태 조회
         List<ScheduleSeat> scheduleSeats = scheduleSeatRepository.findBySchedule_ScheduleId(scheduleId);
+
+        model.addAttribute("schedule", schedule);
         model.addAttribute("seatListFromDb", seats);
         model.addAttribute("scheduleSeats", scheduleSeats);
+        model.addAttribute("scheduleId", scheduleId);
 
         return "reservation/booking_seat";
     }
+
     /**
      * 좌석 선택 후 결제 요청 (fetch JSON)
      */
@@ -116,6 +111,8 @@ public class BookingController {
     public String showBookingResult(@PathVariable("id") Long id, Model model) {
 
         BookingResponseDTO response = bookingService.getBookingResult(id);
+        
+        bookingService.confirmBookingStatus(response.getBookingNumber());
 
         model.addAttribute("booking", response);
         model.addAttribute("suggestStore", true);
@@ -134,7 +131,4 @@ public class BookingController {
 
         return "redirect:/auth/myPage?reservationTab=cancel";
     }
-  
-
-   
 }

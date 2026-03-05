@@ -189,6 +189,11 @@ th:text="${#temporals.format(schedule.showTime,'MM.dd(E) HH:mm')}">
 <span id="display-seat-names" class="font-black text-[#9D7BFF]">선택 안 됨</span>
 </div>
 
+<div class="flex justify-between items-center text-sm">
+<span class="text-gray-500 font-bold">좌석 점유 시간</span>
+<span id="timer" class="text-[#9D7BFF] font-black text-lg">05:00</span>
+</div>
+
 <div class="pt-6 border-t border-gray-800 flex justify-between items-end">
 <span class="text-gray-500 font-bold uppercase tracking-widest mb-1">총 결제 금액</span>
 <span id="display-total-price" class="text-3xl font-black">₩0</span>
@@ -242,6 +247,7 @@ th:value="${_csrf.token}">
 /*<![CDATA[*/
 
 const seatListFromDb = /*[[${seatListFromDb}]]*/ [];
+const scheduleSeats = /*[[${scheduleSeats}]]*/ [];
 
 lucide.createIcons();
 
